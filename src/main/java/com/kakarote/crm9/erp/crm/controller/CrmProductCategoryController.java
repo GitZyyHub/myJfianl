@@ -1,0 +1,69 @@
+package com.kakarote.crm9.erp.crm.controller;
+
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
+import com.jfinal.aop.Clear;
+import com.jfinal.aop.Inject;
+import com.jfinal.core.Controller;
+import com.jfinal.core.paragetter.Para;
+import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
+import com.kakarote.crm9.erp.crm.entity.CrmProductCategory;
+import com.kakarote.crm9.erp.crm.service.CrmProductCategoryService;
+import com.kakarote.crm9.utils.AdminLogUtil;
+import com.kakarote.crm9.utils.BaseUtil;
+import com.kakarote.crm9.utils.R;
+
+public class CrmProductCategoryController extends Controller {
+    @Inject
+    private CrmProductCategoryService crmProductCategoryService;
+    /**
+     * 根据pid(父级id)查询类别
+     * @author zxy
+     */
+    public void  querylist(@Para("pid") Integer pid){
+        if (pid == null){
+            pid = 0;
+        }
+        renderJson(R.ok().put("data",crmProductCategoryService.queryListByPid(pid)));
+    }
+    /**
+     * 根据id查询类别
+     * @author zxy
+     */
+    public void queryById(@Para("id") Integer id){
+        renderJson(R.ok().put("data",crmProductCategoryService.queryById(id)));
+
+    }
+    /**
+     * 添加或修改类别
+     * @author zxy
+     */
+    public void saveAndUpdate(@Para("") CrmProductCategory category){
+        renderJson(crmProductCategoryService.saveAndUpdate(category));
+    }
+    /**
+     * 递归查询全部产品类别
+     * @author zxy
+     */
+    public void queryList(@Para("type") String type) {
+        if (StrUtil.isEmpty(type)) {
+            renderJson(crmProductCategoryService.queryAllList());
+        } else {
+            renderJson(crmProductCategoryService.queryList());
+        }
+    }
+    /**
+     * 查询所有产品类别列表
+     */
+    @Clear
+    public void queryAllList(){
+        renderJson(crmProductCategoryService.queryAllList());
+    }
+    /**
+     * 根据ID删除类别
+     * @author zxy
+     */
+    public void deleteById(@Para("id") Integer id){
+        renderJson(crmProductCategoryService.deleteById(id));
+    }
+}

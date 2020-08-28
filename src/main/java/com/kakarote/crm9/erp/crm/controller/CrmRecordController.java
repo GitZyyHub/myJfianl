@@ -1,0 +1,62 @@
+package com.kakarote.crm9.erp.crm.controller;
+
+import cn.hutool.extra.servlet.ServletUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Inject;
+import com.jfinal.core.Controller;
+import com.kakarote.crm9.common.annotation.Permissions;
+import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.service.CrmRecordService;
+import com.kakarote.crm9.utils.AdminLogUtil;
+import com.kakarote.crm9.utils.AuthUtil;
+import com.kakarote.crm9.utils.R;
+
+import java.util.List;
+
+
+public class CrmRecordController extends Controller {
+
+    @Inject
+    private CrmRecordService crmRecordService;
+
+    /**
+     * @author hmb
+     * 查询操作记录列表
+     */
+    public void queryRecordList(){
+        String actionId = getPara("actionId");
+        String types = getPara("types");
+        boolean auth;
+        if("2".equals(types)){
+            auth = AuthUtil.isPoolAuth(Integer.valueOf(actionId));
+        }else {
+            auth = AuthUtil.isCrmAuth(CrmEnum.parse(Integer.parseInt(types)), Integer.valueOf(actionId));
+        }
+        if(auth){renderJson(R.noAuth()); return; }
+        renderJson(crmRecordService.queryRecordList(actionId,types));
+    }
+
+
+    /**
+     * @author wyq
+     * 跟进记录类型设置
+     */
+    public void queryRecordOptions(){
+        renderJson(crmRecordService.queryRecordOptions());
+    }
+
+    /**
+     * @author wyq
+     * 设置跟进记录类型
+     */
+    @Permissions("manage:crm:setting")
+    public void setRecordOptions(){
+        JSONObject jsonObject = JSONObject.parseObject(getRawData());
+        JSONArray jsonArray = JSONArray.parseArray(jsonObject.getString("value"));
+        List<String> list = jsonArray.toJavaList(String.class);
+        String ipAddress = ServletUtil.getClientIP(getRequest());
+        renderJson(crmRecordService.setRecordOptions(list));
+    }
+}

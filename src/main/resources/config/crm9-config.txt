@@ -1,0 +1,14 @@
+#mysql
+mysql.jdbcUrl = jdbc:mysql://39.100.199.172:3306/crm_cloud?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
+mysql.user = root
+mysql.password =Admin001m.
+jfinal.devMode = true
+
+#---------------------------------------------------------
+appkey =
+appSecret =
+#---------------------------------------------------------
+
+
+MiNiApp.AppId = wx5f09cd66ffc1b9b5
+MiNiApp.Secret = 3f0e37a293116bd6179006e8b2aaacc1

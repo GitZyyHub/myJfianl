@@ -1,0 +1,16 @@
+cron4j=customerCron,taskCron,eventNoticeCron
+customerCron.cron=0 2 * * *
+customerCron.class=com.kakarote.crm9.erp.crm.cron.CrmCustomerCron
+customerCron.daemon=true
+customerCron.enable=true
+
+taskCron.cron=0 1 * * *
+taskCron.class=com.kakarote.crm9.erp.work.cron.TaskCron
+taskCron.daemon=true
+taskCron.enable=true
+
+eventNoticeCron.cron=0 0 * * *
+eventNoticeCron.class=com.kakarote.crm9.erp.oa.cron.EventNoticeCron
+eventNoticeCron.daemon=true
+eventNoticeCron.enable=true
+

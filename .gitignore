@@ -1,0 +1,8 @@
+.idea
+target
+*.iml
+src/test/*
+src/main/webapp/*
+README.md
+logs
+
