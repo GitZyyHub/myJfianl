@@ -43,7 +43,7 @@ public class OaAnnouncementController extends Controller {
      * 倒叙查询公告集合
      * @author zhangzhiwei
      */
-    public void queryList(BasePageRequest<OaAnnouncement> basePageRequest,@Para("type")Integer type){
+    public void queryList(BasePageRequest<OaAnnouncement> basePageRequest, @Para("type")Integer type){
         renderJson(announcementService.queryList(basePageRequest,type));
     }
 

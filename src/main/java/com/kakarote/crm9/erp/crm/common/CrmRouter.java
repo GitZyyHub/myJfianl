@@ -15,13 +15,13 @@ public class CrmRouter extends Routes {
         add("/CrmContacts", CrmContactsController.class);
         add("/CrmContract", CrmContractController.class);
         add("/CrmReceivables", CrmReceivablesController.class);
-        add("/CrmRecord",CrmRecordController.class);
-        add("/Crm/ReceivablesPlan",CrmReceivablesPlanController.class);
-        add("/Crm/Instrument",InstrumentController.class);
-        add("/CrmBackLog",CrmBackLogController.class);
+        add("/CrmRecord", CrmRecordController.class);
+        add("/Crm/ReceivablesPlan", CrmReceivablesPlanController.class);
+        add("/Crm/Instrument", InstrumentController.class);
+        add("/CrmBackLog", CrmBackLogController.class);
         add("/CrmActivity",CrmActivityController.class);
         add("/CrmMarketing",CrmMarketingController.class);
-        add("/CrmCustomerPool",CrmCustomerPoolController.class);
+        add("/CrmCustomerPool", CrmCustomerPoolController.class);
         add("/CrmProductUser",CrmProductUserController.class);
         add("/CrmReturnVisit", CrmReturnVisitController.class);
         add("/CrmInvoice", CrmInvoiceController.class);

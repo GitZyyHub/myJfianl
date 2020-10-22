@@ -15,7 +15,6 @@ import com.kakarote.crm9.erp.bi.entity.BiParams;
 import com.kakarote.crm9.erp.crm.service.CrmContractService;
 import com.kakarote.crm9.erp.crm.service.CrmCustomerService;
 import com.kakarote.crm9.erp.crm.service.CrmReceivablesService;
-import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.util.ArrayList;

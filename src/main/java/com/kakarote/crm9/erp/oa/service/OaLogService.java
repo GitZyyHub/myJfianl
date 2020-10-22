@@ -1,6 +1,5 @@
 package com.kakarote.crm9.erp.oa.service;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -267,11 +266,11 @@ public class OaLogService {
     private void saveLogRecord(Integer logId){
         OaLogRecord logRecord=new OaLogRecord();
         logRecord.setLogId(logId);
-        Record record=Db.template("crm.Instrument.queryBulletinByLog",Kv.by("userIds",BaseUtil.getUserId())).findFirst();
+        Record record=Db.template("crm.Instrument.queryBulletinByLog",Kv.by("userIds", BaseUtil.getUserId())).findFirst();
         logRecord.put(record);
         logRecord.setCreateTime(new Date());
         logRecord.save();
-        List<OaLogBulletin> bulletinList=OaLogBulletin.dao.template("crm.Instrument.queryBulletinByLogInfo",Kv.by("userIds",BaseUtil.getUserId())).find();
+        List<OaLogBulletin> bulletinList= OaLogBulletin.dao.template("crm.Instrument.queryBulletinByLogInfo",Kv.by("userIds", BaseUtil.getUserId())).find();
         Date date=new Date();
         bulletinList.forEach(bulletin->{
             bulletin.setLogId(logId);
@@ -299,7 +298,7 @@ public class OaLogService {
         Integer type = data.getType();
         List<Integer> typeIds=new ArrayList<>();
         if(Objects.equals(today,1)){
-            List<OaLogBulletin> bulletinList=OaLogBulletin.dao.template("crm.Instrument.queryBulletinByLogInfo",Kv.by("userIds",BaseUtil.getUserId())).find();
+            List<OaLogBulletin> bulletinList= OaLogBulletin.dao.template("crm.Instrument.queryBulletinByLogInfo",Kv.by("userIds", BaseUtil.getUserId())).find();
             bulletinList.forEach(oaLogBulletin -> {
                 if(oaLogBulletin.getType().equals(type)){
                     typeIds.add(oaLogBulletin.getTypeId());
@@ -316,7 +315,7 @@ public class OaLogService {
         return  R.ok().put("data",paginate);
     }
 
-    public R queryLogRecordCount(Integer logId,Integer today){
+    public R queryLogRecordCount(Integer logId, Integer today){
         List<Integer> typeIds=new ArrayList<>();
         if(Objects.equals(today,1)){
             List<OaLogBulletin> bulletinList = OaLogBulletin.dao.template("crm.Instrument.queryBulletinByLogInfo", Kv.by("userIds", BaseUtil.getUserId())).find();

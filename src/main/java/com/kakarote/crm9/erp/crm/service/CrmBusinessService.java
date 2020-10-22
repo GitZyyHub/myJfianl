@@ -537,7 +537,7 @@ public class CrmBusinessService extends AbstractBasePageList {
                 businessStatus = "无效";
             }
         }
-        crmActivityService.addActivity(3,CrmActivityEnum.BUSINESS,crmBusiness.getBusinessId(),businessStatus);
+        crmActivityService.addActivity(3, CrmActivityEnum.BUSINESS,crmBusiness.getBusinessId(),businessStatus);
         return crmBusiness.update() ? R.ok() : R.error();
     }
 
@@ -592,7 +592,7 @@ public class CrmBusinessService extends AbstractBasePageList {
      * 设置首要联系人
      * @return
      */
-    public R setContacts(Integer businessId,Integer contactsId){
+    public R setContacts(Integer businessId, Integer contactsId){
         if(businessId==null||contactsId==null){
             return R.error("参数错误");
         }

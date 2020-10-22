@@ -446,7 +446,7 @@ public class CrmBackLogService {
         data.fluentPut("backLog", new JSONObject().fluentPut("name", "customer_id").fluentPut("condition", "in").fluentPut("value", StrUtil.join(",", customerIdSet)));
         basePageRequest.setJsonObject(jsonObject.fluentPut("data", data));
         R r = crmCustomerService.queryPageList(basePageRequest, false);
-        JSONObject object = (JSONObject) r.get("data");
+        JSONObject object = JSONObject.parseObject(JSONObject.toJSONString(r.get("data")));
         List<Record> list = object.getJSONArray("list").toJavaList(Record.class);
         list.forEach(record -> record.set("poolDay", customerMap.get(record.getInt("customer_id"))));
         object.fluentPut("list", list);

@@ -1,6 +1,5 @@
 package com.kakarote.crm9.erp.admin.service;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.erp.admin.entity.AdminModelSort;

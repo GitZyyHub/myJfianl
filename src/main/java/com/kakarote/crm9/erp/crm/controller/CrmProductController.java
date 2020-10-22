@@ -29,7 +29,6 @@ import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmProduct;
 import com.kakarote.crm9.erp.crm.service.CrmProductService;
-import com.kakarote.crm9.erp.crm.service.CrmRecordService;
 import com.kakarote.crm9.utils.ActionRecordUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -338,7 +337,7 @@ public class CrmProductController extends Controller {
      */
     @Permissions("crm:product:excelimport")
     public void uploadExcel(@Para("file") UploadFile file,@Para("ownerUserId") Long ownerUserId,@Para("repeatHandling") Integer repeatHandling) {
-        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_PRODUCT, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling);
+        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_PRODUCT, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling,null);
         renderJson(R.ok().put("data",messageId));
     }
 

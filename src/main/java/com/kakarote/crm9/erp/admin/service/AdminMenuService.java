@@ -70,7 +70,7 @@ public class AdminMenuService {
      * @return 菜单列表
      * @author zhangzhiwei
      */
-    public AdminMenu queryMenuListByRealm(Integer parentId,String realm){
+    public AdminMenu queryMenuListByRealm(Integer parentId, String realm){
         Kv data=Kv.by("parentId",parentId).set("realm",realm);
         return AdminMenu.dao.template("admin.menu.queryMenuList",data).findFirst();
     }
@@ -117,7 +117,7 @@ public class AdminMenuService {
         } else if (type == 2) {
             realm="crm";
             AdminMenu bi = queryMenuListByRealm(0,"bi");
-            List<AdminMenu> biList = getMenuList(bi.getMenuId(),BaseConstant.AUTH_DATA_RECURSION_NUM, "oa");
+            List<AdminMenu> biList = getMenuList(bi.getMenuId(), BaseConstant.AUTH_DATA_RECURSION_NUM, "oa");
             bi.put("childMenu", biList);
             kv.set("bi", bi);
         } else if(type==5){
@@ -126,7 +126,7 @@ public class AdminMenuService {
             realm="oa";
             AdminMenu bi = queryMenuListByRealm(0,"bi");
             String[] realmArr = new String[]{"achievement", "business", "customer", "contract", "product", "portrait", "ranking","call"};
-            List<AdminMenu> biList = getMenuList(bi.getMenuId(),BaseConstant.AUTH_DATA_RECURSION_NUM, realmArr);
+            List<AdminMenu> biList = getMenuList(bi.getMenuId(), BaseConstant.AUTH_DATA_RECURSION_NUM, realmArr);
             bi.put("childMenu", biList);
             kv.set("bi", bi);
         } else if (type == 8) {

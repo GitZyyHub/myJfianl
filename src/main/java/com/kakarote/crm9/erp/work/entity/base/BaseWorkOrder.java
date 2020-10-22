@@ -13,7 +13,7 @@ public abstract class BaseWorkOrder<M extends BaseWorkOrder<M>> extends Model<M>
 		set("order_id", orderId);
 		return (M)this;
 	}
-
+	
 	public Integer getOrderId() {
 		return getInt("order_id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseWorkOrder<M extends BaseWorkOrder<M>> extends Model<M>
 		set("work_id", workId);
 		return (M)this;
 	}
-
+	
 	public Integer getWorkId() {
 		return getInt("work_id");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseWorkOrder<M extends BaseWorkOrder<M>> extends Model<M>
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseWorkOrder<M extends BaseWorkOrder<M>> extends Model<M>
 		set("order_num", orderNum);
 		return (M)this;
 	}
-
+	
 	public Integer getOrderNum() {
 		return getInt("order_num");
 	}

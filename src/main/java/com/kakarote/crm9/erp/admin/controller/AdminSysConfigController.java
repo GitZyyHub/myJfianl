@@ -1,6 +1,5 @@
 package com.kakarote.crm9.erp.admin.controller;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,12 +14,10 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminNumberSetting;
 import com.kakarote.crm9.erp.admin.entity.AdminUserConfig;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -105,7 +102,7 @@ public class AdminSysConfigController extends Controller {
         }
         //修改模块后清除企业用户缓存
         List<Long> userIds=Db.query("SELECT user_id FROM `72crm_admin_user` ");
-        userIds.forEach(userId->CaffeineCache.ME.remove("role:permissions:", userId.toString()));
+        userIds.forEach(userId-> CaffeineCache.ME.remove("role:permissions:", userId.toString()));
         renderJson(R.isSuccess(adminConfig.update()));
     }
 
@@ -144,14 +141,14 @@ public class AdminSysConfigController extends Controller {
      */
     public void deleteConfigById(@Para("settingId") Integer settingId){
         boolean b = AdminConfig.dao.deleteById(settingId);
-        renderJson(b?R.ok():R.error());
+        renderJson(b? R.ok(): R.error());
     }
 
     /**
      * 查询手机端模块设置
      */
     public void queryMobileModuleSetting(){
-        AdminUserConfig userConfig=AdminUserConfig.getConfig("MobileModuleSetting");
+        AdminUserConfig userConfig= AdminUserConfig.getConfig("MobileModuleSetting");
         if(userConfig==null){
             renderJson(R.ok().put("data",new JSONArray()));
             return;
@@ -186,7 +183,7 @@ public class AdminSysConfigController extends Controller {
     public void setActivityPhrase(){
         List<String> stringList = JSON.parseArray(getRawData(), String.class);
         String name = "ActivityPhrase";
-        Db.delete("delete from `72crm_admin_user_config` where user_id = ? and name = ?",BaseUtil.getUserId(),name);
+        Db.delete("delete from `72crm_admin_user_config` where user_id = ? and name = ?", BaseUtil.getUserId(),name);
         List<AdminUserConfig> adminUserConfigList = new ArrayList<>();
         stringList.forEach(s->{
             AdminUserConfig userConfig = new AdminUserConfig();

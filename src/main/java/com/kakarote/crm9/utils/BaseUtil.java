@@ -213,6 +213,10 @@ public class BaseUtil {
         return 198335;
     }
 
+    public static Integer getReadOnlyRoles(){
+        return 198336;
+    }
+
     public static String getIp() {
         return getUser().get("ip");
     }

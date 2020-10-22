@@ -39,6 +39,29 @@ public class AdminDeptService {
         return R.isSuccess(bol,"设置失败");
     }
 
+    private List<Record> buildTreeBy2Loop(List<Record> treeNodes, Integer root, List<Record> allDeptList) {
+        List<Record> trees = new ArrayList<>();
+        for (Record node : treeNodes) {
+            if (root.equals(node.getInt("pid"))) {
+                node.set("label", node.getStr("name"));
+                trees.add(node);
+                allDeptList.add(node);
+            }
+            List<Record> childTrees = new ArrayList<>();
+            for (Record treeNode : treeNodes) {
+                if (node.getInt("id").equals(treeNode.getInt("pid"))) {
+                    treeNode.set("label", treeNode.getStr("name"));
+                    childTrees.add(treeNode);
+                    allDeptList.add(treeNode);
+                }
+            }
+            if (childTrees.size() != 0) {
+                node.set("children", childTrees);
+            }
+        }
+        return trees;
+    }
+
     public List<Record> queryDeptTree(String type,Integer id) {
         List<Record> allDeptList = new ArrayList<>();
         List<Record> adminDeptList = Db.find("select dept_id as id,name,pid from 72crm_admin_dept");
@@ -53,6 +76,22 @@ public class AdminDeptService {
             return new ArrayList<>();
         }
     }
+    public List<Record> queryDeptName(String type,Integer id) {
+        List<Record> allDeptList = new ArrayList<>();
+        List<Record> adminDeptList = Db.find("select dept_id as id,name,pid from 72crm_admin_dept where pid!=0");
+        Integer integer = Db.queryInt("select dept_id from 72crm_admin_dept where pid = 0");
+        List<Record> recordList = buildTreeBy2Loop(adminDeptList, integer, allDeptList);
+        if (StrUtil.isNotBlank(type) && "tree".equals(type)) {
+            return recordList;
+        } else if (StrUtil.isBlank(type) || "save".equals(type)) {
+            return adminDeptList;
+        } else if (StrUtil.isNotBlank(type) && "update".equals(type)){
+            return queryTopDeptList(id);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
 
     public List<Record> querySubDeptTree(Integer deptId){
         List<Record> allDeptList = new ArrayList<>();
@@ -66,7 +105,7 @@ public class AdminDeptService {
     private List<Record> queryTopDeptList(Integer deptId) {
         List<Record> recordList = Db.find("select dept_id as id,name,pid from 72crm_admin_dept");
         AdminUserService adminUserService = new AdminUserService();
-        List<Integer> subDeptList = adminUserService.queryChileDeptIds(deptId,BaseConstant.AUTH_DATA_RECURSION_NUM);
+        List<Integer> subDeptList = adminUserService.queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);
         recordList.removeIf(record -> subDeptList.contains(record.getInt("id")));
         recordList.removeIf(record -> record.getInt("id").equals(deptId));
         return recordList;
@@ -124,28 +163,7 @@ public class AdminDeptService {
         }
         return recordList;
     }
-    private List<Record> buildTreeBy2Loop(List<Record> treeNodes, Integer root, List<Record> allDeptList) {
-        List<Record> trees = new ArrayList<>();
-        for (Record node : treeNodes) {
-            if (root.equals(node.getInt("pid"))) {
-                node.set("label", node.getStr("name"));
-                trees.add(node);
-                allDeptList.add(node);
-            }
-            List<Record> childTrees = new ArrayList<>();
-            for (Record treeNode : treeNodes) {
-                if (node.getInt("id").equals(treeNode.getInt("pid"))) {
-                    treeNode.set("label", treeNode.getStr("name"));
-                    childTrees.add(treeNode);
-                    allDeptList.add(treeNode);
-                }
-            }
-            if (childTrees.size() != 0) {
-                node.set("children", childTrees);
-            }
-        }
-        return trees;
-    }
+
 
     public R deleteDept(String id) {
         Integer userCount = Db.queryInt("select count(*) from 72crm_admin_user where dept_id = ?", id);

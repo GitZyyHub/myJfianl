@@ -21,7 +21,6 @@ import com.kakarote.crm9.common.constant.BehaviorEnum;
 import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminExamineLog;
-import com.kakarote.crm9.erp.admin.entity.AdminNumberSetting;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -124,7 +123,7 @@ public class CrmContractService extends AbstractBasePageList {
         recordList.add(new Record().set("name","审核状态").set("value",record.getInt("check_status")).set("formType", "check_status").set("field_type",1));
         recordList.add(new Record().set("name","商机名称").set("value",new Record().set("businessId",record.getInt("business_id")).set("businessName",record.getStr("business_name"))).set("formType","business").set("field_type",1));
         recordList.add(new Record().set("name","客户签约人").set("value",new Record().set("contacts_id",record.getInt("contacts_id")).set("contacts_name",record.getStr("contacts_name"))).set("formType","contacts").set("field_type",1));
-        recordList.add(new Record().set("name","公司签约人").set("value",Db.template("admin.user.queryByIds",Kv.by("ids",TagUtil.toSet(record.getStr("company_user_id")))).find()).set("formType","user").set("field_type",1));
+        recordList.add(new Record().set("name","公司签约人").set("value",Db.template("admin.user.queryByIds",Kv.by("ids", TagUtil.toSet(record.getStr("company_user_id")))).find()).set("formType","user").set("field_type",1));
         recordList.add(new Record().set("name","客户名称").set("value",new Record().set("customerId",record.getInt("customer_id")).set("customerName",record.getStr("customer_name"))).set("formType","customer").set("field_type",1));
         recordList.add(new Record().set("name", "已收款金额").set("value", record.getBigDecimal("received_money")).set("formType", FormTypeEnum.NUMBER.getFormType()).set("field_type", 1));
         recordList.add(new Record().set("name", "未收款金额").set("value", record.getBigDecimal("unreceived_money")).set("formType", FormTypeEnum.NUMBER.getFormType()).set("field_type", 1));
@@ -296,7 +295,7 @@ public class CrmContractService extends AbstractBasePageList {
             List<Long> examineLogIdList = examineData.get("examineLogIds");
             examineLogIdList.forEach(examineLogId ->{
                 AdminExamineLog examineLog = AdminExamineLog.dao.findById(examineLogId);
-                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.CRM_CONTRACT_EXAMINE,examineLog,BaseUtil.getUserId());
+                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.CRM_CONTRACT_EXAMINE,examineLog, BaseUtil.getUserId());
             });
         }
         JSONArray jsonArray = jsonObject.getJSONArray("product");
@@ -649,7 +648,7 @@ public class CrmContractService extends AbstractBasePageList {
 
     public R contractDiscard(Integer contractId) {
         actionRecordUtil.addObjectActionRecord(CrmEnum.CRM_CONTRACT, contractId, BehaviorEnum.CANCEL_EXAMINE);
-        return Db.template("crm.contract.contractDiscard",Kv.by("contractId",contractId)).update()>0?R.ok():R.error();
+        return Db.template("crm.contract.contractDiscard",Kv.by("contractId",contractId)).update()>0? R.ok(): R.error();
     }
 
     /**

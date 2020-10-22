@@ -45,7 +45,7 @@ public class AdminSceneController extends Controller {
      * 更新场景
      */
     @NotNullValidate(value = "sceneId",message = "场景id不能为空")
-    public void updateScene(@Para("")AdminScene adminScene){
+    public void updateScene(@Para("") AdminScene adminScene){
         renderJson(adminSceneService.updateScene(adminScene));
     }
 
@@ -64,7 +64,7 @@ public class AdminSceneController extends Controller {
      * 删除场景
      */
     @NotNullValidate(value = "sceneId",message = "场景id不能为空")
-    public void deleteScene(@Para("")AdminScene adminScene){
+    public void deleteScene(@Para("") AdminScene adminScene){
         renderJson(adminSceneService.deleteScene(adminScene));
     }
 

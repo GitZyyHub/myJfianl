@@ -20,7 +20,6 @@ import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.annotation.SysLog;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.LogEnum;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
@@ -31,9 +30,7 @@ import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.erp.crm.service.CrmContractService;
 import com.kakarote.crm9.erp.crm.service.CrmReceivablesPlanService;
 import com.kakarote.crm9.erp.crm.service.CrmReceivablesService;
-import com.kakarote.crm9.erp.crm.service.CrmRecordService;
 import com.kakarote.crm9.utils.ActionRecordUtil;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import org.apache.poi.ss.usermodel.*;
@@ -105,7 +102,7 @@ public class CrmContractController extends Controller {
      * 添加或修改
      * @author zxy
      */
-    @Permissions({"crm:contract:save","crm:contract:update"})
+    //@Permissions({"crm:contract:save","crm:contract:update"})
     public void saveAndUpdate(){
         String data = getRawData();
         JSONObject jsonObject = JSON.parseObject(data);

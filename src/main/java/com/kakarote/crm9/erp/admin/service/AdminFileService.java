@@ -163,7 +163,7 @@ public class AdminFileService {
      * 上传文件
      * @param fileType   oss,file,img
      */
-    public R ossUpload(UploadFile file,String batchId, String fileType){
+    public R ossUpload(UploadFile file, String batchId, String fileType){
         if (StrUtil.isBlank(fileType)) {
             String fileValue = "oss:"+fileType;
             fileType = fileValue;
@@ -187,7 +187,7 @@ public class AdminFileService {
      * @param fileId
      */
     public File downFile(String fileId){
-        fileId="/file/downFile?fileId="+fileId;
+        fileId = "/file/downFile?fileId="+fileId;
         AdminFile adminFile = AdminFile.dao.findFirst("SELECT * FROM `72crm_admin_file` where file_path=? LIMIT 0,1",fileId);
         if (adminFile != null) {
             File file = new File(adminFile.getPath());

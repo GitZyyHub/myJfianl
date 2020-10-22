@@ -45,6 +45,7 @@ public class AdminRoleService {
                 List<Integer> bi = Db.query(Db.getSql("admin.role.getRoleMenu"), role.getInt("id"), 2, 2);
                 role.set("rules", new JSONObject().fluentPut("crm", crm).fluentPut("bi", bi));
             });
+
             record.set("list", recordList);
             records.add(record);
         }
@@ -140,7 +141,7 @@ public class AdminRoleService {
         jsonObject = new JSONObject();
         List<AdminMenu> menuRecords;
         List<Integer> roleIds = queryRoleIdsByUserId(userId);
-        if (roleIds.contains(BaseUtil.getSuperRole()) || BaseUtil.getSuperUser().equals(userId)) {
+        if (roleIds.contains(BaseUtil.getSuperRole()) || BaseUtil.getSuperUser().equals(userId)) { //如果是超级管理员
             menuRecords = adminMenuService.queryMenuList();
         } else {
             menuRecords = adminMenuService.queryMenuByUserId(userId);
@@ -165,7 +166,7 @@ public class AdminRoleService {
                 }
             }
             //1为crm顶部菜单id,根据用户权限添加公海权限
-            if (adminMenu.getMenuId().equals(1)) {
+            /*if (adminMenu.getMenuId().equals(1)) {
                 JSONObject authObject = new JSONObject();
                 Integer read = Db.template("crm.customerPool.queryPoolReadAuth", Kv.by("userId", userId).set("deptId", BaseUtil.getUser().getDeptId())).queryInt();
                 if (BaseUtil.isAdmin() || read > 0) {
@@ -176,7 +177,7 @@ public class AdminRoleService {
                     authObject.fluentPut("distribute", true).fluentPut("excelexport", true).fluentPut("delete", true);
                 }
                 object.fluentPut("pool", authObject);
-            }
+            }*/
             //3为后台顶部菜单id
             if (adminMenu.getMenuId() == 2) {
                 AdminConfig adminConfig = AdminConfig.getConfig("call");
@@ -238,6 +239,18 @@ public class AdminRoleService {
             }
         }
         jsonObject.remove("work");
+        /*try {
+            JSONObject project = jsonObject.getJSONObject("project");
+            if(project!=null){
+                JSONObject projectManage = project.getJSONObject("projectManage");
+                projectManage.put("index",true);
+                project.put("projectManage",projectManage);
+                jsonObject.put("project",projectManage);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
+
         CaffeineCache.ME.put("role:permissions:",userId.toString(),jsonObject);
         return jsonObject;
     }
@@ -408,7 +421,7 @@ public class AdminRoleService {
             adminRole.setRoleType(6);
             bol = adminRole.save();
         } else {
-            adminRole=AdminRole.dao.findById(roleId);
+            adminRole= AdminRole.dao.findById(roleId);
             adminRole.setRoleName(roleName);
             adminRole.setRemark(remark);
             adminRole.setRoleId(roleId);

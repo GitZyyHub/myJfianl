@@ -59,10 +59,10 @@ public class CrmMarketingService {
             Aop.get(ActionRecordUtil.class).updateRecord(new CrmMarketing().dao().findById(crmMarketing.getMarketingId()), crmMarketing, CrmEnum.CRM_MARKETING);
             bol = crmMarketing.update();
         }
-        return bol?R.ok():R.error();
+        return bol? R.ok(): R.error();
     }
 
-    public R queryPageList(BasePageRequest<CrmMarketing> basePageRequest,Integer status) {
+    public R queryPageList(BasePageRequest<CrmMarketing> basePageRequest, Integer status) {
         List<Long> userIds = Aop.get(AdminUserService.class).queryChileUserIds(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
         userIds.add(BaseUtil.getUserId());
         JSONObject jsonObject = basePageRequest.getJsonObject();
@@ -71,7 +71,7 @@ public class CrmMarketingService {
                         .set("address", BaseUtil.getIpAddress())
                         .set("userIds", userIds).set("crmType", jsonObject.getInteger("crmType")).
                         set("search", jsonObject.getString("search")).
-                        set("isAdmin",BaseUtil.isAdmin()).
+                        set("isAdmin", BaseUtil.isAdmin()).
                         set("timeType",basePageRequest.getJsonObject().get("timeType")).
                         set("status",status)).
                 paginate(basePageRequest.getPage(), basePageRequest.getLimit());
@@ -95,7 +95,7 @@ public class CrmMarketingService {
         return queryById(marketingId,null);
     }
 
-    public R queryById(Integer marketingId,String device) {
+    public R queryById(Integer marketingId, String device) {
         AES aes = SecureUtil.aes(bytes);
         CrmMarketing crmMarketing = CrmMarketing.dao.template("crm.marketing.queryById", Kv.by("marketingId",marketingId)).findFirst();
         crmMarketing.put("enMarketingId",aes.encryptHex(crmMarketing.getMarketingId().toString()));
@@ -103,7 +103,7 @@ public class CrmMarketingService {
         crmMarketing.put("relationUserInfo", Db.find(Db.getSqlPara("admin.user.queryByIds", Kv.by("ids", TagUtil.toLongSet(crmMarketing.getRelationUserId())))));
         crmMarketing.put("createUserInfo", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?",crmMarketing.getCreateUserId()));
         if (StrUtil.isNotEmpty(crmMarketing.getDetailFileIds())) {
-            SqlPara sqlPara=Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", crmMarketing.getDetailFileIds()).set("path", BaseConstant.UPLOAD_PATH).set("address",BaseUtil.getIpAddress()));
+            SqlPara sqlPara=Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", crmMarketing.getDetailFileIds()).set("path", BaseConstant.UPLOAD_PATH).set("address", BaseUtil.getIpAddress()));
             crmMarketing.put("detailFileList", updateUrl(sqlPara));
         }else {
             crmMarketing.put("detailFileList", new ArrayList<>());
@@ -169,7 +169,7 @@ public class CrmMarketingService {
             return R.error("二维码过期！");
         }
         Db.update("update `72crm_crm_marketing` set browse = browse + 1 where marketing_id = ?",marketingIdInt);
-        List<Record> recordList = Db.template("crm.marketing.queryFieldByIds", Kv.by("fieldIds",TagUtil.toSet(crmMarketing.getFieldDataId()))).find();
+        List<Record> recordList = Db.template("crm.marketing.queryFieldByIds", Kv.by("fieldIds", TagUtil.toSet(crmMarketing.getFieldDataId()))).find();
         Aop.get(AdminFieldService.class).recordToFormType(recordList);
         Kv kv = Kv.by("marketingName", crmMarketing.getMarketingName()).set("list", recordList);
         if (crmMarketing.getMainFileIds() != null) {
@@ -228,14 +228,14 @@ public class CrmMarketingService {
         }
         Db.update("update 72crm_crm_marketing set submit_num = submit_num + 1 where marketing_id = ?",marketingId);
         marketingInfo.setCreateTime(new Date());
-        return marketingInfo.save()?R.ok():R.error();
+        return marketingInfo.save()? R.ok(): R.error();
     }
 
     @Before(Tx.class)
-    public R syncData(Integer marketingId,String rIds) {
+    public R syncData(Integer marketingId, String rIds) {
         Set<Integer> ids;
         if (StrUtil.isEmpty(rIds)){
-            ids = new HashSet<>(Db.query("select r_id from `72crm_crm_marketing_info` where marketing_id = ? and owner_user_id = ?",marketingId,BaseUtil.getUserId()));
+            ids = new HashSet<>(Db.query("select r_id from `72crm_crm_marketing_info` where marketing_id = ? and owner_user_id = ?",marketingId, BaseUtil.getUserId()));
         }else {
             ids = TagUtil.toSet(rIds);
         }
@@ -289,7 +289,7 @@ public class CrmMarketingService {
         return R.ok();
     }
 
-    public R updateShareNum(Long marketingId,Integer num){
+    public R updateShareNum(Long marketingId, Integer num){
         if (num == null){
             Db.update("update 72crm_crm_marketing set share_num = share_num + 1 where marketing_id = ?",marketingId);
         }else {

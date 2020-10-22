@@ -7,7 +7,6 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.CrmAchievement;
-import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ public class AdminAchievementService {
      */
     @Before(Tx.class)
     public R deleteAchievement(Integer achievementId) {
-        CrmAchievement achievement=CrmAchievement.dao.findById(achievementId);
+        CrmAchievement achievement= CrmAchievement.dao.findById(achievementId);
         if(achievement!=null){
             achievement.delete();
         }

@@ -140,7 +140,7 @@ public class OaExamineCategoryService{
 
     public R queryAllExamineCategoryList(){
         AdminUser user = BaseUtil.getUser();
-        List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.queryAllExamineCategoryList",Kv.by("userId",user.getUserId()).set("deptId",user.getDeptId()).set("isAdmin",BaseUtil.isAdmin())));
+        List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.queryAllExamineCategoryList",Kv.by("userId",user.getUserId()).set("deptId",user.getDeptId()).set("isAdmin", BaseUtil.isAdmin())));
         return R.ok().put("data", recordList);
     }
 

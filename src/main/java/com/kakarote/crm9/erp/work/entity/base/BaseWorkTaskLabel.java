@@ -13,7 +13,7 @@ public abstract class BaseWorkTaskLabel<M extends BaseWorkTaskLabel<M>> extends 
 		set("label_id", labelId);
 		return (M)this;
 	}
-
+	
 	public Integer getLabelId() {
 		return getInt("label_id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseWorkTaskLabel<M extends BaseWorkTaskLabel<M>> extends 
 		set("name", name);
 		return (M)this;
 	}
-
+	
 	public String getName() {
 		return getStr("name");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseWorkTaskLabel<M extends BaseWorkTaskLabel<M>> extends 
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseWorkTaskLabel<M extends BaseWorkTaskLabel<M>> extends 
 		set("create_user_id", createUserId);
 		return (M)this;
 	}
-
+	
 	public Long getCreateUserId() {
 		return getLong("create_user_id");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseWorkTaskLabel<M extends BaseWorkTaskLabel<M>> extends 
 		set("status", status);
 		return (M)this;
 	}
-
+	
 	public Integer getStatus() {
 		return getInt("status");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseWorkTaskLabel<M extends BaseWorkTaskLabel<M>> extends 
 		set("color", color);
 		return (M)this;
 	}
-
+	
 	public String getColor() {
 		return getStr("color");
 	}

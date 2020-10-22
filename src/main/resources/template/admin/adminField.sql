@@ -1,5 +1,23 @@
 #namespace("admin.field")
-    #sql ("queryAddField")
+    #sql ("queryField")
+        SELECT `field_id`,`field_name`,`name`,`type`,`label`,`remark`,
+        `input_tips`,`default_value`,`is_unique`,`is_null`,`sorting`,`options`,`field_type`
+        FROM `72crm_admin_field` WHERE `label` = ? and `is_hidden`=0 order by sorting
+    #end
+
+    #sql("querySysInformationById")
+        SELECT create_time,create_user_id,update_time FROM #para(tableName) WHERE #para(tableId)=#para(id)
+    #end
+
+
+
+
+
+
+
+
+
+#sql ("queryAddField")
     select field_id,field_name,name,type,input_tips,options,is_unique,is_null,"" as value,field_type,label,default_value
     from 72crm_admin_field where label = ? and is_hidden = 0 order by sorting
     #end

@@ -29,7 +29,7 @@ public enum AdminMessageEnum {
     CRM_CONTACTS_IMPORT_CANCEL(17,6,"导入联系人取消通知"),
     CRM_LEADS_IMPORT(18,6,"导入线索通知"),
     CRM_LEADS_IMPORT_CANCEL(19,6,"导入线索取消通知"),
-    CRM_PRODUCT_IMPORT(20,6,"导入产品通知"),
+
     CRM_PRODUCT_IMPORT_CANCEL(21,6,"导入产品取消通知"),
     CRM_BUSINESS_USER(22,6,"商机团队成员通知"),
     CRM_CUSTOMER_USER(23,6,"客户团队成员通知"),
@@ -47,6 +47,18 @@ public enum AdminMessageEnum {
     CRM_INVOICE_REJECT(35, 6, "发票拒绝通知"),
     CRM_INVOICE_PASS(36, 6, "发票通过通知"),
     CRM_INVOICE_EXAMINE(37, 6, "发票待审核审批提醒"),
+
+
+
+    CRM_PRODUCT_IMPORT(38,6,"导入项目通知"),
+    CRM_DEMAND_IMPORT(39,6,"导入需求通知"),
+    WORK_RISK_IMPORT(40,6,"导入风险通知"),
+    WORK_TASK_IMPORT(41,6,"导入任务通知"),
+    WORK_RESOURCES(42,6,"导入资源配置通知"),
+    WORK_PRODUCT(43,6,"导入产品通知"),
+    WORK_PRODUCT_FUNCTIONE(44,6,"导入产品功能通知"),
+    WORK_WORKCONFIG(45,6,"导入配置管理通知"),
+
     ;
 
     AdminMessageEnum(Integer type,Integer label,String remarks){

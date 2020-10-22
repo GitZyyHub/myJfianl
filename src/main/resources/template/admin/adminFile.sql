@@ -1,4 +1,12 @@
 #namespace("admin.file")
+
+
+    #sql ("queryById")
+        SELECT a.file_id,a.`name`,a.size,a.create_user_id,b.realname AS create_user_name,a.create_time,a.file_path,a.file_type,a.batch_id FROM
+        72crm_admin_file a INNER JOIN 72crm_admin_user b ON a.create_user_id=b.user_id WHERE a.file_id=?
+    #end
+
+
     #sql("saveFile")
       INSERT INTO `72crm_admin_file`
       (`types`, `name`, `size`, `create_user_id`, `create_time`, `file_path`, `batch_id`)
@@ -40,6 +48,6 @@
       #end
     #end
      #sql("deleteFileByIds")
-      DELETE FROM `72crm_admin_file`  where file_id in (#fori(ids))
+      DELETE FROM `72crm_task_file`  where file_id in (#fori(ids))
     #end
 #end

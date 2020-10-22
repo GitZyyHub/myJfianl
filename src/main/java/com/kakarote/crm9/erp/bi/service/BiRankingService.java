@@ -7,7 +7,6 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
 import com.kakarote.crm9.erp.bi.entity.BiParams;
-import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.util.ArrayList;

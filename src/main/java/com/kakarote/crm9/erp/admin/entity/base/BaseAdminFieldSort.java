@@ -13,7 +13,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("id", id);
 		return (M)this;
 	}
-
+	
 	public Integer getId() {
 		return getInt("id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("label", label);
 		return (M)this;
 	}
-
+	
 	public Integer getLabel() {
 		return getInt("label");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("field_name", fieldName);
 		return (M)this;
 	}
-
+	
 	public String getFieldName() {
 		return getStr("field_name");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("name", name);
 		return (M)this;
 	}
-
+	
 	public String getName() {
 		return getStr("name");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("type", type);
 		return (M)this;
 	}
-
+	
 	public Integer getType() {
 		return getInt("type");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("sort", sort);
 		return (M)this;
 	}
-
+	
 	public Integer getSort() {
 		return getInt("sort");
 	}
@@ -67,7 +67,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -76,7 +76,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("is_hide", isHide);
 		return (M)this;
 	}
-
+	
 	public Integer getIsHide() {
 		return getInt("is_hide");
 	}
@@ -85,7 +85,7 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		set("field_id", fieldId);
 		return (M)this;
 	}
-
+	
 	public Integer getFieldId() {
 		return getInt("field_id");
 	}

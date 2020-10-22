@@ -35,7 +35,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_CONTRACT)
-    public void contractRanKing(@Para("")BiParams biParams){
+    public void contractRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         biParams.setIsUser(0);
@@ -101,7 +101,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_RECEIVABLES)
-    public void receivablesRanKing(@Para("")BiParams biParams){
+    public void receivablesRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         biParams.setIsUser(0);
@@ -167,7 +167,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_SIGNING)
-    public void contractCountRanKing(@Para("")BiParams biParams){
+    public void contractCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         biParams.setIsUser(0);
@@ -233,7 +233,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_PRODUCT)
-    public void productCountRanKing(@Para("")BiParams biParams){
+    public void productCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         renderJson(service.productCountRanKing(biParams));
@@ -295,7 +295,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_ADD_CUSTOMER)
-    public void customerCountRanKing(@Para("")BiParams biParams){
+    public void customerCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         biParams.setIsUser(0);
@@ -361,7 +361,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_ADD_CONTACTS)
-    public void contactsCountRanKing(@Para("")BiParams biParams){
+    public void contactsCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         biParams.setIsUser(0);
@@ -427,7 +427,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_RECORD_CUSTOMER)
-    public void customerGenjinCountRanKing(@Para("")BiParams biParams){
+    public void customerGenjinCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         renderJson(service.customerGenjinCountRanKing(biParams));
@@ -489,7 +489,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_RECORD_NUN)
-    public void recordCountRanKing(@Para("")BiParams biParams){
+    public void recordCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         biParams.setIsUser(0);
@@ -555,7 +555,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.PRODUCT_CATEGORY)
-    public void contractProductRanKing(@Para("")BiParams biParams){
+    public void contractProductRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         renderJson(service.contractProductRanKing(biParams));
@@ -567,7 +567,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:ranking:read")
     @SysLog(LogEnum.RANKING_EXAMINE)
-    public void travelCountRanKing(@Para("")BiParams biParams){
+    public void travelCountRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         renderJson(service.travelCountRanKing(biParams));
@@ -628,7 +628,7 @@ public class BiRankingController extends Controller {
      * @author zxy
      */
     @Permissions("bi:product:read")
-    public void productSellRanKing(@Para("")BiParams biParams){
+    public void productSellRanKing(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "ranking", "read");
         biParams.setMenuId(menuId);
         renderJson(service.productSellRanKing(biParams));
@@ -664,7 +664,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:portrait:read")
     @SysLog(LogEnum.PORTRAIT_ADDRESS)
-    public void addressAnalyse(@Para("")BiParams biParams){
+    public void addressAnalyse(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "portrait", "read");
         biParams.setMenuId(menuId);
         renderJson(service.addressAnalyse(biParams));
@@ -675,7 +675,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:portrait:read")
     @SysLog(LogEnum.PORTRAIT_CUSTOMER_INDUSTRY)
-    public void portrait(@Para("")BiParams biParams){
+    public void portrait(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "portrait", "read");
         biParams.setMenuId(menuId);
         renderJson(service.portrait(biParams));
@@ -686,7 +686,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:portrait:read")
     @SysLog(LogEnum.PORTRAIT_CUSTOMER_LEVEL)
-    public void portraitLevel(@Para("")BiParams biParams){
+    public void portraitLevel(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "portrait", "read");
         biParams.setMenuId(menuId);
         renderJson(service.portraitLevel(biParams));
@@ -697,7 +697,7 @@ public class BiRankingController extends Controller {
      */
     @Permissions("bi:portrait:read")
     @SysLog(LogEnum.PORTRAIT_CUSTOMER_SOURCE)
-    public void portraitSource(@Para("")BiParams biParams){
+    public void portraitSource(@Para("") BiParams biParams){
         Integer menuId = Db.queryInt(Db.getSql("admin.menu.queryMenuId"), "bi", "portrait", "read");
         biParams.setMenuId(menuId);
         renderJson(service.portraitSource(biParams));

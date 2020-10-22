@@ -17,6 +17,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmInvoice;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
+import com.kakarote.crm9.erp.work.entity.TaskHours;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -165,7 +166,7 @@ public class AdminExamineService {
     /**
      * 查询当前启用审核流程步骤
      */
-    public R queryExaminStep(Integer categoryType,Integer id) {
+    public R queryExaminStep(Integer categoryType, Integer id) {
         Record record = Db.findFirst(Db.getSql("admin.examine.getAllExamineByCategoryType"), categoryType);
         if (record != null) {
             if (record.getInt("examine_type") == 1) {
@@ -204,6 +205,11 @@ public class AdminExamineService {
                         CrmInvoice crmInvoice = CrmInvoice.dao.findById(id);
                         if (crmInvoice.getExamineRecordId() != null) {
                             recordId = crmInvoice.getExamineRecordId();
+                        }
+                    }else if(categoryType == 4){
+                        TaskHours taskHours = TaskHours.dao.findById(id);
+                        if(taskHours.getExamineRecordId() != null){
+                            recordId = taskHours.getExamineRecordId();
                         }
                     }
                     if (recordId != null) {

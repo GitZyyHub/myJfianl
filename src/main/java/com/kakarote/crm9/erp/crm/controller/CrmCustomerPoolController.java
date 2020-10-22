@@ -18,15 +18,12 @@ import com.kakarote.crm9.common.annotation.RequestBody;
 import com.kakarote.crm9.common.annotation.SysLog;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.LogEnum;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.service.CrmCustomerPoolService;
 import com.kakarote.crm9.erp.crm.service.CrmCustomerService;
-import com.kakarote.crm9.erp.crm.service.CrmRecordService;
 import com.kakarote.crm9.utils.ActionRecordUtil;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import org.apache.poi.ss.usermodel.*;
@@ -154,7 +151,7 @@ public class CrmCustomerPoolController extends Controller {
     @Permissions("crm:customer:excelimport")
     @NotNullValidate(value = "poolId", message = "请选择公海")
     public void uploadExcel(@Para("file") UploadFile file, @Para("poolId") Integer poolId, @Para("repeatHandling") Integer repeatHandling) {
-        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_CUSTOMER, file.getFile().getAbsolutePath(), null, poolId, repeatHandling);
+        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_CUSTOMER, file.getFile().getAbsolutePath(), null, poolId, repeatHandling,null);
         renderJson(R.ok().put("data", messageId));
     }
 

@@ -27,7 +27,6 @@ import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.crm.service.CrmLeadsService;
-import com.kakarote.crm9.erp.crm.service.CrmRecordService;
 import com.kakarote.crm9.utils.ActionRecordUtil;
 import com.kakarote.crm9.utils.R;
 import org.apache.poi.hssf.usermodel.*;
@@ -301,7 +300,7 @@ public class CrmLeadsController extends Controller {
     @Permissions("crm:leads:excelimport")
     @NotNullValidate(value = "ownerUserId",message = "请选择负责人")
     public void uploadExcel(@Para("file") UploadFile file,@Para("ownerUserId") Long ownerUserId,@Para("repeatHandling") Integer repeatHandling){
-        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_LEADS, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling);
+        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_LEADS, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling,null);
         renderJson(R.ok().put("data",messageId));
     }
 

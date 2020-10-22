@@ -1,4 +1,35 @@
 #namespace("admin.role")
+    #sql ("queryRoleDataType")
+        SELECT max(data_type)
+        FROM  (
+            SELECT DISTINCT
+                b.data_type,
+                b.role_id
+            FROM
+                72crm_admin_user_role AS a
+                JOIN 72crm_admin_role  AS b ON a.role_id = b.role_id
+                and user_id = ?
+        ) a
+        WHERE a.role_id IN (
+        SELECT role_id FROM 72crm_admin_role_menu WHERE menu_id=?)
+    #end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #sql ("getMenuIdByRoleId")
       select menu_id from 72crm_admin_role_menu where role_id = ?
     #end

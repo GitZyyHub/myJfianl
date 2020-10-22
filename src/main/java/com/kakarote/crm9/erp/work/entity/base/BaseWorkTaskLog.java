@@ -13,7 +13,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("log_id", logId);
 		return (M)this;
 	}
-
+	
 	public Integer getLogId() {
 		return getInt("log_id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("content", content);
 		return (M)this;
 	}
-
+	
 	public String getContent() {
 		return getStr("content");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("status", status);
 		return (M)this;
 	}
-
+	
 	public Integer getStatus() {
 		return getInt("status");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("task_id", taskId);
 		return (M)this;
 	}
-
+	
 	public Integer getTaskId() {
 		return getInt("task_id");
 	}
@@ -67,7 +67,7 @@ public abstract class BaseWorkTaskLog<M extends BaseWorkTaskLog<M>> extends Mode
 		set("work_id", workId);
 		return (M)this;
 	}
-
+	
 	public Integer getWorkId() {
 		return getInt("work_id");
 	}

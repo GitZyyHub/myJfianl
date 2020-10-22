@@ -112,7 +112,7 @@ public class CrmReceivablesService extends AbstractBasePageList {
     @Before(Tx.class)
     public R saveOrUpdate(JSONObject jsonObject) {
         CrmReceivables crmReceivables = jsonObject.getObject("entity", CrmReceivables.class);
-        CrmContract crmContract=CrmContract.dao.findById(crmReceivables.getContractId());
+        CrmContract crmContract= CrmContract.dao.findById(crmReceivables.getContractId());
         if(crmContract==null||!crmContract.getCheckStatus().equals(1)){
             return R.error("当前合同未审核通过，不能添加回款");
         }
@@ -373,7 +373,7 @@ public class CrmReceivablesService extends AbstractBasePageList {
      * 回款转移
      */
     @Permissions("crm:receivables:transfer")
-    public R transfer(String receivablesIds,Long newOwnerUserId){
+    public R transfer(String receivablesIds, Long newOwnerUserId){
         String[] receivablesIdsArr = receivablesIds.split(",");
         for (String receivablesId : receivablesIdsArr){
             CrmReceivables crmReceivables = new CrmReceivables();

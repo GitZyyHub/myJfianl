@@ -13,7 +13,7 @@ public abstract class BaseWorkUser<M extends BaseWorkUser<M>> extends Model<M> i
 		set("id", id);
 		return (M)this;
 	}
-
+	
 	public Integer getId() {
 		return getInt("id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseWorkUser<M extends BaseWorkUser<M>> extends Model<M> i
 		set("work_id", workId);
 		return (M)this;
 	}
-
+	
 	public Integer getWorkId() {
 		return getInt("work_id");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseWorkUser<M extends BaseWorkUser<M>> extends Model<M> i
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseWorkUser<M extends BaseWorkUser<M>> extends Model<M> i
 		set("role_id", roleId);
 		return (M)this;
 	}
-
+	
 	public Integer getRoleId() {
 		return getInt("role_id");
 	}

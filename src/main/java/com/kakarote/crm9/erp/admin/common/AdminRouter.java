@@ -7,12 +7,28 @@ public class AdminRouter extends Routes {
     @Override
     public void config() {
         addInterceptor(new AdminInterceptor());
+
+        /*add("/system/dept", AdminDeptController.class);
+        add("/system/menu", AdminMenuController.class);
+        add("/system/role", AdminRoleController.class);
+
+        add("/file", AdminFileController.class);
+
+        add("/businessType", AdminBusinessTypeController.class);
+        add("/achievement",AdminAchievementController.class);
+        add("/sysConfig",AdminSysConfigController.class);
+
+        add("/system/log", AdminLogController.class);
+        add("/config", AdminConfigController.class);
+
+        add("/field",AdminFieldController.class);*/
+
+        addInterceptor(new AdminInterceptor());
         add("/", AdminLoginController.class);
         add("/system/user", AdminUserController.class);
         add("/system/dept", AdminDeptController.class);
         add("/system/menu", AdminMenuController.class);
         add("/system/role", AdminRoleController.class);
-        add("/system/message", AdminMessageController.class);
         add("/file", AdminFileController.class);
         add("/field",AdminFieldController.class);
         add("/scene",AdminSceneController.class);
@@ -23,6 +39,7 @@ public class AdminRouter extends Routes {
         add("/examineRecord", AdminExamineRecordController.class);
         add("/system/log", AdminLogController.class);
         add("/config", AdminConfigController.class);
+        add("/system/message", AdminMessageController.class);
 
     }
 }

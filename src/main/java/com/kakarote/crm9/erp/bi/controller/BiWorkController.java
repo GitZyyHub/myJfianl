@@ -35,7 +35,7 @@ public class BiWorkController extends Controller {
      */
     @Permissions("bi:oa:read")
     @SysLog(LogEnum.LOG_ANALYSIS)
-    public void logStatistics(@Para("")BiParams biParams){
+    public void logStatistics(@Para("") BiParams biParams){
         renderJson(R.ok().put("data",biWorkService.logStatistics(biParams)));
     }
 
@@ -64,7 +64,7 @@ public class BiWorkController extends Controller {
      * 导出日志统计信息
      * @author zhangzhiwei
      */
-    public void logStatisticsExport(@Para("")BiParams biParams)throws IOException {
+    public void logStatisticsExport(@Para("") BiParams biParams)throws IOException {
         List<Record> recordList=biWorkService.logStatistics(biParams);
         List<Map<String,Object>> mapList=new LinkedList<>();
         recordList.forEach(record -> mapList.add(record.remove("img","user_id","username").getColumns()));
@@ -114,7 +114,7 @@ public class BiWorkController extends Controller {
      */
     @Permissions("bi:oa:read")
     @SysLog(LogEnum.EXAMINE_ANALYSIS)
-    public void examineStatistics(@Para("")BiParams biParams){
+    public void examineStatistics(@Para("") BiParams biParams){
         renderJson(R.ok().put("data",biWorkService.examineStatistics(biParams)));
     }
 
@@ -123,7 +123,7 @@ public class BiWorkController extends Controller {
      * @author zhangzhiwei
      */
     @SuppressWarnings("unchecked")
-    public void examineStatisticsExport(@Para("")BiParams biParams)throws IOException {
+    public void examineStatisticsExport(@Para("") BiParams biParams)throws IOException {
         JSONObject object=biWorkService.examineStatistics(biParams);
         List<Map<String,Object>> mapList=new LinkedList<>();
         ExcelWriter writer=null;

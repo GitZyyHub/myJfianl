@@ -21,7 +21,7 @@ public class CrmProductDetailImgService {
      * 产品详情添加
      */
     public R save(CrmProductDetailImg img){
-        CrmProductDetailImg   detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",img.getProductId());
+        CrmProductDetailImg detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",img.getProductId());
             if (detailImg != null) {
                img.setImgId(detailImg.getImgId());
             }
@@ -38,7 +38,7 @@ public class CrmProductDetailImgService {
      * 产品详情查询
      */
     public R queryListByType(Long productId){
-        CrmProductDetailImg   detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",productId);
+        CrmProductDetailImg detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",productId);
         if (detailImg != null) {
             if (detailImg.getMainFileIds() != null) {
                 SqlPara sqlPara = Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", detailImg.getMainFileIds()).set("path", BaseConstant.UPLOAD_PATH).set("address", BaseUtil.getIpAddress()));

@@ -1,6 +1,5 @@
 package com.kakarote.crm9.erp.admin.controller;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,10 +8,8 @@ import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.CrmBusinessType;
 import com.kakarote.crm9.erp.admin.service.AdminBusinessTypeService;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.TagUtil;
 

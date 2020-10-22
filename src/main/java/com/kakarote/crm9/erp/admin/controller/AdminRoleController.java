@@ -11,12 +11,10 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRole;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
 import com.kakarote.crm9.erp.admin.service.AdminConfigService;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -59,7 +57,7 @@ public class AdminRoleController extends Controller {
      */
     @Permissions("manage:permission:update")
     @Before(Tx.class)
-    public void add(@Para("")AdminRole adminRole){
+    public void add(@Para("") AdminRole adminRole){
         renderJson(adminRoleService.save(adminRole));
     }
 
@@ -70,7 +68,7 @@ public class AdminRoleController extends Controller {
     @Permissions("manage:permission:update")
     @NotNullValidate(value = "roleId",message = "角色id不能为空")
     @NotNullValidate(value = "roleName",message = "角色名称不能为空")
-    public void update(@Para("")AdminRole adminRole){
+    public void update(@Para("") AdminRole adminRole){
         Integer number = Db.queryInt("select count(*) from 72crm_admin_role where role_name = ? and role_type = ? and role_id != ?", adminRole.getRoleName(),adminRole.getRoleType(),adminRole.getRoleId());
         if (number > 0){
             renderJson(R.error("角色名已存在"));
@@ -134,7 +132,7 @@ public class AdminRoleController extends Controller {
      * 关联员工
      */
     @Permissions("manage:permission:update")
-    public void relatedUser(@Para("")AdminUserRole adminUserRole){
+    public void relatedUser(@Para("") AdminUserRole adminUserRole){
         renderJson(adminRoleService.relatedUser(adminUserRole));
     }
 

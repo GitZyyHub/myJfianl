@@ -56,11 +56,11 @@ public class OaExamineService{
         JSONObject jsonObject = request.getJsonObject();
         Long userId = BaseUtil.getUser().getUserId();
         if(request.getPageType() == 0){
-            List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin",BaseUtil.isAdmin())));
+            List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin", BaseUtil.isAdmin())));
             transfer(recordList);
             return R.ok().put("data", recordList);
         }else{
-            Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin",BaseUtil.isAdmin())));
+            Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin", BaseUtil.isAdmin())));
             transfer(recordList.getList());
             return R.ok().put("data", recordList);
         }
@@ -70,21 +70,21 @@ public class OaExamineService{
         Long userId = BaseUtil.getUser().getUserId();
         JSONObject jsonObject = request.getJsonObject();
         if(request.getPageType() == 0){
-            List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin",BaseUtil.isAdmin())));
+            List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin", BaseUtil.isAdmin())));
             transfer(recordList);
             return R.ok().put("data", recordList);
         }else{
-            Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getString("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin",BaseUtil.isAdmin())));
+            Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getString("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime")).set("isAdmin", BaseUtil.isAdmin())));
             transfer(recordList.getList());
             return R.ok().put("data", recordList);
         }
     }
 
     public void transfer(List<Record> recordList){
-        Long userId=BaseUtil.getUserId();
+        Long userId= BaseUtil.getUserId();
         recordList.forEach(record -> {
             setRelation(record);
-            AdminUser user=AdminUser.dao.findByIdLoadColumns(record.getLong("create_user_id"),"user_id,realname,img,parent_id");
+            AdminUser user= AdminUser.dao.findByIdLoadColumns(record.getLong("create_user_id"),"user_id,realname,img,parent_id");
             record.set("createUser", user);
             String batchId = record.getStr("batch_id");
             Integer examineStatus = record.getInt("examine_status");
@@ -276,7 +276,7 @@ public class OaExamineService{
                 oaExamineLog.setCreateTime(new Date());
                 oaExamineLog.setExamineUser(userId);
                 oaExamineLog.save();
-                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.OA_EXAMINE_NOTICE,oaExamineLog,BaseUtil.getUserId());
+                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.OA_EXAMINE_NOTICE,oaExamineLog, BaseUtil.getUserId());
             }
         }
         if(jsonObject.get("oaExamineRelation") != null){

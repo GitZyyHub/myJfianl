@@ -1,15 +1,12 @@
 package com.kakarote.crm9.erp.admin.controller;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSON;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
 import com.kakarote.crm9.common.annotation.Permissions;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.CrmAchievement;
 import com.kakarote.crm9.erp.admin.service.AdminAchievementService;
-import com.kakarote.crm9.utils.AdminLogUtil;
 
 import java.util.List;
 
@@ -38,7 +35,7 @@ public class AdminAchievementController extends Controller {
      */
     @Permissions("manage:crm:achievement")
     public void addAchievement(){
-        CrmAchievement crmAchievement = JSON.parseObject(getRawData(),CrmAchievement.class);
+        CrmAchievement crmAchievement = JSON.parseObject(getRawData(), CrmAchievement.class);
         renderJson(adminAchievementService.addAchievement(crmAchievement));
     }
 
@@ -59,7 +56,7 @@ public class AdminAchievementController extends Controller {
      * @author hmb
      */
     @Permissions("manage:crm:achievement")
-    public void queryAchievementList(@Para("")CrmAchievement achievement){
+    public void queryAchievementList(@Para("") CrmAchievement achievement){
         Long userId = getParaToLong("userId");
         Integer deptId = getParaToInt("deptId");
         renderJson(adminAchievementService.queryAchievementList(achievement,userId,deptId));

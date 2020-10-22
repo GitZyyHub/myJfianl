@@ -48,7 +48,7 @@ public class CrmContactsService extends AbstractBasePageList {
     @Inject
     private CrmActivityService crmActivityService;
 
-    public R queryPageList(BasePageRequest basePageRequest,boolean isDataAuth) {
+    public R queryPageList(BasePageRequest basePageRequest, boolean isDataAuth) {
         Kv kv = getKv(basePageRequest,CrmEnum.CRM_CONTACTS,isDataAuth);
         if (kv.containsKey("error")){
             return R.error(kv.getStr("error"));
@@ -286,7 +286,7 @@ public class CrmContactsService extends AbstractBasePageList {
      * @param customerId 客户ID
      * @param ownerUserId 负责人ID
      */
-    public R updateOwnerUserId(Integer customerId,Long ownerUserId){
+    public R updateOwnerUserId(Integer customerId, Long ownerUserId){
         List<Integer> contactsIdList = Db.query("select contacts_id from 72crm_crm_contacts where customer_id = ?",customerId);
         for (Integer contactsId : contactsIdList) {
             if (AuthUtil.isRwAuth(contactsId, CrmEnum.CRM_CONTACTS)) {

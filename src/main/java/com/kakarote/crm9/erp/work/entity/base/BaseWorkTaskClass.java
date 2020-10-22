@@ -10,19 +10,19 @@ import com.jfinal.plugin.activerecord.IBean;
 public abstract class BaseWorkTaskClass<M extends BaseWorkTaskClass<M>> extends Model<M> implements IBean {
 
 	public M setClassId(Integer classId) {
-		set("class_id", classId);
+		set("type", classId);
 		return (M)this;
 	}
-
+	
 	public Integer getClassId() {
-		return getInt("class_id");
+		return getInt("type");
 	}
 
 	public M setName(String name) {
 		set("name", name);
 		return (M)this;
 	}
-
+	
 	public String getName() {
 		return getStr("name");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseWorkTaskClass<M extends BaseWorkTaskClass<M>> extends 
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseWorkTaskClass<M extends BaseWorkTaskClass<M>> extends 
 		set("create_user_id", createUserId);
 		return (M)this;
 	}
-
+	
 	public Long getCreateUserId() {
 		return getLong("create_user_id");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseWorkTaskClass<M extends BaseWorkTaskClass<M>> extends 
 		set("status", status);
 		return (M)this;
 	}
-
+	
 	public Integer getStatus() {
 		return getInt("status");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseWorkTaskClass<M extends BaseWorkTaskClass<M>> extends 
 		set("work_id", workId);
 		return (M)this;
 	}
-
+	
 	public Integer getWorkId() {
 		return getInt("work_id");
 	}
@@ -67,7 +67,7 @@ public abstract class BaseWorkTaskClass<M extends BaseWorkTaskClass<M>> extends 
 		set("order_num", orderNum);
 		return (M)this;
 	}
-
+	
 	public Integer getOrderNum() {
 		return getInt("order_num");
 	}

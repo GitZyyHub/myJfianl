@@ -4,7 +4,6 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
@@ -44,7 +43,7 @@ public class OaLogController extends Controller {
      * 分页条件查询日志
      * @author zhangzhiwei
      */
-    @SysLog({LogEnum.ALL_LOG,LogEnum.MY_SEND_LOG,LogEnum.MY_RECEIVE_LOG})
+    @SysLog({LogEnum.ALL_LOG, LogEnum.MY_SEND_LOG, LogEnum.MY_RECEIVE_LOG})
     public void queryList(BasePageRequest basePageRequest) {
         Page<OaLog> recordList=oaLogService.queryList(basePageRequest);
         renderJson(R.ok().put("data",recordList));

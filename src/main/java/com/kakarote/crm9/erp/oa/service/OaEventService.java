@@ -51,7 +51,7 @@ public class OaEventService {
         return queryList(oaEventList, startTime, endTime);
     }
 
-    private List<OaEventDTO> queryList(List<OaEvent> oaEventList,long startTime,long endTime){
+    private List<OaEventDTO> queryList(List<OaEvent> oaEventList, long startTime, long endTime){
         List<OaEventDTO> recordList=new ArrayList<>();
         Set<String> batchIds = oaEventList.stream().map(OaEvent::getBatchId).collect(Collectors.toSet());
         List<OaEventUpdateRecord> oaEventUpdateRecordList = new OaEventUpdateRecord().dao().template("oa.event.queryEventRecordList",Kv.by("batchIds",batchIds)).find();
@@ -99,7 +99,7 @@ public class OaEventService {
         }
         Db.batchSave(notices,10);
         eventNoticeUpdate(event,event.getEventId());
-        return save?R.ok():R.error();
+        return save? R.ok(): R.error();
     }
 
 
@@ -179,7 +179,7 @@ public class OaEventService {
         if (time <= System.currentTimeMillis()){
             eventNoticeUpdate(event,eventId);
         }
-        return save?R.ok():R.error();
+        return save? R.ok(): R.error();
     }
 
     @Before(Tx.class)

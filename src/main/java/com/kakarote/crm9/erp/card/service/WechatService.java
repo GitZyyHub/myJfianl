@@ -1,13 +1,10 @@
 package com.kakarote.crm9.erp.card.service;
 
-import cn.binarywang.wx.miniapp.api.WxMaCodeService;
 import cn.binarywang.wx.miniapp.api.WxMaQrcodeService;
-import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.code.WxMaCategory;
 import cn.binarywang.wx.miniapp.bean.code.WxMaCodeAuditStatus;
 import cn.binarywang.wx.miniapp.bean.code.WxMaCodeSubmitAuditRequest;
-import cn.binarywang.wx.miniapp.config.impl.WxMaRedisConfigImpl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
@@ -15,17 +12,14 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
-import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
-import com.kakarote.crm9.common.config.JfinalConfig;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.entity.AdminUserHisTable;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
 import com.kakarote.crm9.erp.card.common.WxMaServiceCongigImpl;
-import com.kakarote.crm9.erp.card.common.WxMiNiAppOpenRedisConfigStorage;
 import com.kakarote.crm9.erp.card.entity.AdminVisitingCard;
 import com.kakarote.crm9.erp.card.entity.CardWeixinBrowse;
 import com.kakarote.crm9.erp.card.entity.CardWeixinLeads;
@@ -34,11 +28,10 @@ import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.WxUtils;
 import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.open.bean.WxOpenMaCodeTemplate;
 import me.chanjar.weixin.open.bean.fastma.WxFastMaCategory;
-import me.chanjar.weixin.open.bean.ma.WxMaOpenCommitExtInfo;
-import me.chanjar.weixin.open.bean.message.WxOpenMaSubmitAuditMessage;
-import me.chanjar.weixin.open.bean.result.*;
+import me.chanjar.weixin.open.bean.result.WxOpenMaSubmitAuditResult;
+import me.chanjar.weixin.open.bean.result.WxOpenQueryAuthResult;
+import me.chanjar.weixin.open.bean.result.WxOpenResult;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -359,7 +352,7 @@ public class WechatService extends WxMaServiceCongigImpl {
         return uploadingErWeiMaGuiZe1(type);
     }
 
-    private R uploadingErWeiMaGuiZe1( Integer type){
+    private R uploadingErWeiMaGuiZe1(Integer type){
         WxOpenMaSubmitAuditResult wxOpenMaSubmitAuditResult = null;
         try {
             //获取小程序模板

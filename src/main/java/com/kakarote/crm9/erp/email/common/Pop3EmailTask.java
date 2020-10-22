@@ -64,7 +64,7 @@ public class Pop3EmailTask {
                         if(!Objects.equals(num,folder.getMessageCount())){
                             System.out.println("------有新邮件-------");
                             num=folder.getMessageCount();
-                            Aop.get(EmailRecordService.class).receivingEmail(emailAccount,adminUser,EmailEnum.RECEIPT_EMAIL);
+                            Aop.get(EmailRecordService.class).receivingEmail(emailAccount,adminUser, EmailEnum.RECEIPT_EMAIL);
                         }
                         folder.close(false);
                     }

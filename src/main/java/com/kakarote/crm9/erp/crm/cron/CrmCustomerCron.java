@@ -1,7 +1,6 @@
 package com.kakarote.crm9.erp.crm.cron;
 
 import com.jfinal.aop.Aop;
-import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPool;
 import com.kakarote.crm9.erp.crm.service.CrmCustomerPoolService;
 import com.kakarote.crm9.utils.BaseUtil;

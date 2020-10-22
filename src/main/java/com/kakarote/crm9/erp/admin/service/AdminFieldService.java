@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
@@ -17,24 +18,209 @@ import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldStyle;
-import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPoolFieldSort;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPoolFieldStyle;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPoolRule;
-import com.kakarote.crm9.utils.BaseUtil;
-import com.kakarote.crm9.utils.FieldUtil;
-import com.kakarote.crm9.utils.R;
-import com.kakarote.crm9.utils.TagUtil;
+import com.kakarote.crm9.erp.work.entity.Milestone;
+import com.kakarote.crm9.erp.work.entity.TaskHours;
+import com.kakarote.crm9.erp.work.service.*;
+import com.kakarote.crm9.utils.*;
+import com.mysql.jdbc.StringUtils;
+import org.apache.poi.util.Internal;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
-
 public class AdminFieldService {
+
+    @Inject
+    WorkService workService;
+
+    @Inject
+    MilestoneService milestoneService;
+
+    @Inject
+    TaskService taskService;
+
+    @Inject
+    WorkDemandService workDemandService;
+
+    @Inject
+    WorkProductService workProductService;
+
+    @Inject
+    WorkProductFuntionService workProductFuntionService;
+
+    @Inject
+    TaskHoursService taskHoursServicel;
+
+    /**
+     * 查询字段详情
+     * @param fieldType
+     * @param id
+     * @return
+     */
+    public List<Record> getFields(Integer fieldType,Integer id){
+        List<Record> records = Db.find(Db.getSql("admin.field.queryField"), fieldType);
+        List<Record> fields = new ArrayList<>();
+        records.forEach(record -> {
+            String field_name = ToolUtils.lineToHump(record.getStr("field_name"));
+            record.set("field_name",field_name);
+            FormTypeEnum type = FormTypeEnum.parse(record.getInt("type"));
+            record.set("formType",type.getFormType());
+            String options = record.getStr("options");
+            if(!StringUtils.isNullOrEmpty(options)){
+                String[] split = options.split(",");
+                record.set("setting",split);
+            }
+            record.set("is_unique",0);
+            fields.add(record);
+        });
+        List<Record> list = new ArrayList<>();
+        if(id!=null){
+            Record record = null;
+            CrmEnum crmEnum = CrmEnum.parse(fieldType);
+            if (id != null){
+                if(CrmEnum.WORK.equals(crmEnum)){
+                    record = workService.queryField(crmEnum, id);
+                }else if(CrmEnum.MILESTONE.equals(crmEnum)){
+                    record = milestoneService.queryById(id);
+                }else if(CrmEnum.TASK.equals(crmEnum)){
+                    record = taskService.queryById(id);
+                }else if(CrmEnum.SUBTASKS.equals(crmEnum)){
+                    record = taskService.queryById(id);
+                }else if(CrmEnum.DEMAND.equals(crmEnum)){
+                    record = workDemandService.queryById(id);
+                }else if(CrmEnum.PRODUCT.equals(crmEnum)){
+                    record = workProductService.queryById(id);
+                }else if(CrmEnum.PRODUCT_FUNCTIONE.equals(crmEnum)){
+                    record = workProductFuntionService.queryById(id);
+                }else if(CrmEnum.TASK_HOURS.equals(crmEnum)){
+                    record = taskHoursServicel.queryById(id);
+                }
+            }
+
+            for (Record field : fields) {
+                field.set("authLevel",3);
+                field.set("sysInformation",0);
+
+                try {
+                    if(field.getInt("type") == FormTypeEnum.SINGLE_USER.getType()){
+                        field.set("value",
+                                Db.find("select user_id,realname from 72crm_admin_user where user_id=?",
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
+                    }/*else if(field.getInt("type") == FormTypeEnum.USER.getType()){
+                        String field_name = record.getStr(ToolUtils.humpToLine(field.getStr("field_name")));
+                        field.set("value",
+                                Db.find("select user_id,realname from 72crm_admin_user where user_id in ("+
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))+")"));
+                    }*/ else if (field.getInt("type") == FormTypeEnum.STRUCTURE.getType()) {
+                        field.set("value",
+                                Db.find("SELECT dept_id,`name` FROM `72crm_admin_dept` WHERE dept_id=?",
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
+                    }else if(field.getInt("type") == FormTypeEnum.CHECKBOX.getType()){
+                        String field_name = record.getStr(ToolUtils.humpToLine(field.getStr("field_name")));
+                        field.set("value",field_name.split(","));
+                    }else if(field.getInt("type") == FormTypeEnum.CUSTOMER.getType()){
+                        field.set("value",
+                                Db.find("SELECT customer_id,`customer_name` FROM `72crm_crm_customer` WHERE customer_id=?",
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
+                    }else if(field.getInt("type") == FormTypeEnum.TASK.getType()){
+                        field.set("value",
+                                Db.find("SELECT task_id,task_name FROM 72crm_task WHERE task_id =?",
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
+                    }else if(field.getInt("type") == FormTypeEnum.SUBTASK.getType()){
+                        field.set("value",
+                                Db.find("SELECT task_id,task_name FROM 72crm_task WHERE task_id =?",
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
+                    }else if(field.getInt("type") == FormTypeEnum.MILESTONE.getType()){
+                        String field_name = ToolUtils.humpToLine(field.getStr("field_name"));
+                        field.set("value",
+                                Db.find("SELECT milestone_id,milestone_name FROM 72crm_milestone WHERE milestone_id =?",
+                                        record.getStr(field_name)));
+                    }else if(field.getInt("type") == FormTypeEnum.WORK.getType()){
+                        field.set("value",
+                                Db.find("SELECT work_id,work_name from 72crm_work WHERE work_id=?",
+                                        record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
+                    } else {
+                        //String field_name = record.get(ToolUtils.humpToLine(field.getStr("field_name")));
+                        field.set("value",record.get(ToolUtils.humpToLine(field.getStr("field_name") )));
+                    }
+                } catch (Exception e) {
+                    field.set("value","查询出错" );
+                }
+                if(!"createUserId".equals(field.getStr("field_name"))){
+                    list.add(field);
+                }
+            }
+        }
+        if(list.size()>0){
+            return list;
+        }
+        return fields;
+    }
+
+    /**
+     * 详情页面修改对应字段内容
+     * @param jsonObject
+     * @return
+     */
+    public R updateInformation(JSONObject jsonObject) {
+        Integer id = jsonObject.getInteger("id");
+        String batchId = jsonObject.getString("batchId");
+        Integer label = jsonObject.getInteger("label");
+        JSONArray list = jsonObject.getJSONArray("list");
+        CrmEnum parse = CrmEnum.parse(label);
+        Record record = new Record();
+        record.set(parse.getTableId(),id);
+        for (int i = 0; i < list.size(); i++) {
+            JSONObject field = list.getJSONObject(i);
+            String fieldName = ToolUtils.humpToLine(field.getString("fieldName"));
+            Object value = field.get("value");
+            record.set(fieldName,value);
+        }
+        Db.update(parse.getTableName(),parse.getTableId(),record);
+        return R.ok();
+    }
+
+    /**
+     * 补充详情页面数据
+     * @param fields
+     * @param id
+     * @return
+     */
+    public List<Record> findFieldDetails(CrmEnum crmEnum, List<Record> fields,Integer id){
+        List<String> sysInformationName = Arrays.asList("创建时间", "创建人", "更新时间");
+        List<String> sysInformationFieldName = Arrays.asList("create_time", "create_user_id", "update_time");
+        //Record sysInformation = Db.findFirst(Db.getSql("work.queryWorkSysInformationById"), id);
+        Record sysInformation = Db.findFirst("SELECT DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%S') create_time," +
+                "(select realname from 72crm_admin_user where user_id = t.create_user_id)create_user_id,DATE_FORMAT(t.update_time,'%Y-%m-%d %H:%i:%S') update_time FROM "+crmEnum.getTableName()+ " t WHERE "+crmEnum.getTableId()+"="+id);
+        for (int i = 0; i < sysInformationFieldName.size(); i++) {
+            Record record = new Record();
+            record.set("authLevel", 2).set("sysInformation", 1).set("fieldName", sysInformationFieldName.get(i))
+                    .set("name", sysInformationName.get(i)).set("value", sysInformation.getStr(sysInformationFieldName.get(i)))
+                    .set("formType", "text").set("isNull", 0).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
+                    .set("label", CrmEnum.WORK.getType()).set("type", 1).set("sorting", 0).set("options", null).set("fieldType", 1);
+            fields.add(record);
+        }
+        return fields;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     private static Map<Integer, List<String>> fieldColumnNameProperties = new HashMap<>();
@@ -564,12 +750,29 @@ public class AdminFieldService {
                 fieldUtil.add("lastTime", "最后跟进时间", 4);
             } else if (CrmEnum.CRM_CUSTOMER_POOL.getType() == adminFieldSort.getLabel()) {
                 fieldUtil.add("lastContent", "最后跟进记录", FormTypeEnum.TEXT.getType());
+            } else if(CrmEnum.TASK_HOURS.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("check_user_name", "审批人", FormTypeEnum.TEXT.getType())
+                         .add("create_user_name", "创建人", FormTypeEnum.TEXT.getType())
+                         .add("create_time", "发起时间", FormTypeEnum.DATE.getType())
+                         .add("examine_time", "审批时间", FormTypeEnum.DATE.getType())
+                         .add("check_status", "审核状态", FormTypeEnum.TEXT.getType());
+            } else if(CrmEnum.SUBTASKS.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("task_num", "子任务编号", FormTypeEnum.TEXT.getType());
             }
-            if (CrmEnum.CRM_RETURN_VISIT.getType() != adminFieldSort.getLabel()) {
+
+
+            if (CrmEnum.TASK.getType() != adminFieldSort.getLabel()&&CrmEnum.CRM_RETURN_VISIT.getType() != adminFieldSort.getLabel()
+                    &&CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()&&CrmEnum.MILESTONE.getType()!=adminFieldSort.getLabel()
+                    &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()) {
                 fieldUtil.add("ownerUserName", "负责人", 1);
             }
-            fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4)
-                    .add("createUserName", "创建人", 1);
+            if(CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()
+                    &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()
+                    &&CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()
+            ){
+                fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4)
+                        .add("createUserName", "创建人", 1);
+            }
             fieldUtil.getAdminFieldSortList().forEach(fieldSort -> {
                 String fieldName = StrUtil.toCamelCase(fieldSort.getFieldName());
                 fieldSort.setFieldName(fieldName);
@@ -587,7 +790,34 @@ public class AdminFieldService {
                     fieldSort.setFieldName("contractNum");
                 } else if ("planId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("planNum");
+                } else if("salesId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("salesName");
+                }else if("managerId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("managerName");
+                }else if("deptId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("deptName");
+                }else if("workId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("workName");
+                }else if("taskId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("taskName");
+                }else if("mainUserId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("mainUserName");
+                }else if("ownerUserId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("ownerUserName");
+                }else if("milestoneId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("milestoneName");
+                }else if("beforeId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("beforeName");
+                }else if("exploitUserId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("exploitUserName");
+                }else if("createUserId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("createUserName");
+                }else if("subtasksId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("subtasksName");
+                }else if("pid".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("pName");
                 }
+
             });
             sortList = fieldUtil.getAdminFieldSortList();
             for (int i = 0; i < sortList.size(); i++) {
@@ -765,4 +995,7 @@ public class AdminFieldService {
             }
         });
     }
+
+
+
 }

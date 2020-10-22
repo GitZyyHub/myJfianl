@@ -13,7 +13,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("field_id", fieldId);
 		return (M)this;
 	}
-
+	
 	public Integer getFieldId() {
 		return getInt("field_id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("field_name", fieldName);
 		return (M)this;
 	}
-
+	
 	public String getFieldName() {
 		return getStr("field_name");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("name", name);
 		return (M)this;
 	}
-
+	
 	public String getName() {
 		return getStr("name");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("type", type);
 		return (M)this;
 	}
-
+	
 	public Integer getType() {
 		return getInt("type");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("label", label);
 		return (M)this;
 	}
-
+	
 	public Integer getLabel() {
 		return getInt("label");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("remark", remark);
 		return (M)this;
 	}
-
+	
 	public String getRemark() {
 		return getStr("remark");
 	}
@@ -67,7 +67,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("input_tips", inputTips);
 		return (M)this;
 	}
-
+	
 	public String getInputTips() {
 		return getStr("input_tips");
 	}
@@ -76,7 +76,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("max_length", maxLength);
 		return (M)this;
 	}
-
+	
 	public Integer getMaxLength() {
 		return getInt("max_length");
 	}
@@ -85,7 +85,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("default_value", defaultValue);
 		return (M)this;
 	}
-
+	
 	public String getDefaultValue() {
 		return getStr("default_value");
 	}
@@ -94,7 +94,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("is_unique", isUnique);
 		return (M)this;
 	}
-
+	
 	public Integer getIsUnique() {
 		return getInt("is_unique");
 	}
@@ -103,7 +103,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("is_null", isNull);
 		return (M)this;
 	}
-
+	
 	public Integer getIsNull() {
 		return getInt("is_null");
 	}
@@ -112,7 +112,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("sorting", sorting);
 		return (M)this;
 	}
-
+	
 	public Integer getSorting() {
 		return getInt("sorting");
 	}
@@ -121,7 +121,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("options", options);
 		return (M)this;
 	}
-
+	
 	public String getOptions() {
 		return getStr("options");
 	}
@@ -130,7 +130,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("operating", operating);
 		return (M)this;
 	}
-
+	
 	public Integer getOperating() {
 		return getInt("operating");
 	}
@@ -139,7 +139,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("is_hidden", isHidden);
 		return (M)this;
 	}
-
+	
 	public Integer getIsHidden() {
 		return getInt("is_hidden");
 	}
@@ -148,7 +148,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("update_time", updateTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getUpdateTime() {
 		return get("update_time");
 	}
@@ -157,7 +157,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("examine_category_id", examineCategoryId);
 		return (M)this;
 	}
-
+	
 	public Integer getExamineCategoryId() {
 		return getInt("examine_category_id");
 	}
@@ -166,7 +166,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("field_type", fieldType);
 		return (M)this;
 	}
-
+	
 	public Integer getFieldType() {
 		return getInt("field_type");
 	}
@@ -175,7 +175,7 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		set("relevant", relevant);
 		return (M)this;
 	}
-
+	
 	public Integer getRelevant() {
 		return getInt("relevant");
 	}

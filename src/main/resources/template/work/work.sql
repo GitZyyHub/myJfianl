@@ -1,5 +1,453 @@
 #namespace("work")
-  #sql("queryWorkNameList")
+
+    #sql("queryStructure")
+        select column_name,column_comment,data_type from information_schema.columns where table_name=?
+    #end
+
+    #sql ("queryDataAuth")
+        select num_id from 72crm_work_user_record where user_id in (#fori(ids)) and type=#para(ty)
+        #if(workId)
+         and work_id = #para(workId)
+        #end
+    #end
+
+    #sql ("queryHistoricalRecordByType")
+        SELECT * FROM 72crm_work_historical_record WHERE module=?
+    #end
+
+    #sql ("updateCheckStatusById")
+        update 72crm_work set check_status=? where work_id=?
+    #end
+
+    #sql ("updateCheckStatusByIdThrough")
+        update 72crm_work set check_status=?,examine_time=? where work_id=?
+    #end
+
+     #sql ("advancedSearch")
+        SELECT
+            (select realname from 72crm_admin_user where user_id=w.create_user_id) create_user_name,
+            (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
+            (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
+            (select `name` from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
+            (select `name` from 72crm_admin_dept where dept_id=w.area) area,
+            work_num,
+            work_id,
+            work_name,
+            batch_id,
+            create_time,
+            work_phase,
+            work_type,
+            start_time,
+            end_time,
+            update_time
+        from 72crm_work AS w
+         where 1=1
+         #if(workPhase)
+            and w.work_phase != #para(workPhase)
+         #end
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        #if(dataAuth)
+            and work_id in (#fori(dataAuth))
+        #end
+        ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
+        #if(page&&limit)
+          LIMIT #(page),#(limit)
+        #end
+    #end
+
+    #sql("queryWoekPageListCount")
+        SELECT count(1) from 72crm_work AS w
+        where status != 3
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        #if(workPhase)
+            and w.work_phase != #para(workPhase)
+         #end
+         #if(dataAuth)
+            and work_id in (#fori(dataAuth))
+        #end
+    #end
+
+    #sql("waiting")
+        SELECT
+                (select realname from 72crm_admin_user where user_id=w.create_user_id) create_user_name,
+                (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
+                (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
+                (select `name` from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
+                (select `name` from 72crm_admin_dept where dept_id=w.area) area,
+                work_num,
+                status,
+                work_id,
+                work_name,
+                batch_id,
+                create_time,
+                description,
+                work_phase,
+                work_type,
+                start_time,
+                end_time,
+                update_time
+        from 72crm_work AS w
+        WHERE 1=1
+        and w.work_id in (SELECT work_id from 72crm_work_user_record WHERE user_id=#para(userId) and type=4)
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        #if(dataAuth)
+            and work_id in (#fori(dataAuth))
+        #end
+        ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
+        #if(page&&limit)
+          LIMIT #(page),#(limit)
+        #end
+    #end
+
+    #sql("waitingCount")
+        SELECT count(1) from 72crm_work AS w
+        where status != 3
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        #if(workPhase)
+            and w.work_phase != #para(workPhase)
+         #end
+         #if(dataAuth)
+            and work_id in (#fori(dataAuth))
+        #end
+    #end
+
+
+    #sql ("queryWorkByIdExport")
+    select * from (
+        SELECT
+
+            w.work_id,
+            w.work_name,
+            w.create_time,
+            w.description,
+            w.area,
+            w.work_type,
+            d.name AS `dept_id`,
+            u2.realname AS sales_id,
+            u3.realname AS create_user_id,
+            u4.realname AS manager_id,
+            w.start_time,
+            w.end_time
+        from 72crm_work AS w
+        LEFT JOIN 72crm_admin_dept AS d ON d.dept_id=w.dept_id
+        LEFT JOIN 72crm_admin_user AS u2 ON u2.user_id=w.sales_id
+        LEFT JOIN 72crm_admin_user AS u3 ON u3.user_id=w.create_user_id
+        LEFT JOIN 72crm_admin_user AS u4 ON u4.user_id=w.manager_id
+
+        GROUP BY  w.batch_id) as a
+        #if(workIds)
+         where work_id in (#fori(workIds))
+        #end
+
+    #end
+
+    #sql ("queryWorkExtensionById")
+        SELECT examine,solution,risk,unscramble,target,contract_amount,effective_amount,implement_cost,
+        maintenance_cost,budget,practical_cost,customer_name,customer_contact,customer_calls,ifnull(forecast_work,0) forecast_work
+        FROM 72crm_work WHERE work_id=?
+    #end
+
+    #sql("queryWorkSysInformationById")
+        SELECT create_time,create_user_id,update_time FROM 72crm_work WHERE work_id=?
+    #end
+
+    #sql("updateWorkPhase")
+        update 72crm_work set work_phase=#para(phase) where work_id in (#fori(ids))
+    #end
+
+
+    #sql("findWorkById")
+        SELECT
+            w.work_num,
+            w.status,
+            w.work_id,
+            w.work_name,
+            w.batch_id,
+            w.create_time,
+            w.description,
+            w.work_phase,
+            w.work_type,
+            w.dept_id,
+            w.area,
+            w.sales_id,
+            w.create_user_id,
+            w.manager_id,
+            w.start_time,
+            w.end_time,
+            w.update_time
+        FROM
+            `72crm_work` w
+        WHERE
+            work_id = ?
+    #end
+
+    #sql ("queryWorkUserByNumId")
+        select user_id,realname from 72crm_admin_user WHERE user_id in (SELECT user_id FROM `72crm_work_user_record` WHERE num_id =? and type=?)
+    #end
+
+
+    #sql ("findMilestoneById")
+        SELECT
+            m.milestone_id,
+            m.milestone_num,
+            m.create_time,
+            m.milestone_name,
+            m.degree,
+            m.start_time,
+            m.end_time,
+            (select work_num from 72crm_work where m.work_id=work_id) work_num,
+			m.update_time,
+			(select realname from 72crm_admin_user where m.main_user_id = user_id) main_user_name,
+            m.instructions,
+            (select work_name from 72crm_work where m.work_id=work_id) work_name,
+			(select task_name from 72crm_task where m.task_id=task_id) task_name
+        from 72crm_milestone m
+	    where 1=1
+		#if(_workId)
+		and m.work_id=#para(_workId)
+		#end
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
+        #if(page&&limit)
+          LIMIT #(page),#(limit)
+        #end
+    #end
+
+    #sql ("queryMilestonePageListCount")
+    SELECT count(1) from 72crm_milestone
+        where 1=1
+		#if(_workId)
+		    and work_id=#para(_workId)
+		#end
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+    #end
+
+    #sql ("updateMilestoneDegree")
+        update 72crm_milestone set degree=#para(degree) where milestone_id=#para(ids)
+    #end
+
+    #sql ("queryMilestoneById")
+        SELECT m.*,w.work_name,t.task_name,u.username AS user_name from 72crm_milestone m
+        left JOIN 72crm_work w ON m.work_id=w.work_id
+        left JOIN 72crm_task t ON m.task_id=t.task_id
+        left JOIN 72crm_admin_user u ON m.main_user_id=u.user_id
+        WHERE m.milestone_id=?
+    #end
+
+    #sql("milestoneExport")
+
+    #end
+
+    #sql ("delRiskByids")
+        DELETE FROM 72crm_work_risk where risk_id in (#para(ids))
+    #end
+    #sql ("queryRiskByBatchId")
+        SELECT
+            `risk_id`,
+            `risk_type`	,
+            `risk_level`,
+            `scope`,
+            `solve_time`,
+            `risk_status`,
+            `solve_advice`,
+            `detailed`,
+            `found_time`,
+            `found_phase`,
+            `found_way`,
+            `direction`,
+            tracking_user_id,
+            solve_user_id,
+            found_user_id
+
+        FROM 72crm_work_risk r
+        WHERE 1=1
+        #if(workId)
+            and r.work_id=#para(workId)
+        #end
+        #if(search)
+            and found_phase like concat('%', #para(search), '%')
+        #end
+        order by update_time desc
+    #end
+    #sql ("queryRiskById")
+    SELECT
+        r.*,
+        (SELECT realname from 72crm_admin_user WHERE user_id=r.tracking_user_id) tracking_user_name,
+        (SELECT realname from 72crm_admin_user WHERE user_id=r.solve_user_id) solve_user_name,
+        (SELECT realname from 72crm_admin_user WHERE user_id=r.found_user_id) found_user_name
+    from 72crm_work_risk r
+    WHERE r.risk_id=?
+    #end
+    #sql ("queryRiskByIdExport")
+        SELECT
+            `risk_type`,
+            `risk_level`,
+            `scope`,
+            `solve_time`,
+            `risk_status`,
+            `solve_advice`,
+            `detailed`,
+            `found_time`,
+            `found_phase`,
+            `found_way`,
+            `direction`,
+            (SELECT realname from 72crm_admin_user WHERE user_id=r.tracking_user_id) tracking_user_name,
+            (SELECT realname from 72crm_admin_user WHERE user_id=r.solve_user_id) solve_user_name,
+            (SELECT realname from 72crm_admin_user WHERE user_id=r.found_user_id) found_user_name
+        from 72crm_work_risk r
+        #if(riskIds)
+            WHERE r.risk_id in (#fori(riskIds))
+        #end
+    #end
+
+
+
+    #sql ("queryChangePageList")
+        SELECT c.*,
+        (select realname from 72crm_admin_user where user_id=c.forward_main_user_id) forward_main_user_name
+        FROM 72crm_work_change c
+        WHERE 1=1
+        #if(_workId)
+        and c.work_id=#para(_workId)
+        #end
+        #if(_batch_id)
+        and c.batch_id=#para(_batchId)
+        #end
+        #if(_search)
+            and c.change_project LIKE concat('%', #para(_search), '%')
+        #end
+        order by update_time desc
+        #if(page&&limit)
+            LIMIT #(page),#(limit)
+        #end
+
+    #end
+    #sql ("queryChangePageListCount")
+        SELECT count(1)
+        FROM 72crm_work_change c
+        WHERE 1=1
+        #if(_workId)
+        and c.work_id=#para(_workId)
+        #end
+        #if(_batch_id)
+        and c.batch_id=#para(_batchId)
+        #end
+        #if(_search)
+            and c.change_project LIKE concat('%', #para(_search), '%')
+        #end
+
+    #end
+
+
+    #sql ("queryChangeUserByChangeId")
+        SELECT user_id,realname FROM 72crm_admin_user where user_id in (
+            SELECT user_id FROM 72crm_work_change_user WHERE change_id = ?)
+    #end
+
+
+
+    #sql ("queryResourcePageList")
+        SELECT s.*,u.realname as main_user_name FROM 72crm_work_resources_setting s
+        LEFT JOIN 72crm_admin_user u ON s.main_user_id=u.user_id
+        WHERE 1=1
+        #if(_workId)
+            and work_id=#para(_workId)
+        #end
+        #if(search)
+            and resources_name LIKE concat('%', #para(search), '%')
+        #end
+        order by create_time desc
+    #end
+
+    #sql ("queryResourceById")
+        SELECT s.*,
+            (SELECT work_name from 72crm_work where work_id=s.work_id) work_name,
+            (SELECT realname from 72crm_admin_user where user_id=s.main_user_id) main_user_name
+        FROM 72crm_work_resources_setting s WHERE s.resources_id=?
+    #end
+
+    #sql ("queryHistoricalRecordList")
+        SELECT * FROM 72crm_work_historical_record WHERE module=#para(type)
+        #if(operationId)
+            and operation_id=#para(operationId)
+        #end
+        order by create_time
+    #end
+    #sql ("queryHistoricalList")
+        SELECT * FROM 72crm_work_historical WHERE 1=1
+        #if(workId)
+            and work_id=#para(workId)
+        #end
+        #if(operationId)
+            and operation_id=#para(operationId)
+        #end
+        order by create_time
+    #end
+    #sql ("queryTaskHistoricalList")
+        SELECT * FROM 72crm_work_task_historical WHERE 1=1
+        #if(taskId)
+        and task_id = #para(taskId)
+        #end
+        #if(type)
+        and module_two = #para(type)
+        #end
+        #if(operationId)
+            and operation_id=#para(operationId)
+        #end
+        order by create_time
+    #end
+
+
+    #sql ("queryTaskConfigByTaskId")
+        SELECT
+            c.*,
+            (SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name,
+            (SELECT realname FROM 72crm_admin_user WHERE user_id = c.create_user_id) create_user_name
+        FROM 72crm_work_config c WHERE 1=1
+        #if(type)
+            and c.type=#para(type)
+        #end
+        #if(workId)
+            and c.work_id=#para(workId)
+        #end
+        #if(associatedId)
+            and c.associated_id=#para(associatedId)
+        #end
+        #if(search)
+            and (config_items like concat('%',#para(search),'%') or associated_name like concat('%',#para(search),'%'))
+        #end
+        #if(page&&limit)
+            LIMIT #(page),#(limit)
+        #end
+        order by update_time desc
+    #end
+
+    #sql ("queryTaskConfigById")
+        SELECT config_items,plan_time,main_user_id,associated_name,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
+    #end
+
+
+
+
+
+/*------------------------------------------*/
+
+
+
+
+    #sql("queryWorkNameList")
     select  a.work_id,a.name,a.owner_user_id,a.color,0 as collect,999 as orderNum,a.is_system_cover,a.is_open,a.create_user_id,a.owner_role,
     (CASE WHEN is_system_cover = 0 THEN b.file_path
           WHEN is_system_cover = 1 THEN a.cover_url END ) as cover_url
@@ -235,3 +683,36 @@
   where a.role_id = ? and b.parent_id = ?
   #end
 #end
+
+
+   /*#sql ("find")
+        SELECT w.*,field_table.*
+        from 72crm_work AS w LEFT JOIN
+            (
+                SELECT d.batch_id  as field_batch_id
+                    #for(field:fields)
+                        ,max(CASE WHEN d.name = '#(field.value.get("name"))' THEN d.value END) AS '#(field.value.get("field_name"))'
+                    #end
+                FROM 72crm_work_data d GROUP BY d.batch_id
+            ) as field_table ON w.batch_id = field_table.field_batch_id
+        where work_id = ?
+    #end*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

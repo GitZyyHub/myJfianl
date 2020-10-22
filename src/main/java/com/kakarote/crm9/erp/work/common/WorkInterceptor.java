@@ -6,6 +6,7 @@ import com.jfinal.aop.Invocation;
 public class WorkInterceptor implements Interceptor {
     @Override
     public void intercept(Invocation inv) {
+
         inv.invoke();
     }
 }

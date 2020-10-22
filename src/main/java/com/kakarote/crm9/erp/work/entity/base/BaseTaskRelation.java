@@ -9,65 +9,47 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseTaskRelation<M extends BaseTaskRelation<M>> extends Model<M> implements IBean {
 
-	public M setRId(Integer rId) {
-		set("r_id", rId);
+	public M setRelationId(Integer relationId) {
+		set("relation_id", relationId);
 		return (M)this;
 	}
-
-	public Integer getRId() {
-		return getInt("r_id");
+	
+	public Integer getRelationId() {
+		return getInt("relation_id");
 	}
 
-	public M setTaskId(Integer taskId) {
+	public M setTaskId(Long taskId) {
 		set("task_id", taskId);
 		return (M)this;
 	}
-
+	
 	public Integer getTaskId() {
 		return getInt("task_id");
 	}
 
-	public M setCustomerIds(String customerIds) {
-		set("customer_ids", customerIds);
+	public M setUserId(Long userId) {
+		set("user_id", userId);
 		return (M)this;
 	}
-
-	public String getCustomerIds() {
-		return getStr("customer_ids");
+	
+	public Integer getUserId() {
+		return getInt("user_id");
 	}
 
-	public M setContactsIds(String contactsIds) {
-		set("contacts_ids", contactsIds);
+	public M setWorkId(Long workId) {
+		set("work_id", workId);
 		return (M)this;
 	}
-
-	public String getContactsIds() {
-		return getStr("contacts_ids");
-	}
-
-	public M setBusinessIds(String businessIds) {
-		set("business_ids", businessIds);
-		return (M)this;
-	}
-
-	public String getBusinessIds() {
-		return getStr("business_ids");
-	}
-
-	public M setContractIds(String contractIds) {
-		set("contract_ids", contractIds);
-		return (M)this;
-	}
-
-	public String getContractIds() {
-		return getStr("contract_ids");
+	
+	public Integer getWorkId() {
+		return getInt("work_id");
 	}
 
 	public M setStatus(Integer status) {
 		set("status", status);
 		return (M)this;
 	}
-
+	
 	public Integer getStatus() {
 		return getInt("status");
 	}
@@ -76,7 +58,7 @@ public abstract class BaseTaskRelation<M extends BaseTaskRelation<M>> extends Mo
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}

@@ -158,7 +158,7 @@ public class OaExamineController extends Controller {
      * @author hmb
      * 查询审批关联业务
      */
-    public void queryExamineRelation(@Para("")BasePageRequest<OaExamineRelation> pageRequest){
+    public void queryExamineRelation(@Para("") BasePageRequest<OaExamineRelation> pageRequest){
         renderJson(oaExamineService.queryExamineRelation(pageRequest));
     }
 

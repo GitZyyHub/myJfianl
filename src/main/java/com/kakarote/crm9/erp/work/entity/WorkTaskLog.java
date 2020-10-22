@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.work.entity;
 
+
 import com.kakarote.crm9.erp.work.entity.base.BaseWorkTaskLog;
 
 /**

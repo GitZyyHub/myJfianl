@@ -4,6 +4,22 @@ public enum CrmEnum {
     /**
      * CRM Enum
      */
+    WORK("work", 19, "项目", "72crm_work", "work_id", null, "work_num"),
+    MILESTONE("milestone", 20, "里程碑", "72crm_milestone", "milestone_id", null, "milestone_num"),
+    TASK("task",21,"任务","72crm_task","task_id",null,null),
+    SUBTASKS("task",29,"子任务","72crm_task","task_id",null,null),
+    RISK("risk",22,"风险","72crm_work_risk","risk_id",null,null),
+    PRODUCT("work_product",23,"产品","72crm_work_product","product_id",null,"product_number"),
+    DEMAND("work_demand",24,"需求","72crm_work_risk","demand_id",null,null),
+    PRODUCT_FUNCTIONE("work_product_function",25,"产品功能","72crm_work_product_function","function_id",null,"function_number"),
+    RISK_CONFIG("task_config",26,"任务配置计划","72crm_task_config","task_config_id",null,null),
+    WORK_CHANGE("work_change",27,"项目变更记录","72crm_work_change","change_id",null,"change_num"),
+    TASK_HOURS("task_hours",28,"任务工时","72crm_task_hours","hours_id",null,null),
+    RESOURCES("work_resources_setting",29,"资源配置","72crm_work_resources_setting","resources_id",null,null),
+    WORKCONFIG("work_config",30,"配置管理","72crm_work_config","config_id",null,null),
+
+
+
     CRM_LEADS("crm_leads", 1, "线索", "72crm_crm_leads", "leads_id", "72crm_crm_leads_data", "leads_name"),
     CRM_CUSTOMER("crm_customer", 2, "客户", "72crm_crm_customer", "customer_id", "72crm_crm_customer_data", "customer_name"),
     CRM_CONTACTS("crm_contacts", 3, "联系人", "72crm_crm_contacts", "contacts_id", "72crm_crm_contacts_data", "name"),
@@ -16,8 +32,8 @@ public enum CrmEnum {
     CRM_MARKETING("crm_marketing", 10, "推广", "72crm_crm_marketing", "marketing_id", null, "marketing_name"),
     OA_LOG("oa_log", 11, "日志", "72crm_oa_log", "log_id", null, null),
     OA_EXAMINE("oa_examine", 12, "办公审批", "72crm_oa_examine", "examine_id", null, "name"),
-    TASK("task", 13, "任务", "72crm_task", "task_id", null, "name"),
-    WORK("work", 14, "项目", "72crm_work", "work_id", null, "name"),
+    //TASK("task", 13, "任务", "72crm_task", "task_id", null, "name"),
+    //WORK("work", 14, "项目", "72crm_work", "work_id", null, "name"),
     WORK_LABEL("work_label", 15, "标签", "72crm_work_task_label", "label_id", null, "name"),
     OA_CALENDAR("oa_calendar", 16, "日历", "72crm_oa_event", "event_id", null, "title"),
     CRM_RETURN_VISIT("crm_return_visit", 17, "客户回访", "72crm_crm_return_visit", "visit_id", "72crm_crm_return_visit_data", "visit_number"),

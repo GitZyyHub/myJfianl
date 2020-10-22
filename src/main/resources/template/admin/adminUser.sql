@@ -1,7 +1,46 @@
 #namespace("admin.user")
+    #sql("queryByIds")
+      select realname from 72crm_admin_user where user_id in (
+        #fori(ids)
+      )
+    #end
+    #sql("queryUserIdAndRealNameByIds")
+      select user_id,realname from 72crm_admin_user where user_id in (
+        #fori(ids)
+      )
+    #end
+
+    #sql ("queryIdByName")
+        select user_id from 72crm_admin_user where realname=?
+    #end
+
+    #sql("queryCountByNames")
+      select user_id from 72crm_admin_user where realname in (
+        #fori(names)
+      )
+    #end
+
+    #sql ("queryUserByDeptIds")
+        select user_id from 72crm_admin_user where dept_id in (#fori(deptIds))
+    #end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #sql("queryByUserName")
       select a.*,
-      (SELECT name FROM 72crm_admin_dept WHERE dept_id = a.dept_id) as deptName,
+      (SELECT username FROM 72crm_admin_dept WHERE dept_id = a.dept_id) as deptName,
       (SELECT realname FROM 72crm_admin_user WHERE user_id=a.parent_id) as parentName
       from 72crm_admin_user as a
       where a.username = #para(username)
@@ -58,11 +97,7 @@
         and realname like concat('%', #para(name), '%')
       #end
     #end
-    #sql("queryByIds")
-      select user_id,realname,img from 72crm_admin_user where user_id in (
-        #fori(ids)
-      )
-    #end
+
     #sql("queryUserByRealName")
       select   au.realname,au.mobile,au.post as postName ,ad.name as deptName from 72crm_admin_user as au
       LEFT JOIN 72crm_admin_dept as ad on au.dept_id = ad.dept_id

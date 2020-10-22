@@ -13,25 +13,151 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		set("work_id", workId);
 		return (M)this;
 	}
-
-	public Integer getWorkId() {
-		return getInt("work_id");
+	
+	public Long getWorkId() {
+		return getLong("work_id");
 	}
 
-	public M setName(String name) {
-		set("name", name);
+	public M setWorkNum(String workNum) {
+		set("work_num", workNum);
+		return (M)this;
+	}
+	
+	public String getWorkNum() {
+		return getStr("work_num");
+	}
+
+	public M setWorkName(String workName) {
+		set("work_name", workName);
+		return (M)this;
+	}
+	
+	public String getWorkName() {
+		return getStr("work_name");
+	}
+
+	public M setWorkPhase(String workPhase) {
+		set("work_phase", workPhase);
+		return (M)this;
+	}
+	
+	public String getWorkPhase() {
+		return getStr("work_phase");
+	}
+
+	public M setArea(Integer area) {
+		set("area", area);
+		return (M)this;
+	}
+	
+	public Integer getArea() {
+		return getInt("area");
+	}
+
+	public M setDeptId(Integer deptId) {
+		set("dept_id", deptId);
+		return (M)this;
+	}
+	
+	public Integer getDeptId() {
+		return getInt("dept_id");
+	}
+
+	public M setWorkType(String workType) {
+		set("work_type", workType);
+		return (M)this;
+	}
+	
+	public String getWorkType() {
+		return getStr("work_type");
+	}
+
+	public M setCustomerId(Integer customerId) {
+		set("customer_id", customerId);
+		return (M)this;
+	}
+	
+	public Integer getCustomerId() {
+		return getInt("customer_id");
+	}
+
+	public M setManagerId(Integer managerId) {
+		set("manager_id", managerId);
+		return (M)this;
+	}
+	
+	public Long getManagerId() {
+		return getLong("manager_id");
+	}
+
+	public M setSalesId(Long salesId) {
+		set("sales_id", salesId);
+		return (M)this;
+	}
+	
+	public Long getSalesId() {
+		return getLong("sales_id");
+	}
+
+	public M setCreateUserId(Long createUserId) {
+		set("create_user_id", createUserId);
+		return (M)this;
+	}
+	
+	public Long getCreateUserId() {
+		return getLong("create_user_id");
+	}
+
+	public M setStartTime(java.util.Date startTime) {
+		set("start_time", startTime);
+		return (M)this;
+	}
+	
+	public java.util.Date getStartTime() {
+		return get("start_time");
+	}
+
+	public M setEndTime(java.util.Date endTime) {
+		set("end_time", endTime);
+		return (M)this;
+	}
+	
+	public java.util.Date getEndTime() {
+		return get("end_time");
+	}
+
+	public M setBatchId(String batchId) {
+		set("batch_id", batchId);
 		return (M)this;
 	}
 
-	public String getName() {
-		return getStr("name");
+	public M setExamineRecordId(Integer examineRecordId) {
+		set("examine_record_id", examineRecordId);
+		return (M)this;
+	}
+
+	public Integer getExamineRecordId() {
+		return getInt("examine_record_id");
+	}
+
+	public M setCheckStatus(Integer checkStatus) {
+		set("check_status", checkStatus);
+		return (M)this;
+	}
+
+	public Integer getCheckStatus() {
+		return getInt("check_status");
+	}
+	
+	public String getBatchId() {
+		return getStr("batch_id");
 	}
 
 	public M setStatus(Integer status) {
 		set("status", status);
 		return (M)this;
 	}
-
+	
 	public Integer getStatus() {
 		return getInt("status");
 	}
@@ -40,25 +166,16 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
-	}
-
-	public M setCreateUserId(Long createUserId) {
-		set("create_user_id", createUserId);
-		return (M)this;
-	}
-
-	public Long getCreateUserId() {
-		return getLong("create_user_id");
 	}
 
 	public M setDescription(String description) {
 		set("description", description);
 		return (M)this;
 	}
-
+	
 	public String getDescription() {
 		return getStr("description");
 	}
@@ -67,7 +184,7 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		set("color", color);
 		return (M)this;
 	}
-
+	
 	public String getColor() {
 		return getStr("color");
 	}
@@ -76,34 +193,25 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		set("is_open", isOpen);
 		return (M)this;
 	}
-
+	
 	public Integer getIsOpen() {
 		return getInt("is_open");
 	}
 
-	public M setOwnerRole(java.lang.Integer ownerRole) {
+	public M setOwnerRole(Integer ownerRole) {
 		set("owner_role", ownerRole);
 		return (M)this;
 	}
-
-	public java.lang.Integer getOwnerRole() {
+	
+	public Integer getOwnerRole() {
 		return getInt("owner_role");
-	}
-
-	public M setOwnerUserId(java.lang.String ownerUserId) {
-		set("owner_user_id", ownerUserId);
-		return (M)this;
-	}
-
-	public String getOwnerUserId() {
-		return getStr("owner_user_id");
 	}
 
 	public M setArchiveTime(java.util.Date archiveTime) {
 		set("archive_time", archiveTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getArchiveTime() {
 		return get("archive_time");
 	}
@@ -112,36 +220,171 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		set("delete_time", deleteTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getDeleteTime() {
 		return get("delete_time");
 	}
 
-	public M setIsSystemCover(java.lang.Integer isSystemCover) {
+	public M setIsSystemCover(Integer isSystemCover) {
 		set("is_system_cover", isSystemCover);
-		return (M) this;
+		return (M)this;
 	}
-
-	public java.lang.Integer getIsSystemCover() {
+	
+	public Integer getIsSystemCover() {
 		return getInt("is_system_cover");
 	}
 
-	public M setCoverUrl(java.lang.String coverUrl) {
+	public M setCoverUrl(String coverUrl) {
 		set("cover_url", coverUrl);
-		return (M) this;
+		return (M)this;
 	}
-
-	public java.lang.String getCoverUrl() {
+	
+	public String getCoverUrl() {
 		return getStr("cover_url");
 	}
 
-	public M setBatchId(java.lang.String batchId) {
-		set("batch_id", batchId);
+	public M setUpdateTime(java.util.Date updateTime) {
+		set("update_time", updateTime);
 		return (M)this;
 	}
+	
+	public java.util.Date getUpdateTime() {
+		return get("update_time");
+	}
 
-	public String getBatchId() {
-		return getStr("batch_id");
+	public M setOwnerUserId(String ownerUserId) {
+		set("owner_user_id", ownerUserId);
+		return (M)this;
+	}
+	
+	public String getOwnerUserId() {
+		return getStr("owner_user_id");
+	}
+
+	public M setExamine(String examine) {
+		set("examine", examine);
+		return (M)this;
+	}
+	
+	public String getExamine() {
+		return getStr("examine");
+	}
+
+	public M setSolution(String solution) {
+		set("solution", solution);
+		return (M)this;
+	}
+	
+	public String getSolution() {
+		return getStr("solution");
+	}
+
+	public M setRisk(String risk) {
+		set("risk", risk);
+		return (M)this;
+	}
+	
+	public String getRisk() {
+		return getStr("risk");
+	}
+
+	public M setUnscramble(String unscramble) {
+		set("unscramble", unscramble);
+		return (M)this;
+	}
+	
+	public String getUnscramble() {
+		return getStr("unscramble");
+	}
+
+	public M setTarget(String target) {
+		set("target", target);
+		return (M)this;
+	}
+	
+	public String getTarget() {
+		return getStr("target");
+	}
+
+	public M setContractAmount(String contractAmount) {
+		set("contract_amount", contractAmount);
+		return (M)this;
+	}
+	
+	public String getContractAmount() {
+		return getStr("contract_amount");
+	}
+
+	public M setEffectiveAmount(String effectiveAmount) {
+		set("effective_amount", effectiveAmount);
+		return (M)this;
+	}
+	
+	public String getEffectiveAmount() {
+		return getStr("effective_amount");
+	}
+
+	public M setImplementCost(java.math.BigDecimal implementCost) {
+		set("implement_cost", implementCost);
+		return (M)this;
+	}
+	
+	public java.math.BigDecimal getImplementCost() {
+		return get("implement_cost");
+	}
+
+	public M setMaintenanceCost(java.math.BigDecimal maintenanceCost) {
+		set("maintenance_cost", maintenanceCost);
+		return (M)this;
+	}
+	
+	public java.math.BigDecimal getMaintenanceCost() {
+		return get("maintenance_cost");
+	}
+
+	public M setBudget(String budget) {
+		set("budget", budget);
+		return (M)this;
+	}
+	
+	public String getBudget() {
+		return getStr("budget");
+	}
+
+	public M setPracticalCost(java.math.BigDecimal practicalCost) {
+		set("practical_cost", practicalCost);
+		return (M)this;
+	}
+	
+	public java.math.BigDecimal getPracticalCost() {
+		return get("practical_cost");
+	}
+
+	public M setCustomerName(String customerName) {
+		set("customer_name", customerName);
+		return (M)this;
+	}
+	
+	public String getCustomerName() {
+		return getStr("customer_name");
+	}
+
+	public M setCustomerContact(String customerContact) {
+		set("customer_contact", customerContact);
+		return (M)this;
+	}
+	
+	public String getCustomerContact() {
+		return getStr("customer_contact");
+	}
+
+	public M setCustomerCalls(String customerCalls) {
+		set("customer_calls", customerCalls);
+		return (M)this;
+	}
+	
+	public String getCustomerCalls() {
+		return getStr("customer_calls");
 	}
 
 }

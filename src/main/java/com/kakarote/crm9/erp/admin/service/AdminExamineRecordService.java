@@ -19,9 +19,12 @@ import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmInvoice;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
+import com.kakarote.crm9.erp.work.entity.TaskHours;
+import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.utils.ActionRecordUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
 
@@ -176,6 +179,10 @@ public class AdminExamineRecordService {
             ownerUserId = CrmContract.dao.findById(id).getOwnerUserId();
         } else if (examine.getCategoryType() == 2) {
             ownerUserId = CrmReceivables.dao.findById(id).getOwnerUserId();
+        } else if(examine.getCategoryType() == 4){
+            ownerUserId = TaskHours.dao.findById(id).getMainUserId();
+        }else if(examine.getCategoryType() == 5){
+            ownerUserId = Work.dao.findById(id).getSalesId();
         } else {
             ownerUserId = CrmInvoice.dao.findById(id).getOwnerUserId();
         }
@@ -215,6 +222,12 @@ public class AdminExamineRecordService {
             } else if (examine.getCategoryType() == 3) {
                 //回款
                 Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), status, id);
+            }else if(examine.getCategoryType() == 4){
+                //工时
+                Db.update(Db.getSql("task.hours.updateCheckStatusById"), status, id);
+            }else if(examine.getCategoryType() == 5){
+                //结项
+                Db.update(Db.getSql("work.updateCheckStatusById"), status, id);
             }
         } else if (status == 4) {
             //先查询该审批流程的审批步骤的第一步
@@ -258,6 +271,20 @@ public class AdminExamineRecordService {
                 }
                 Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),4,id);
                 Aop.get(ActionRecordUtil.class).addCrmExamineActionRecord(CrmEnum.CRM_RECEIVABLES, recordId, BehaviorEnum.RECHECK_EXAMINE);
+            }else if(examine.getCategoryType() == 4){
+                TaskHours taskHours = TaskHours.dao.findById(id);
+                if(taskHours.getCheckStatus() ==1){
+                    return R.error("该工时已审核通过，不能撤回！");
+                }
+                //工时
+                Db.update(Db.getSql("task.hours.updateCheckStatusById"), 4, id);
+            }else if(examine.getCategoryType() == 5){
+                Work work = Work.dao.findById(id);
+                if(work.getCheckStatus() == 1){
+                    return R.error("该工时已审核通过，不能撤回！");
+                }
+                //结项
+                Db.update(Db.getSql("work.updateCheckStatusById"), 4, id);
             } else {
                 CrmInvoice crmInvoice = CrmInvoice.dao.findById(id);
                 if (crmInvoice.getCheckStatus() == 1) {
@@ -305,6 +332,12 @@ public class AdminExamineRecordService {
                         } else if (examine.getCategoryType() == 2) {
                             //回款
                             Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
+                        }else if(examine.getCategoryType() == 4){
+                            //工时
+                            Db.update(Db.getSql("task.hours.updateCheckStatusById"), 3, id);
+                        }else if(examine.getCategoryType() == 5){
+                            //结项
+                            Db.update(Db.getSql("work.updateCheckStatusById"), 3, id);
                         } else {
                             Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 3, id);
                         }
@@ -399,6 +432,12 @@ public class AdminExamineRecordService {
                         } else if (examine.getCategoryType() == 2) {
                             //回款
                             Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
+                        }else if(examine.getCategoryType() == 4){
+                            //工时
+                            Db.update(Db.getSql("task.hours.updateCheckStatusById"), 3, id);
+                        }else if(examine.getCategoryType() == 5){
+                            //结项
+                            Db.update(Db.getSql("work.updateCheckStatusById"), 3, id);
                         } else {
                             Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 3, id);
                         }
@@ -412,6 +451,12 @@ public class AdminExamineRecordService {
                         } else if (examine.getCategoryType() == 2) {
                             Db.update(Db.getSql("crm.receivables.updateCheckStatusById"), 1, id);
                             updateContractMoney(id);
+                        }else if(examine.getCategoryType() == 4){
+                            //工时
+                            Db.update(Db.getSql("task.hours.updateCheckStatusByIdThrough"), 1,new Date(),id);
+                        }else if(examine.getCategoryType() == 5){
+                            //结项
+                            Db.update(Db.getSql("work.updateCheckStatusByIdThrough"), 1,new Date(), id);
                         } else {
                             Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 1, id);
                         }
@@ -445,6 +490,12 @@ public class AdminExamineRecordService {
                     } else if (examine.getCategoryType() == 2) {
                         //回款
                         Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
+                    }else if(examine.getCategoryType() == 4){
+                        //工时
+                        Db.update(Db.getSql("task.hours.updateCheckStatusById"), 3, id);
+                    }else if(examine.getCategoryType() == 5){
+                        //结项
+                        Db.update(Db.getSql("work.updateCheckStatusById"), 3, id);
                     } else {
                         Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 3, id);
                     }
@@ -458,7 +509,13 @@ public class AdminExamineRecordService {
                     } else if (examine.getCategoryType() == 2) {
                         Db.update(Db.getSql("crm.receivables.updateCheckStatusById"), 1, id);
                         updateContractMoney(id);
-                    } else {
+                    }else if(examine.getCategoryType() == 4){
+                        //工时
+                        Db.update(Db.getSql("task.hours.updateCheckStatusByIdThrough"), 1,new Date(),id);
+                    }else if(examine.getCategoryType() == 5){
+                        //结项
+                        Db.update(Db.getSql("work.updateCheckStatusByIdThrough"), 1,new Date(), id);
+                    }else {
                         Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 1, id);
                     }
                 }
@@ -713,7 +770,7 @@ public class AdminExamineRecordService {
         return R.ok().put("data", jsonObject);
     }
     public Page<Record> myInitiate(BasePageRequest basePageRequest){
-        basePageRequest.getJsonObject().put("userId",BaseUtil.getUserId());
+        basePageRequest.getJsonObject().put("userId", BaseUtil.getUserId());
         SqlPara sqlPara=Db.getSqlPara("admin.examineLog.myInitiate",basePageRequest.getJsonObject());
         Page<Record> recordPage=Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),sqlPara);
         transfer(recordPage.getList());
@@ -721,8 +778,8 @@ public class AdminExamineRecordService {
     }
 
     public Page<Record> myExamine(BasePageRequest basePageRequest){
-        basePageRequest.getJsonObject().put("userId",BaseUtil.getUserId());
-        basePageRequest.getJsonObject().put("isAdmin",BaseUtil.isAdmin());
+        basePageRequest.getJsonObject().put("userId", BaseUtil.getUserId());
+        basePageRequest.getJsonObject().put("isAdmin", BaseUtil.isAdmin());
         basePageRequest.getJsonObject().put("status",basePageRequest.getJsonObject().getInteger("status"));
         basePageRequest.getJsonObject().put("categoryType",basePageRequest.getJsonObject().getInteger("categoryType"));
         SqlPara sqlPara=Db.getSqlPara("admin.examineLog.myExamine",basePageRequest.getJsonObject());
@@ -730,12 +787,24 @@ public class AdminExamineRecordService {
         transfer(recordPage.getList());
         return recordPage;
     }
+    public R myExamineExport(BasePageRequest basePageRequest){
+        basePageRequest.getJsonObject().put("userId", BaseUtil.getUserId());
+        basePageRequest.getJsonObject().put("isAdmin", BaseUtil.isAdmin());
+        basePageRequest.getJsonObject().put("status",basePageRequest.getJsonObject().getInteger("status"));
+        basePageRequest.getJsonObject().put("categoryType",basePageRequest.getJsonObject().getInteger("categoryType"));
+        SqlPara sqlPara=Db.getSqlPara("admin.examineLog.myExamine",basePageRequest.getJsonObject());
+        List<Record> records = Db.find(sqlPara);
+        transfer(records);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list",records);
+        return R.ok().put("data",jsonObject);
+    }
     public void transfer(List<Record> recordList){
-        Long userId=BaseUtil.getUserId();
+        Long userId= BaseUtil.getUserId();
         recordList.forEach(record -> {
             SqlPara examineSqlPara=Db.getSqlPara("admin.examineLog.queryExamineUserByExamineLog",record);
             record.set("examineName",Db.queryStr(examineSqlPara.getSql(),examineSqlPara.getPara()));
-            AdminUser user=AdminUser.dao.findByIdLoadColumns(record.getInt("create_user_id"),"user_id,realname,img,parent_id");
+            AdminUser user= AdminUser.dao.findByIdLoadColumns(record.getInt("create_user_id"),"user_id,realname,img,parent_id");
             record.set("create_user", user);
             Integer examineStatus = record.getInt("examine_status");
             Map<String,Integer> permission = new HashMap<>();

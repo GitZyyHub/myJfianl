@@ -13,34 +13,106 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("task_id", taskId);
 		return (M)this;
 	}
-
-	public Integer getTaskId() {
-		return getInt("task_id");
+	
+	public Long getTaskId() {
+		return getLong("task_id");
 	}
 
-	public M setName(String name) {
-		set("name", name);
+	public M setTaskNum(String taskNum) {
+		set("task_num", taskNum);
 		return (M)this;
 	}
-
-	public String getName() {
-		return getStr("name");
+	
+	public String getTaskNum() {
+		return getStr("task_num");
 	}
 
-	public M setCreateUserId(Long createUserId) {
-		set("create_user_id", createUserId);
+	public M setWorkId(Integer workId) {
+		set("work_id", workId);
 		return (M)this;
 	}
+	
+	public Long getWorkId() {
+		return getLong("work_id");
+	}
 
-	public Long getCreateUserId() {
-		return getLong("create_user_id");
+	public M setBeforeId(Integer beforeId) {
+		set("before_id", beforeId);
+		return (M)this;
+	}
+	
+	public Integer getBeforeId() {
+		return getInt("before_id");
+	}
+
+	public M setMilestoneId(Long milestoneId) {
+		set("milestone_id", milestoneId);
+		return (M)this;
+	}
+	
+	public Long getMilestoneId() {
+		return getLong("milestone_id");
+	}
+
+	public M setClassId(String classId) {
+		set("class_id", classId);
+		return (M)this;
+	}
+	
+	public String getClassId() {
+		return getStr("class_id");
+	}
+
+	public M setTaskName(String taskName) {
+		set("task_name", taskName);
+		return (M)this;
+	}
+	
+	public String getTaskName() {
+		return getStr("task_name");
+	}
+
+	public M setStatus(String status) {
+		set("status", status);
+		return (M)this;
+	}
+	
+	public String getStatus() {
+		return getStr("status");
+	}
+
+	public M setCompleteness(String completeness) {
+		set("completeness", completeness);
+		return (M)this;
+	}
+	
+	public String getCompleteness() {
+		return getStr("completeness");
+	}
+
+	public M setStartTime(java.util.Date startTime) {
+		set("start_time", startTime);
+		return (M)this;
+	}
+	
+	public java.util.Date getStartTime() {
+		return get("start_time");
+	}
+
+	public M setEndTime(java.util.Date endTime) {
+		set("end_time", endTime);
+		return (M)this;
+	}
+	
+	public java.util.Date getEndTime() {
+		return get("end_time");
 	}
 
 	public M setMainUserId(Long mainUserId) {
 		set("main_user_id", mainUserId);
 		return (M)this;
 	}
-
+	
 	public Long getMainUserId() {
 		return getLong("main_user_id");
 	}
@@ -49,16 +121,70 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("owner_user_id", ownerUserId);
 		return (M)this;
 	}
-
+	
 	public String getOwnerUserId() {
 		return getStr("owner_user_id");
+	}
+
+	public M setCreateUserId(Long createUserId) {
+		set("create_user_id", createUserId);
+		return (M)this;
+	}
+	
+	public Long getCreateUserId() {
+		return getLong("create_user_id");
+	}
+
+	public M setPriority(String priority) {
+		set("priority", priority);
+		return (M)this;
+	}
+	
+	public String getPriority() {
+		return getStr("priority");
+	}
+
+	public M setDifficulty(String difficulty) {
+		set("difficulty", difficulty);
+		return (M)this;
+	}
+	
+	public String getDifficulty() {
+		return getStr("difficulty");
+	}
+
+	public M setDegree(String degree) {
+		set("degree", degree);
+		return (M)this;
+	}
+	
+	public String getDegree() {
+		return getStr("degree");
+	}
+
+	public M setDescription(String description) {
+		set("description", description);
+		return (M)this;
+	}
+	
+	public String getDescription() {
+		return getStr("description");
+	}
+
+	public M setBatchId(String batchId) {
+		set("batch_id", batchId);
+		return (M)this;
+	}
+	
+	public String getBatchId() {
+		return getStr("batch_id");
 	}
 
 	public M setCreateTime(java.util.Date createTime) {
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -67,97 +193,34 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("update_time", updateTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getUpdateTime() {
 		return get("update_time");
-	}
-
-	public M setStatus(Integer status) {
-		set("status", status);
-		return (M)this;
-	}
-
-	public Integer getStatus() {
-		return getInt("status");
-	}
-
-	public M setClassId(Integer classId) {
-		set("class_id", classId);
-		return (M)this;
-	}
-
-	public Integer getClassId() {
-		return getInt("class_id");
 	}
 
 	public M setLabelId(String labelId) {
 		set("label_id", labelId);
 		return (M)this;
 	}
-
+	
 	public String getLabelId() {
 		return getStr("label_id");
-	}
-
-	public M setDescription(String description) {
-		set("description", description);
-		return (M)this;
-	}
-
-	public String getDescription() {
-		return getStr("description");
 	}
 
 	public M setPid(Integer pid) {
 		set("pid", pid);
 		return (M)this;
 	}
-
+	
 	public Integer getPid() {
 		return getInt("pid");
-	}
-
-	public M setStartTime(java.util.Date startTime) {
-		set("start_time", startTime);
-		return (M)this;
-	}
-
-	public java.util.Date getStartTime() {
-		return get("start_time");
-	}
-
-	public M setStopTime(java.util.Date stopTime) {
-		set("stop_time", stopTime);
-		return (M)this;
-	}
-
-	public java.util.Date getStopTime() {
-		return get("stop_time");
-	}
-
-	public M setPriority(Integer priority) {
-		set("priority", priority);
-		return (M)this;
-	}
-
-	public Integer getPriority() {
-		return getInt("priority");
-	}
-
-	public M setWorkId(Integer workId) {
-		set("work_id", workId);
-		return (M)this;
-	}
-
-	public Integer getWorkId() {
-		return getInt("work_id");
 	}
 
 	public M setIsTop(Integer isTop) {
 		set("is_top", isTop);
 		return (M)this;
 	}
-
+	
 	public Integer getIsTop() {
 		return getInt("is_top");
 	}
@@ -166,7 +229,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("is_open", isOpen);
 		return (M)this;
 	}
-
+	
 	public Integer getIsOpen() {
 		return getInt("is_open");
 	}
@@ -175,7 +238,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("order_num", orderNum);
 		return (M)this;
 	}
-
+	
 	public Integer getOrderNum() {
 		return getInt("order_num");
 	}
@@ -184,7 +247,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("top_order_num", topOrderNum);
 		return (M)this;
 	}
-
+	
 	public Integer getTopOrderNum() {
 		return getInt("top_order_num");
 	}
@@ -193,7 +256,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("archive_time", archiveTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getArchiveTime() {
 		return get("archive_time");
 	}
@@ -202,7 +265,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("ishidden", ishidden);
 		return (M)this;
 	}
-
+	
 	public Integer getIshidden() {
 		return getInt("ishidden");
 	}
@@ -211,25 +274,16 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("hidden_time", hiddenTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getHiddenTime() {
 		return get("hidden_time");
-	}
-
-	public M setBatchId(String batchId) {
-		set("batch_id", batchId);
-		return (M)this;
-	}
-
-	public String getBatchId() {
-		return getStr("batch_id");
 	}
 
 	public M setIsArchive(Integer isArchive) {
 		set("is_archive", isArchive);
 		return (M)this;
 	}
-
+	
 	public Integer getIsArchive() {
 		return getInt("is_archive");
 	}

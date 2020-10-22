@@ -71,7 +71,7 @@ public class AdminMessageController extends Controller {
      * @author zhangzhiwei
      */
     public void stopImport(@Para("messageId") Long messageId){
-        AdminMessage adminMessage=AdminMessage.dao.findById(messageId);
+        AdminMessage adminMessage= AdminMessage.dao.findById(messageId);
         if(adminMessage==null||!adminMessage.getCreateUser().equals(BaseUtil.getUserId())){
             renderJson(R.noAuth());
             return;
@@ -86,12 +86,12 @@ public class AdminMessageController extends Controller {
      * @author zhangzhiwei
      */
     public void downImportError(@Para("messageId") Long messageId){
-        AdminMessage adminMessage=AdminMessage.dao.findById(messageId);
+        AdminMessage adminMessage= AdminMessage.dao.findById(messageId);
         if(adminMessage==null){
             renderNull();
             return;
         }
-        AdminFile adminFile=AdminFile.dao.findById(adminMessage.getTypeId());
+        AdminFile adminFile= AdminFile.dao.findById(adminMessage.getTypeId());
         if(adminFile!=null&&adminFile.getCreateUserId().equals(BaseUtil.getUserId())){
             File file=new File(adminFile.getPath());
             if(file.exists()){
@@ -108,7 +108,7 @@ public class AdminMessageController extends Controller {
      * @author zhangzhiwei
      */
     public void queryImportInfo(@Para("messageId") Long messageId){
-        AdminMessage adminMessage=AdminMessage.dao.findById(messageId);
+        AdminMessage adminMessage= AdminMessage.dao.findById(messageId);
         if(adminMessage!=null){
             String[] content = adminMessage.getContent().split(",");
             R r = R.ok().put("totalSize", adminMessage.getTitle()).put("errSize", content[0]);

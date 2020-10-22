@@ -13,7 +13,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("id", id);
 		return (M)this;
 	}
-
+	
 	public Long getId() {
 		return getLong("id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("style", style);
 		return (M)this;
 	}
-
+	
 	public Integer getStyle() {
 		return getInt("style");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("type", type);
 		return (M)this;
 	}
-
+	
 	public Integer getType() {
 		return getInt("type");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("field_name", fieldName);
 		return (M)this;
 	}
-
+	
 	public String getFieldName() {
 		return getStr("field_name");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -67,7 +67,7 @@ public abstract class BaseAdminFieldStyle<M extends BaseAdminFieldStyle<M>> exte
 		set("update_time", updateTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getUpdateTime() {
 		return get("update_time");
 	}

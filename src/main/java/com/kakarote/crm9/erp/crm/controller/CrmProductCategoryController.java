@@ -1,16 +1,12 @@
 package com.kakarote.crm9.erp.crm.controller;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmProductCategory;
 import com.kakarote.crm9.erp.crm.service.CrmProductCategoryService;
-import com.kakarote.crm9.utils.AdminLogUtil;
-import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 public class CrmProductCategoryController extends Controller {

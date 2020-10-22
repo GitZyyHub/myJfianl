@@ -13,7 +13,7 @@ public abstract class BaseWorkCollect<M extends BaseWorkCollect<M>> extends Mode
 		set("collect_id", collectId);
 		return (M)this;
 	}
-
+	
 	public Integer getCollectId() {
 		return getInt("collect_id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseWorkCollect<M extends BaseWorkCollect<M>> extends Mode
 		set("work_id", workId);
 		return (M)this;
 	}
-
+	
 	public Integer getWorkId() {
 		return getInt("work_id");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseWorkCollect<M extends BaseWorkCollect<M>> extends Mode
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseWorkCollect<M extends BaseWorkCollect<M>> extends Mode
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}

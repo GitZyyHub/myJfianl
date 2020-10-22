@@ -1,7 +1,7 @@
 #mysql
-mysql.jdbcUrl = jdbc:mysql://39.100.199.172:3306/crm_cloud?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
+mysql.jdbcUrl = jdbc:mysql://localhost:3306/crm_zkjs?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
 mysql.user = root
-mysql.password =Admin001m.
+mysql.password = 123456
 jfinal.devMode = true
 
 #---------------------------------------------------------

@@ -17,14 +17,12 @@ import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.common.AbstractBasePageList;
 import com.kakarote.crm9.erp.crm.common.CrmActivityEnum;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.*;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -216,7 +214,7 @@ public class CrmCustomerPoolService extends AbstractBasePageList {
      * 设置公海
      */
     @Before(Tx.class)
-    public R setCustomerPool(JSONObject jsonObject,String ipAddress) {
+    public R setCustomerPool(JSONObject jsonObject, String ipAddress) {
         CrmCustomerPool customerPool = JSONObject.toJavaObject(jsonObject, CrmCustomerPool.class);
         if (customerPool.getPoolId() == null) {
             if ((StrUtil.isEmpty(customerPool.getMemberUserId()) && StrUtil.isEmpty(customerPool.getMemberDeptId())) || StrUtil.isEmpty(customerPool.getAdminUserId())) {

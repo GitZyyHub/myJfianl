@@ -1,14 +1,12 @@
 package com.kakarote.crm9.erp.admin.controller;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.common.annotation.Permissions;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminDept;
 import com.kakarote.crm9.erp.admin.service.AdminDeptService;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -43,6 +41,16 @@ public class AdminDeptController extends Controller {
         String type = getPara("type");
         Integer id = getParaToInt("id");
         renderJson(R.ok().put("data",adminDeptService.queryDeptTree(type,id)));
+    }
+
+    public void queryDeptName(){
+        String type = getPara("type");
+        Integer id = getParaToInt("id");
+        renderJson(R.ok().put("data",adminDeptService.queryDeptName(type,id)));
+    }
+
+    public void queryDeptByPid(@Para("pid")String pid){
+        renderJson(R.ok().put("data", Db.findFirst("select dept_id,name from 72crm_admin_dept where dept_id=?",pid)));
     }
 
     /**

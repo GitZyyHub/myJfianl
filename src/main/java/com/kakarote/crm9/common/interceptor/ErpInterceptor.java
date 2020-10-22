@@ -30,7 +30,7 @@ public class ErpInterceptor implements Interceptor {
             Controller controller = invocation.getController();
             String token = BaseUtil.getToken(controller.getRequest());
 
-            if("".equals(token)){
+            if("testLogin".equals(token)||"".equalsIgnoreCase(token)){
                 LoginFormCookie cookie = invocation.getMethod().getAnnotation(LoginFormCookie.class);
                 if(cookie!=null){
                     token=invocation.getController().getCookie("Admin-Token","");

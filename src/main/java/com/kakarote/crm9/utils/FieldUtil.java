@@ -82,7 +82,7 @@ public class FieldUtil {
         return this;
     }
 
-    public <T> FieldUtil add(String fieldName, String name, String formType,T settingArr){
+    public <T> FieldUtil add(String fieldName, String name, String formType, T settingArr){
         Record record = new Record();
         record.set("fieldName",fieldName).set("name",name).set("formType",formType).set("setting",settingArr);
         recordList.add(record);
@@ -99,7 +99,7 @@ public class FieldUtil {
      * @param isUnique 是否验证 0否 1 是
      * @return
      */
-    public FieldUtil oaFieldAdd(String fieldName, String name, String formType, String[] settingArr, Integer isNull,Integer isUnique,Object value,String defaultValue,Integer operating,Integer fieldType){
+    public FieldUtil oaFieldAdd(String fieldName, String name, String formType, String[] settingArr, Integer isNull, Integer isUnique, Object value, String defaultValue, Integer operating, Integer fieldType){
         Record record = new Record();
         record.set("fieldName",fieldName).set("name",name).set("formType",formType).set("setting",settingArr).set("isNull",isNull).set("isUnique",isUnique).set("value",value).set("defaultValue",defaultValue).set("operating",operating).set("maxLength",0).set("fieldType",fieldType);
         recordList.add(record);

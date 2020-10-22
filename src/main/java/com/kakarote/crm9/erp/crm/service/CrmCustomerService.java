@@ -21,7 +21,6 @@ import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.config.redis.Redis;
 import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
@@ -894,7 +893,7 @@ public class CrmCustomerService extends AbstractBasePageList {
         return R.ok().put("data", "客户名称");
     }
 
-    public R customerSetting(CrmCustomerSetting customerSetting,String ipAddress) {
+    public R customerSetting(CrmCustomerSetting customerSetting, String ipAddress) {
         List<String> errorList = new ArrayList<>();
         Db.tx(() -> {
             Db.delete("delete from `72crm_crm_customer_settinguser` where setting_id = ?", customerSetting.getSettingId());

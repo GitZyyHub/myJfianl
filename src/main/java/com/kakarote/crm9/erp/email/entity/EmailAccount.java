@@ -11,7 +11,9 @@ import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 import org.xbill.DNS.*;
 
-import javax.mail.*;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;

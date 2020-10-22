@@ -1,0 +1,177 @@
+package com.kakarote.crm9.erp.work.service;
+
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
+import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
+import com.jfinal.kit.Kv;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
+import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+
+import com.kakarote.crm9.common.constant.BehaviorEnum;
+import com.kakarote.crm9.common.constant.WorkRecordEnum;
+import com.kakarote.crm9.erp.admin.entity.AdminConfig;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.work.common.WorkPermissions;
+import com.kakarote.crm9.erp.work.common.WorkUserEnum;
+import com.kakarote.crm9.erp.work.entity.Milestone;
+import com.kakarote.crm9.erp.work.entity.WorkHistoricalRecord;
+import com.kakarote.crm9.utils.AbstractBasePageList;
+import com.kakarote.crm9.utils.BaseUtil;
+import com.kakarote.crm9.utils.R;
+import com.kakarote.crm9.utils.ToolUtils;
+import com.mysql.jdbc.StringUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ * @author zyy
+ */
+public class MilestoneService extends AbstractBasePageList {
+
+    @Inject
+    WorkHistoricalRecordService workHistoricalRecordService;
+
+
+    /**
+     * 查询里程碑
+     *
+     * @param basePageRequest
+     * @param isDataAuth
+     * @return
+     */
+    public R queryPageList(BasePageRequest basePageRequest, boolean isDataAuth) {
+        CrmEnum milestone = CrmEnum.MILESTONE;
+        Kv kv = getKv(basePageRequest, milestone, isDataAuth);
+        Object workId = basePageRequest.getJsonObject().get("workId");
+        kv.set("_workId", workId);
+        List<Record> records = Db.find(Db.getSqlPara("work.findMilestoneById", kv));
+        Integer integer = Db.template("work.queryMilestonePageListCount", kv).queryInt();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list", records);
+        jsonObject.put("totalRow", integer);
+        return R.ok().put("data", jsonObject);
+    }
+
+    /**
+     * 删除里程碑
+     *
+     * @param
+     * @return
+     */
+    public R delMilestone(String milestoneIds) {
+        String[] split = milestoneIds.split(",");
+        for (String id : split) {
+//            if(!WorkPermissions.isPermissions(CrmEnum.MILESTONE.getTableName(),CrmEnum.MILESTONE.getTableId(),id)) return R.error("无权操作");
+            Integer integer = Db.queryInt("SELECT COUNT(1) FROM 72crm_task WHERE milestone_id =? AND ishidden=1", id);
+            if (integer != 0) {
+                return R.error("编号为：" + integer + "的里程碑下存在未完成的任务");
+            }
+            Milestone byId = Aop.get(Milestone.class).dao().findById(id);
+            boolean milestone_id = Db.deleteById("72crm_milestone", "milestone_id", id);
+        }
+
+        return R.ok();
+    }
+
+    /**
+     * 查询里程碑名
+     *
+     * @param
+     * @return
+     */
+    public R queryMilestoneIdAndName() {
+        /*Integer integer = Db.queryInt("SELECT count(1) FROM `72crm_milestone` ");
+        if(integer == 0 ){
+            return R.error("里程碑已删除");
+        }*/
+        List<Record> records = Db.find("SELECT milestone_id,milestone_name FROM `72crm_milestone`");
+        return R.ok().put("data", records);
+    }
+
+    /**
+     * 设置里程碑
+     *
+     * @param jsonObject
+     * @return
+     */
+    @Before(Tx.class)
+    public R setMilestone(JSONObject jsonObject) {
+        //变更后数据
+        JSONObject data = jsonObject.getJSONObject("entity");
+        Milestone entity = jsonObject.getObject("entity", Milestone.class);
+        Long userId = BaseUtil.getUserId();
+        boolean setting;
+        if (entity.getMilestoneId() == null) {
+            if (StrUtil.isEmpty(entity.getMilestoneNum())) {
+                AdminConfig adminConfig = AdminConfig.dao.findFirst("select setting_id,status,value from 72crm_admin_config where name = 'numberSetting' and value = 20");
+                String result = Aop.get(ToolUtils.class).generateNumber(adminConfig, null);
+                entity.setMilestoneNum(result);
+            }
+            entity.setCreateTime(new Date());
+            entity.setUpdateTime(new Date());
+            setting = entity.save();
+            workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.SAVE, entity.getMilestoneNum(),null,null, entity.getMilestoneId());
+        } else {
+            setting = true;
+            //变更前数据
+            String tableName = CrmEnum.MILESTONE.getTableName();
+            String tableId = CrmEnum.MILESTONE.getTableId();
+            Record first = Db.findFirst("SELECT * FROM 72crm_milestone WHERE milestone_id=?", entity.getMilestoneId());
+            if (first == null) {
+                return R.error("里程碑不存在");
+            }
+            entity.setUpdateTime(new Date());
+            entity.update();
+            Record after = Db.findFirst("SELECT * FROM 72crm_milestone WHERE milestone_id=?", entity.getMilestoneId());
+            //添加变更记录
+            workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.UPDATE, entity.getMilestoneNum(),first,after,entity.getMilestoneId());
+        }
+        WorkService.setWorkRelation(Arrays.asList(entity.getMainUserId()), entity.getTaskId(), WorkUserEnum.MILESTONE.getType(),entity.getWorkId());
+        return setting ? R.ok() : R.error();
+    }
+
+    public R updateDegree(String ids, String degree) {
+        /*List<String> strings = Arrays.asList(ids.split(","));
+        for (String string : strings) {
+//            if(!WorkPermissions.isPermissions(CrmEnum.MILESTONE.getTableName(),CrmEnum.MILESTONE.getTableId(),Integer.parseInt(string))) return R.error("无权操作");
+        }*/
+        Db.update(Db.getSqlPara("work.updateMilestoneDegree", Kv.by("ids",ids).set("degree",degree)));
+        return R.ok();
+    }
+
+    /**
+     * 根据Id查询
+     *
+     * @param id
+     * @return
+     */
+    public Record queryById(Integer id) {
+        Record first = Db.findFirst(Db.getSql("work.queryMilestoneById"), id);
+        return first;
+    }
+
+    /**
+     * 普通搜索
+     *
+     * @param search
+     * @return
+     */
+    @Override
+    public JSONObject appendSqlSearch(String search) {
+        JSONObject sqlObject = new JSONObject();
+        String conditions = " and milestone_name like '%{search}%'";
+        sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
+        sqlObject.put("type", 1);
+        return sqlObject;
+    }
+
+
+
+}

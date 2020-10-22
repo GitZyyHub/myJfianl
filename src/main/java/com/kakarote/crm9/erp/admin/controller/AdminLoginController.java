@@ -17,7 +17,6 @@ import com.jfinal.kit.Prop;
 import com.jfinal.kit.PropKit;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.redis.Redis;
 import com.kakarote.crm9.common.config.redis.RedisManager;
@@ -89,7 +88,7 @@ public class AdminLoginController extends Controller {
         String key = BaseConstant.USER_LOGIN_ERROR_KEY + username;
         Redis redis = RedisManager.getRedis();
         long beforeTime = System.currentTimeMillis() - 60 * 5 * 1000;
-        if (redis.exists(key)) {
+        /*if (redis.exists(key)) {
             if (redis.zcount(key, beforeTime, System.currentTimeMillis()) >= 5) {
                 Set zrevrange = redis.zrevrange(key, 4, 5);
                 Long time = (Long) zrevrange.iterator().next() + 60 * 5 * 1000;
@@ -97,7 +96,7 @@ public class AdminLoginController extends Controller {
                 renderJson(R.error("密码错误次数过多，请等" + expire + "秒后在重试！"));
                 return;
             }
-        }
+        }*/
         redis.zadd(key, System.currentTimeMillis(), System.currentTimeMillis());
         redis.expire(key, 3600);
         if (StrUtil.isEmpty(username) || StrUtil.isEmpty(password)) {
@@ -160,13 +159,13 @@ public class AdminLoginController extends Controller {
             flag = true;
         }
         Integer isReadNotice = Db.queryInt("select status from 72crm_admin_user_config where user_id = ? and name = 'readNotice'", BaseUtil.getUserId());
-        EmailAccount account = EmailAccount.getEmailAccount(BaseUtil.getUserId());
+        //EmailAccount account = EmailAccount.getEmailAccount(BaseUtil.getUserId());
         setCookie("Admin-Token", token, 3600 * 24 * 30, true);
         renderJson(R.ok().put("Admin-Token", token).put("user", user.remove("password", "salt"))
                 .put("auth", adminRoleService.auth(user.getUserId()))
                 .put("isAdmin", user.getUserId().equals(BaseUtil.getSuperUser()))
                 .put("cardAuth", flag)
-                .put("emailId", account != null ? account.getId() : null)
+                //.put("emailId", account != null ? account.getId() : null)
                 .put("isReadNotice", isReadNotice)
                 .put("firstModel", adminConfigService.firstModel())
         );

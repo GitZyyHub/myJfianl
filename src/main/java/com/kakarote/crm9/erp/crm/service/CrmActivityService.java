@@ -227,7 +227,7 @@ public class CrmActivityService{
             CrmEnum crmEnum = CrmEnum.parse(lastRecord.getActivityType());
             Db.update(Db.getSqlPara("crm.activity.updateLastRecord", Kv.by("id", lastRecord.getActivityTypeId()).set("tableName", crmEnum.getTableName()).set("tableId", crmEnum.getTableId()).set("type", crmEnum.getType()).set("lastTime", lastRecord.getCreateTime()).set("lastContent", lastRecord.getContent())));
         }
-        return crmActivity.delete()?R.ok():R.error();
+        return crmActivity.delete()? R.ok(): R.error();
     }
 
     public void deleteActivityRecord(CrmActivityEnum crmActivityEnum,String... ids){

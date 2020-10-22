@@ -13,7 +13,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("file_id", fileId);
 		return (M)this;
 	}
-
+	
 	public Integer getFileId() {
 		return getInt("file_id");
 	}
@@ -22,16 +22,43 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("name", name);
 		return (M)this;
 	}
-
+	
 	public String getName() {
 		return getStr("name");
+	}
+
+	public M setMainUserId(Long mainUserId) {
+		set("main_user_id", mainUserId);
+		return (M)this;
+	}
+	
+	public Long getMainUserId() {
+		return getLong("main_user_id");
+	}
+
+	public M setStatus(Integer status) {
+		set("status", status);
+		return (M)this;
+	}
+	
+	public Integer getStatus() {
+		return getInt("status");
+	}
+
+	public M setFileAttr(String fileAttr) {
+		set("file_attr", fileAttr);
+		return (M)this;
+	}
+	
+	public String getFileAttr() {
+		return getStr("file_attr");
 	}
 
 	public M setSize(Long size) {
 		set("size", size);
 		return (M)this;
 	}
-
+	
 	public Long getSize() {
 		return getLong("size");
 	}
@@ -40,7 +67,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("create_user_id", createUserId);
 		return (M)this;
 	}
-
+	
 	public Long getCreateUserId() {
 		return getLong("create_user_id");
 	}
@@ -49,7 +76,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -58,7 +85,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("path", path);
 		return (M)this;
 	}
-
+	
 	public String getPath() {
 		return getStr("path");
 	}
@@ -67,7 +94,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("file_path", filePath);
 		return (M)this;
 	}
-
+	
 	public String getFilePath() {
 		return getStr("file_path");
 	}
@@ -76,7 +103,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("file_type", fileType);
 		return (M)this;
 	}
-
+	
 	public String getFileType() {
 		return getStr("file_type");
 	}
@@ -85,7 +112,7 @@ public abstract class BaseAdminFile<M extends BaseAdminFile<M>> extends Model<M>
 		set("batch_id", batchId);
 		return (M)this;
 	}
-
+	
 	public String getBatchId() {
 		return getStr("batch_id");
 	}

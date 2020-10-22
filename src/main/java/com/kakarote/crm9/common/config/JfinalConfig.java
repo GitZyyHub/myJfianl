@@ -25,13 +25,12 @@ import com.kakarote.crm9.common.interceptor.AuthInterceptor;
 import com.kakarote.crm9.common.interceptor.ErpInterceptor;
 import com.kakarote.crm9.erp._MappingKit;
 import com.kakarote.crm9.erp.admin.common.AdminRouter;
-import com.kakarote.crm9.erp.bi.common.BiRouter;
 import com.kakarote.crm9.erp.call.common.CallRoutes;
 import com.kakarote.crm9.erp.card.common.CardRouter;
 import com.kakarote.crm9.erp.crm.common.CrmRouter;
 import com.kakarote.crm9.erp.email.common.EmailRoutes;
-import com.kakarote.crm9.erp.email.common.Pop3EmailTask;
 import com.kakarote.crm9.erp.oa.common.OaRouter;
+import com.kakarote.crm9.erp.test.common.TestRouter;
 import com.kakarote.crm9.erp.work.common.WorkRouter;
 
 import java.io.File;
@@ -56,7 +55,7 @@ public class JfinalConfig extends JFinalConfig {
         me.setBaseDownloadPath(BaseConstant.UPLOAD_PATH);
         me.setJsonFactory(new ErpJsonFactory());
         //限制上传100M
-        me.setMaxPostSize(104857600);
+        me.setMaxPostSize(300305090);
         me.setProxyFactory(new CglibProxyFactory());
     }
 
@@ -66,13 +65,14 @@ public class JfinalConfig extends JFinalConfig {
     @Override
     public void configRoute(Routes me) {
         me.add(new AdminRouter());
-        me.add(new BiRouter());
+        me.add(new WorkRouter());
+        me.add(new TestRouter());
         me.add(new CrmRouter());
         me.add(new OaRouter());
-        me.add(new WorkRouter());
         me.add(new CardRouter());
         me.add(new EmailRoutes());
         me.add(new CallRoutes());
+
     }
 
     @Override
@@ -103,15 +103,15 @@ public class JfinalConfig extends JFinalConfig {
         RedisPlugin redisPlugin=new RedisPlugin();
         me.add(redisPlugin);
         //cron定时器
-        me.add(new Cron4jPlugin(PropKit.use("config/cron4j.txt")));
+        //me.add(new Cron4jPlugin(PropKit.use("config/cron4j.txt")));
         //model映射
         _MappingKit.mapping(arp);
     }
 
     public static DruidPlugin createDruidPlugin() {
-        DruidPlugin plugin=new DruidPlugin(prop.get("mysql.jdbcUrl"), prop.get("mysql.user"), prop.get("mysql.password").trim()).setInitialSize(10).setMinIdle(1).setMaxActive(2000).setTimeBetweenEvictionRunsMillis(5000).setValidationQuery("select 1").setTimeBetweenEvictionRunsMillis(60000).setMinEvictableIdleTimeMillis(30000);
+        DruidPlugin plugin=new DruidPlugin(prop.get("mysql.jdbcUrl"), prop.get("mysql.user"), prop.get("mysql.password").trim());
         plugin.setRemoveAbandoned(true);
-        plugin.setRemoveAbandonedTimeoutMillis(60);
+        //plugin.setRemoveAbandonedTimeoutMillis(3 * 60 * 60 * 60 * 1000);
         plugin.setFilters("wall,stat");
         return plugin;
     }
@@ -141,7 +141,7 @@ public class JfinalConfig extends JFinalConfig {
         boolean master=prop.getBoolean("jfinal.master",false);
         if(master){
             //邮箱收信
-            Pop3EmailTask.ME.receivingEmail();
+            //Pop3EmailTask.ME.receivingEmail();
         }
 
     }

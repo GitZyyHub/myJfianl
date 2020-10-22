@@ -9,10 +9,9 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
-import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * crm模块操作记录

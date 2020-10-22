@@ -190,7 +190,7 @@ public class InstrumentService{
         Integer beginTime = record.getInt("beginTime");
         List<String> mouthList=new ArrayList<>();
         for(int i = 1; i <= cycleNum; i++){
-            String month=MonthEnum.valueOf(DateUtil.parse(beginTime.toString(),record.getStr("dateFormat")).monthStartFromOne());
+            String month= MonthEnum.valueOf(DateUtil.parse(beginTime.toString(),record.getStr("dateFormat")).monthStartFromOne());
             mouthList.add(month);
             beginTime = biTimeUtil.estimateTime(beginTime);
         }
@@ -325,7 +325,7 @@ public class InstrumentService{
         return R.ok().put("data",kv);
     }
 
-    public R forgottenCustomerPageList(BasePageRequest basePageRequest,String userIds) {
+    public R forgottenCustomerPageList(BasePageRequest basePageRequest, String userIds) {
         Integer day = basePageRequest.getJsonObject().getInteger("day");
         JSONObject jsonObject=new JSONObject();
         List<Integer> customerIds = Db.template("crm.Instrument.forgottenCustomer", Kv.by("day", day).set("userIds",userIds)).query();
@@ -337,7 +337,7 @@ public class InstrumentService{
         return crmCustomerService.queryPageList(basePageRequest,false);
     }
 
-    public R unContactCustomerPageList(BasePageRequest basePageRequest,String userIds) {
+    public R unContactCustomerPageList(BasePageRequest basePageRequest, String userIds) {
         String search = basePageRequest.getJsonObject().getString("search");
         List<Integer> customerIds = Db.template("crm.Instrument.unContactCustomer", Kv.by("search",search).set("userIds",userIds)).query();
         if (customerIds.size() == 0) {

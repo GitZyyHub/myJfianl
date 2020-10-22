@@ -42,7 +42,7 @@ public class OaCommentService{
     @Before(Tx.class)
     public R deleteComment(Integer commentId){
         Db.delete("delete from `72crm_task_comment` where main_id = ?",commentId);
-        return new TaskComment ().dao ().deleteById ( commentId )?R.ok ():R.error ();
+        return new TaskComment ().dao ().deleteById ( commentId )? R.ok (): R.error ();
     }
 
     public List<Record> queryCommentList(Integer typeId, String type) {
@@ -72,7 +72,7 @@ public class OaCommentService{
     }
 
     @Before(Tx.class)
-    public R deleteComment(Integer type,Integer typeId){
+    public R deleteComment(Integer type, Integer typeId){
         Db.delete("delete from `72crm_task_comment` where type = ? and type_id = ?",type,typeId);
         return R.ok ();
     }

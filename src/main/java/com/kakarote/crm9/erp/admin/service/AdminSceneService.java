@@ -160,6 +160,31 @@ public class AdminSceneService{
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
+        }else if(CrmEnum.WORK.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        }else if(CrmEnum.MILESTONE.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        }else if(CrmEnum.TASK.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        }else if(CrmEnum.DEMAND.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        }else if(CrmEnum.SUBTASKS.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
         }else{
             return R.error("场景label不符合要求！");
         }
@@ -335,6 +360,45 @@ public class AdminSceneService{
                 systemScene.setName("全部回访").save();
                 systemScene.setSceneId(null).setName("我负责的回访").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的回访").setData(subOwnerObject.toString()).save();
+            } else if(CrmEnum.WORK.getType() ==type){
+                systemScene.setName("全部项目").save();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.fluentPut("manager_id", new JSONObject().fluentPut("name", "manager_id").fluentPut("condition", "is").fluentPut("value", userId));
+                systemScene.setSceneId(null).setName("我负责的项目").setData(jsonObject.toString()).save();
+            } else if(CrmEnum.MILESTONE.getType() ==type){
+                systemScene.setName("全部里程碑").save();
+            } else if(CrmEnum.TASK.getType() == type){
+                systemScene.setName("全部任务").save();
+                JSONObject jsonObject = new JSONObject();
+                systemScene.setSceneId(null).setName("下属负责的任务").setData(jsonObject.toString()).save();
+                jsonObject.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", userId));
+                systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject.toString()).save();
+            } else if(CrmEnum.PRODUCT.getType() == type){
+                systemScene.setName("全部产品").save();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.fluentPut("product_status",new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "0"));
+                systemScene.setSceneId(null).setName("发版的产品").setData(jsonObject.toString()).save();
+                JSONObject jsonObject1 = new JSONObject();
+                jsonObject1.fluentPut("product_status",new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "1"));
+                systemScene.setSceneId(null).setName("规划的产品").setData(jsonObject1.toString()).save();
+            } else if(CrmEnum.DEMAND.getType() == type){
+                systemScene.setName("全部需求").save();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.fluentPut("is_associated",new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "0"));
+                systemScene.setSceneId(null).setName("已对标需求").setData(jsonObject.toString()).save();
+                JSONObject jsonObject1 = new JSONObject();
+                jsonObject1.fluentPut("is_associated",new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "1"));
+                systemScene.setSceneId(null).setName("未对标需求").setData(jsonObject1.toString()).save();
+            } else if(CrmEnum.SUBTASKS.getType() == type){
+                systemScene.setName("全部任务").save();
+                JSONObject jsonObject = new JSONObject();
+                systemScene.setSceneId(null).setName("下属负责的任务").setData(jsonObject.toString()).save();
+                jsonObject.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", userId));
+                systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject.toString()).save();
+                JSONObject j = new JSONObject();
+                j.fluentPut("oneself","oneself");
+                systemScene.setSceneId(null).setName("我参与的任务").setData(j.toString()).save();
+
             }
         }
         return R.ok().put("data", Db.find(Db.getSql("admin.scene.queryScene"), type, userId));

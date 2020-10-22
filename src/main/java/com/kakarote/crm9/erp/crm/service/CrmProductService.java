@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
@@ -96,7 +95,7 @@ public class CrmProductService extends AbstractBasePageList {
      * 分页条件查询产品
      */
     public Page<CrmProduct> queryPage(BasePageRequest<CrmProduct> basePageRequest) {
-        CrmProductUser crmProductUser = CrmProductUser.dao.findFirst(Db.getSqlPara("crm.product.queryByUserId", Kv.by("userId",BaseUtil.getUserId())));
+        CrmProductUser crmProductUser = CrmProductUser.dao.findFirst(Db.getSqlPara("crm.product.queryByUserId", Kv.by("userId", BaseUtil.getUserId())));
         String ids = null;
         if (crmProductUser != null && StrUtil.isNotEmpty(crmProductUser.getProductIds())){
             ids = crmProductUser.getProductIds();
@@ -112,7 +111,7 @@ public class CrmProductService extends AbstractBasePageList {
         for (CrmProduct crmProduct: list) {
             detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",crmProduct.getProductId());
             if (detailImg != null && detailImg.getMainFileIds() != null) {
-                SqlPara sqlPara = Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", detailImg.getMainFileIds()).set("path", BaseConstant.UPLOAD_PATH).set("address",BaseUtil.getIpAddress()));
+                SqlPara sqlPara = Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", detailImg.getMainFileIds()).set("path", BaseConstant.UPLOAD_PATH).set("address", BaseUtil.getIpAddress()));
                 crmProduct.put("mainFileList",  updateUrl(sqlPara));
             }else {
                 crmProduct.put("mainFileList",  null);
@@ -145,7 +144,7 @@ public class CrmProductService extends AbstractBasePageList {
             }
 
             if (detailImg.getDetailFileIds() != null) {
-                SqlPara sqlPara = Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", detailImg.getDetailFileIds()).set("path",  BaseConstant.UPLOAD_PATH).set("address",BaseUtil.getIpAddress()));
+                SqlPara sqlPara = Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", detailImg.getDetailFileIds()).set("path",  BaseConstant.UPLOAD_PATH).set("address", BaseUtil.getIpAddress()));
                 List<Record> list = updateUrl(sqlPara);
                 crmProduct.put("detailFileList", list);
                 crmProduct.put("detailFile",list);
@@ -191,7 +190,7 @@ public class CrmProductService extends AbstractBasePageList {
             crmProduct.setUpdateTime(DateUtil.date());
             flag = crmProduct.update();
         }
-        CrmProductDetailImg   detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",crmProduct.getProductId());
+        CrmProductDetailImg detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",crmProduct.getProductId());
         if (detailImg != null){
             img.setImgId(detailImg.getImgId());
             img.update();
@@ -226,7 +225,7 @@ public class CrmProductService extends AbstractBasePageList {
         Record crmProduct = Db.findFirst(Db.getSql("crm.product.queryById"),id);
         List<Record> recordList = Db.find("select name,value from `72crm_crm_product_data` where batch_id = ?", crmProduct.getStr("batch_id"));
         recordList.forEach(field->crmProduct.set(field.getStr("name"),field.getStr("value")));
-        CrmProductDetailImg   detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",id);
+        CrmProductDetailImg detailImg = CrmProductDetailImg.dao.findFirst("select * from 72crm_crm_product_detail_img where  product_id = ?",id);
         if (detailImg != null) {
             if (detailImg.getMainFileIds() != null) {
                 SqlPara sqlPara = Db.getSqlPara("admin.file.queryByIds", Kv.by("fileIds", detailImg.getMainFileIds()).set("path",  BaseConstant.UPLOAD_PATH).set("address", BaseUtil.getIpAddress()));

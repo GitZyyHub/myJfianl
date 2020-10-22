@@ -10,9 +10,27 @@ public class WorkRouter extends Routes {
         addInterceptor(new WorkAuthInterceptor());
         add("/work", WorkController.class);
         add("/task", TaskController.class);
-        add("/taskLabel", LabelController.class);
+        add("/work/milestone",MilestoneController.class);
+        add("/work/resources",WorkResourcesSettingController.class);
+        add("/work/risk",WorkRiskController.class);
+        add("/work/change",WorkChangeController.class);
+        add("/task/config",TaskConfigController.class);
+        add("/work/config",ConfigManageController.class);
+        add("/work/demand",WorkDemandController.class);
+        add("/work/historical",WorkHistoricalRecordController.class);
+        add("/work/product",WorkProductController.class);
+        add("/work/product/funtion",WorkProductFuntionController.class);
+        add("/task/hours",TaskHoursController.class);
+        add("/task/file",TaskFileController.class);
+        add("/work/file",WorkTaskFileController.class);
+        add("/task/historical",WorkTaskHistoricalController.class);
+        add("/task/hoursLock",TaskHoursLockController.class);
+        add("/task/hoursRecord",TaskHoursRecordController.class);
+
+
+        /*add("/taskLabel", LabelController.class);
         add("/workbench", WorkbenchController.class);
-        add("/workTrash", TrashController.class);
+        add("/workTrash", TrashController.class);*/
     }
 
 }

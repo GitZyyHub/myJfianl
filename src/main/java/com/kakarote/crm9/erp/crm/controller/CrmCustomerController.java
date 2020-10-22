@@ -20,7 +20,6 @@ import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.annotation.*;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.LogEnum;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
@@ -32,7 +31,10 @@ import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerSetting;
 import com.kakarote.crm9.erp.crm.service.*;
-import com.kakarote.crm9.utils.*;
+import com.kakarote.crm9.utils.ActionRecordUtil;
+import com.kakarote.crm9.utils.AuthUtil;
+import com.kakarote.crm9.utils.R;
+import com.kakarote.crm9.utils.TagUtil;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -687,7 +689,7 @@ public class CrmCustomerController extends Controller {
     @Permissions("crm:customer:excelimport")
     @NotNullValidate(value = "ownerUserId", message = "请选择负责人")
     public void uploadExcel(@Para("file") UploadFile file, @Para("ownerUserId") Long ownerUserId,@Para("repeatHandling") Integer repeatHandling) {
-        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_CUSTOMER, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling);
+        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_CUSTOMER, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling,null);
         renderJson(R.ok().put("data",messageId));
     }
 

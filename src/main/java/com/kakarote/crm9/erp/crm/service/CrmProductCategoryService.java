@@ -1,6 +1,5 @@
 package com.kakarote.crm9.erp.crm.service;
 
-import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.crm.entity.CrmProductCategory;
@@ -23,9 +22,9 @@ public class CrmProductCategoryService {
      */
     public R saveAndUpdate(CrmProductCategory category){
         if (category.getCategoryId() == null){
-            return category.save()?R.ok():R.error();
+            return category.save()? R.ok(): R.error();
         }else {
-            return category.update()?R.ok():R.error();
+            return category.update()? R.ok(): R.error();
         }
     }
     /**
@@ -40,7 +39,7 @@ public class CrmProductCategoryService {
         if (catagoryNum > 0 ){
             return R.error("该类别下有其他产品类别！");
         }
-        return CrmProductCategory.dao.deleteById(id)?R.ok():R.error();
+        return CrmProductCategory.dao.deleteById(id)? R.ok(): R.error();
     }
     /**
      * 迭代查询全部产品类别
@@ -95,7 +94,7 @@ public class CrmProductCategoryService {
     }
 
     public R queryAllList() {
-        List<CrmProductCategory> crmProductCategorys =CrmProductCategory.dao.find(Db.getSqlPara("crm.product.queryAllCategory"));
+        List<CrmProductCategory> crmProductCategorys = CrmProductCategory.dao.find(Db.getSqlPara("crm.product.queryAllCategory"));
         return R.ok().put("data",crmProductCategorys);
     }
 }

@@ -13,7 +13,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("user_id", userId);
 		return (M)this;
 	}
-
+	
 	public Long getUserId() {
 		return getLong("user_id");
 	}
@@ -22,7 +22,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("username", username);
 		return (M)this;
 	}
-
+	
 	public String getUsername() {
 		return getStr("username");
 	}
@@ -31,7 +31,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("password", password);
 		return (M)this;
 	}
-
+	
 	public String getPassword() {
 		return getStr("password");
 	}
@@ -40,7 +40,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("salt", salt);
 		return (M)this;
 	}
-
+	
 	public String getSalt() {
 		return getStr("salt");
 	}
@@ -49,7 +49,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("img", img);
 		return (M)this;
 	}
-
+	
 	public String getImg() {
 		return getStr("img");
 	}
@@ -58,7 +58,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("create_time", createTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
@@ -67,7 +67,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("realname", realname);
 		return (M)this;
 	}
-
+	
 	public String getRealname() {
 		return getStr("realname");
 	}
@@ -76,7 +76,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("num", num);
 		return (M)this;
 	}
-
+	
 	public String getNum() {
 		return getStr("num");
 	}
@@ -85,7 +85,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("mobile", mobile);
 		return (M)this;
 	}
-
+	
 	public String getMobile() {
 		return getStr("mobile");
 	}
@@ -94,7 +94,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("email", email);
 		return (M)this;
 	}
-
+	
 	public String getEmail() {
 		return getStr("email");
 	}
@@ -103,7 +103,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("sex", sex);
 		return (M)this;
 	}
-
+	
 	public Integer getSex() {
 		return getInt("sex");
 	}
@@ -112,7 +112,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("dept_id", deptId);
 		return (M)this;
 	}
-
+	
 	public Integer getDeptId() {
 		return getInt("dept_id");
 	}
@@ -121,7 +121,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("post", post);
 		return (M)this;
 	}
-
+	
 	public String getPost() {
 		return getStr("post");
 	}
@@ -130,7 +130,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("status", status);
 		return (M)this;
 	}
-
+	
 	public Integer getStatus() {
 		return getInt("status");
 	}
@@ -139,7 +139,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("parent_id", parentId);
 		return (M)this;
 	}
-
+	
 	public Long getParentId() {
 		return getLong("parent_id");
 	}
@@ -148,7 +148,7 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("last_login_time", lastLoginTime);
 		return (M)this;
 	}
-
+	
 	public java.util.Date getLastLoginTime() {
 		return get("last_login_time");
 	}
@@ -157,9 +157,36 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		set("last_login_ip", lastLoginIp);
 		return (M)this;
 	}
-
+	
 	public String getLastLoginIp() {
 		return getStr("last_login_ip");
+	}
+
+	public M setDingUserId(String dingUserId) {
+		set("ding_user_id", dingUserId);
+		return (M)this;
+	}
+	
+	public String getDingUserId() {
+		return getStr("ding_user_id");
+	}
+
+	public M setDingDeptId(String dingDeptId) {
+		set("ding_dept_id", dingDeptId);
+		return (M)this;
+	}
+	
+	public String getDingDeptId() {
+		return getStr("ding_dept_id");
+	}
+
+	public M setDingUnionId(String dingUnionId) {
+		set("ding_union_id", dingUnionId);
+		return (M)this;
+	}
+	
+	public String getDingUnionId() {
+		return getStr("ding_union_id");
 	}
 
 }

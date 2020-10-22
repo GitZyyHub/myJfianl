@@ -20,7 +20,9 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 
 /**
  * @author fff  邮箱

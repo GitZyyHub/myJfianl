@@ -73,7 +73,7 @@ public class OaAnnouncementService {
      * @author zhangzhiwei
      */
     public R queryList(BasePageRequest<OaAnnouncement> page, Integer type) {
-        AdminUser adminUser=BaseUtil.getUser();
+        AdminUser adminUser= BaseUtil.getUser();
         Kv kv=Kv.by("type",type).set("deptId",adminUser.getDeptId()).set("userId",adminUser.getUserId());
         Page<Record> recordPage=Db.paginate(page.getPage(),page.getLimit(),Db.getSqlPara("oa.announcement.queryList",kv));
         return R.ok().put("data", recordPage);

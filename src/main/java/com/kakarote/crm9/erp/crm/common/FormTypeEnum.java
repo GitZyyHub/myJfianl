@@ -17,11 +17,11 @@ public enum FormTypeEnum{
     MOBILE(7,"mobile"),
     FILE(8,"file"),
     CHECKBOX(9,"checkbox"),
-    USER(10,"user"),
+    USER(10,"user"),        //选择系统人员
     STRUCTURE(12,"structure"),
-    DATETIME(13,"datetime"),
+    DATETIME(13,"datetime"),    //开始时间
     EMAIL(14,"email"),
-    CUSTOMER(15,"customer"),
+    CUSTOMER(15,"customer"),    //选择客户名称
     BUSINESS(16,"business"),
     CONTACTS(17,"contacts"),
     MAP_ADDRESS(18,"map_address"),
@@ -35,6 +35,10 @@ public enum FormTypeEnum{
     RETURN_VISIT(26, "return_visit"),
     RETURN_VISIT_CONTRACT(27, "return_visit_contract"),
     SINGLE_USER(28, "single_user"),
+    TASK(29,"task"),    //任务
+    MILESTONE(30,"milestone"), //里程碑
+    WORK(31,"work"),        //项目
+    SUBTASK(32,"subTask"),  //子任务
     NULL(0,"null")
     ;
 

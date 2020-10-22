@@ -1,6 +1,5 @@
 package com.kakarote.crm9.erp.admin.controller;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -14,15 +13,12 @@ import com.kakarote.crm9.common.annotation.SysLog;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.common.constant.LogEnum;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
-import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.entity.AdminUserConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminUserHisTable;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.email.entity.EmailAccount;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -119,7 +115,7 @@ public class AdminUserController extends Controller {
      * @author zxy
      * 查询系统所有用户名称
      */
-    @SysLog({LogEnum.ALL_ADDRESS_BOOK,LogEnum.MY_FOLLOW_ADDRESS_BOOK})
+    @SysLog({LogEnum.ALL_ADDRESS_BOOK, LogEnum.MY_FOLLOW_ADDRESS_BOOK})
     public void queryListName(BasePageRequest<AdminUser> basePageRequest){
         renderJson(adminUserService.queryListName(basePageRequest));
     }
@@ -130,7 +126,7 @@ public class AdminUserController extends Controller {
      */
     public void queryLoginUser(){
 
-        AdminUserHisTable userHisTable = AdminUserHisTable.dao.findFirst("select * from 72crm_admin_user_his_table where  type = ? and user_id = ? and his_table = 1",3,BaseUtil.getUserId());
+        AdminUserHisTable userHisTable = AdminUserHisTable.dao.findFirst("select * from 72crm_admin_user_his_table where  type = ? and user_id = ? and his_table = 1",3, BaseUtil.getUserId());
         boolean flag = false;
         if (userHisTable != null){
             flag = true;
@@ -162,7 +158,7 @@ public class AdminUserController extends Controller {
     public void updatePassword(){
         String oldPass=getPara("oldPwd");
         String newPass=getPara("newPwd");
-        AdminUser adminUser=BaseUtil.getUser();
+        AdminUser adminUser= BaseUtil.getUser();
         if(!BaseUtil.verify(adminUser.getUsername()+oldPass,adminUser.getSalt(),adminUser.getPassword())){
             renderJson(R.error("密码输入错误"));
             return;
@@ -173,7 +169,7 @@ public class AdminUserController extends Controller {
 
     @NotNullValidate(value = "realname",message = "姓名不能为空")
     @NotNullValidate(value = "username",message = "用户名不能为空")
-    public void updateUser(@Para("")AdminUser adminUser){
+    public void updateUser(@Para("") AdminUser adminUser){
         renderJson(adminUserService.updateUser(adminUser));
     }
 
@@ -266,5 +262,12 @@ public class AdminUserController extends Controller {
             Db.update("update 72crm_admin_user_config set status = 1 where user_id = ? and name = 'readNotice'", BaseUtil.getUserId());
         }
         renderJson(R.ok());
+    }
+
+    /**
+     * 标记人员为人力资源
+     */
+    public void setResources(@Para("memeberIds") String userIds , @Para("isResources")String isResources){
+        renderJson(adminUserService.setResources(userIds,isResources));
     }
 }

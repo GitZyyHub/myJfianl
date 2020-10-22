@@ -28,7 +28,6 @@ import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmContacts;
 import com.kakarote.crm9.erp.crm.service.CrmContactsService;
-import com.kakarote.crm9.erp.crm.service.CrmRecordService;
 import com.kakarote.crm9.utils.ActionRecordUtil;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
@@ -321,7 +320,7 @@ public class CrmContactsController extends Controller {
     @Permissions("crm:contacts:excelimport")
     @NotNullValidate(value = "ownerUserId", message = "请选择负责人")
     public void uploadExcel(@Para("file") UploadFile file,@Para("ownerUserId") Long ownerUserId,@Para("repeatHandling") Integer repeatHandling) {
-        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_CONTACTS, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling);
+        Long messageId = new CrmExcelUtil().addWork(CrmEnum.CRM_CONTACTS, file.getFile().getAbsolutePath(), ownerUserId, null, repeatHandling,null);
         renderJson(R.ok().put("data",messageId));
     }
 

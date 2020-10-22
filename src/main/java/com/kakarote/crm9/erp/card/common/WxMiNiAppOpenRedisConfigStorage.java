@@ -1,10 +1,7 @@
 package com.kakarote.crm9.erp.card.common;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
 import cn.binarywang.wx.miniapp.config.WxMaConfig;
-import cn.binarywang.wx.miniapp.config.impl.WxMaRedisConfigImpl;
-import com.jfinal.plugin.redis.Redis;
 import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.utils.HttpUtils;
 import me.chanjar.weixin.common.bean.WxAccessToken;

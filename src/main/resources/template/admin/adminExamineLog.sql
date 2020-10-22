@@ -140,21 +140,34 @@
       a.*,
       a.record_id as examineRecordId,
       a.create_user as create_user_id,
+      (select realname from 72crm_admin_user where user_id = a.create_user) create_user_name,
       b.`name`,
       b.examine_type,
       #if(categoryType==1)
-        c.`name` AS catagory,
-        c.contract_id AS catagory_id,
-        c.order_date,
-        d.customer_id as catagory_cite_id,
-        d.customer_name as catagory_cite_name
-      #else
-        d.number AS catagory,
-        d.receivables_id AS catagory_id,
-        d.return_time,
-        c.contract_id as catagory_cite_id,
-        c.name as catagory_cite_name
-        #end
+          c.`name` AS catagory,
+          c.contract_id AS catagory_id,
+          c.order_date,
+          d.customer_id as catagory_cite_id,
+          d.customer_name as catagory_cite_name
+      #else if(categoryType==2)
+          d.number AS catagory,
+          d.receivables_id AS catagory_id,
+          d.return_time,
+          c.contract_id as catagory_cite_id,
+          c.name as catagory_cite_name
+      #else if(categoryType==4)
+      (case when d.subtasks_id=null then d.subtasks_name else d.task_name end) as catagory,
+      d.hours_id as catagory_id,
+      d.create_time,
+      c.task_id as catagory_cite_id,
+      c.task_name as catagory_cite_name
+      #else if(categoryType==5)
+          w.work_name AS catagory,
+          w.work_id AS catagory_id,
+          w.work_name AS catagory_cite_name,
+          w.work_id AS catagory_cite_id,
+          w.create_time
+      #end
     FROM
       72crm_admin_examine_log AS e
       LEFT JOIN 72crm_admin_examine_record AS a ON e.record_id = a.record_id
@@ -162,9 +175,14 @@
       #if(categoryType==1)
       LEFT JOIN 72crm_crm_contract AS c ON c.examine_record_id = a.record_id AND b.category_type = '1'
       LEFT JOIN 72crm_crm_customer as d on c.customer_id=d.customer_id
-      #else
+      #else if(categoryType==2)
       LEFT JOIN 72crm_crm_receivables AS d ON d.examine_record_id = a.record_id AND b.category_type = '2'
       LEFT JOIN 72crm_crm_contract AS c ON d.contract_id = c.contract_id
+      #else if(categoryType==4)
+        left join 72crm_task_hours as d on d.examine_record_id = a.record_id AND b.category_type = '4'
+        left join 72crm_task as c on d.subtasks_id = c.task_id
+      #else if(categoryType==5)
+        left join 72crm_work as w on w.examine_record_id = a.record_id AND b.category_type = '5'
       #end
     WHERE
     e.log_id IN (
@@ -188,7 +206,7 @@
     #if(categoryType)
       and b.category_type=#para(categoryType)
     #end
-    order by create_time desc
+    order by e.create_time desc
   #end
   #sql("queryExamineUserByExamineLog")
      SELECT

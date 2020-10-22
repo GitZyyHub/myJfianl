@@ -85,7 +85,7 @@ public class AdminMessageService {
     }
 
     public Page<AdminMessage> queryList(BasePageRequest<AdminMessage> request) {
-        Page<AdminMessage> page=AdminMessage.dao.template("admin.message.queryList", request.getData().put("key", new ArrayList<>()).put("userId", BaseUtil.getUserId())).paginate(request.getPage(), request.getLimit());
+        Page<AdminMessage> page= AdminMessage.dao.template("admin.message.queryList", request.getData().put("key", new ArrayList<>()).put("userId", BaseUtil.getUserId())).paginate(request.getPage(), request.getLimit());
         if(Arrays.asList(14,16,18,20).contains(request.getData().getType())){
             page.getList().forEach(data->{
                 data.setContent(data.getContent().split(",")[0]);
@@ -141,9 +141,9 @@ public class AdminMessageService {
             adminMessage.setCreateUser(userId);
             adminMessage.setType(messageEnum.getType());
             adminMessage.setLabel(messageEnum.getLabel());
-            adminMessage.setTitle(task.getName());
+            //adminMessage.setTitle(task.getName());
             adminMessage.setRecipientUser(id);
-            adminMessage.setTypeId(task.getTaskId());
+            //adminMessage.setTypeId(task.getTaskId());
             messageList.add(adminMessage);
             String content = "";
             if (messageEnum.equals(AdminMessageEnum.OA_TASK_ALLOCATION)){

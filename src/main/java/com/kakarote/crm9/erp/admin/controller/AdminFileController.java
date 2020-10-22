@@ -1,7 +1,6 @@
 package com.kakarote.crm9.erp.admin.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
@@ -11,7 +10,12 @@ import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class AdminFileController extends Controller {
@@ -97,39 +101,71 @@ public class AdminFileController extends Controller {
         }
         renderNull();
     }*/
+
     /**
      * @author zhangzhiwei
      * 上传附件 type oss：上传到阿里云 file,img :上传到本地
      */
-    public void ossUpload(){
+    public void ossUpload() {
         String prefix = BaseUtil.getDate();
         renderJson(adminFileService.ossUpload(getFile("file", prefix), getPara("batchId"), getPara("type")));
     }
+
     /**
      * 下载文件
+     *
      * @param fileId
      */
     @LoginFormCookie
-    public void downFile(@Para("fileId") String fileId){
-        File file = adminFileService.downFile(fileId);
-        if (file != null){
-            renderFile(file);
+    public void downFile(@Para("fileId") String fileId) {
+        // File file = adminFileService.downFile(fileId);
+        fileId = "/file/downFile?fileId=" + fileId;
+        AdminFile adminFile = AdminFile.dao.findFirst("SELECT * FROM `72crm_admin_file` where file_path=? LIMIT 0,1", fileId);
+        File file = null;
+        if (adminFile != null) {
+            file = new File(adminFile.getPath());
+        }
+        String name = file.getName();
+        name =  name.substring(name.lastIndexOf("."));
+
+        if (file != null) {
+            renderFile(file,"file"+name);
             return;
         }
         renderNull();
     }
+
     /**
      * 删除文件 根据id
      */
-    public void deleteByIds(){
-        List<Long> ids = JSON.parseArray(getRawData(),Long.class);
+    public void deleteByIds() {
+        List<Long> ids = JSON.parseArray(getRawData(), Long.class);
         renderJson(adminFileService.deleteByIds(ids));
     }
+
     /**
      * 删除文件 根据批次
      */
-    public void deleteByBatchIds(){
-        List<String> batchIds = JSON.parseArray(getRawData(),String.class);
+    public void deleteByBatchIds() {
+        List<String> batchIds = JSON.parseArray(getRawData(), String.class);
         renderJson(adminFileService.deleteByBatchIds(batchIds));
     }
 }
+
+/*HttpServletResponse response = getResponse();
+        try (BufferedInputStream br = new BufferedInputStream(new FileInputStream(file));ServletOutputStream outputStream = response.getOutputStream();){
+            byte[] buf = new byte[1024];
+            response.reset();
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/x-msdownload");
+            String name = file.getName();
+            name =  name.substring(name.lastIndexOf("."));
+            response.setHeader("Content-Disposition", "attachment; filename=file." + name);
+            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+
+            int len = 0;
+            while ((len = br.read(buf)) > 0)
+                outputStream.write(buf, 0, len);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/

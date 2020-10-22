@@ -14,7 +14,6 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.erp.admin.common.AdminModelEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
@@ -23,7 +22,6 @@ import com.kakarote.crm9.erp.crm.service.CrmContractService;
 import com.kakarote.crm9.erp.crm.service.CrmCustomerService;
 import com.kakarote.crm9.erp.oa.entity.OaCalendarType;
 import com.kakarote.crm9.erp.oa.entity.OaCalendarTypeUser;
-import com.kakarote.crm9.utils.AdminLogUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
