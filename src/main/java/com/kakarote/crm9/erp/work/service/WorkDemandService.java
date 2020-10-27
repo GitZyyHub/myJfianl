@@ -131,7 +131,7 @@ public class WorkDemandService extends AbstractBasePageList {
             entity.update();
             Record update = Db.findFirst(Db.getSql("work.demand.queryDemandById"), entity.getDemandId());
             //添加变更记录
-            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.UPDATE, entity.getDemandNumber(), first, update,entity.getDemandId());
+            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.UPDATE, entity.getDemandNumber(), update,first, entity.getDemandId());
         }
         HashSet<Long> set = new HashSet<>();
         set.add(entity.getCreateUserId());

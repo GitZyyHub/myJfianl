@@ -46,13 +46,17 @@
       where a.username = #para(username)
     #end
     #sql("queryUserList")
-        select a.realname,a.username,a.user_id,a.sex,a.mobile,a.email,e.name as deptName,a.status,a.create_time,a.dept_id,
-       a.post,a.parent_id,a.img,
-       (select b.realname from 72crm_admin_user b where b.user_id = a.parent_id) as parentName,
-       a.post,a.parent_id,a.img,
-       (select b.realname from 72crm_admin_user as b where b.user_id = a.parent_id) as parentName,
-       (select group_concat(d.role_id) from 72crm_admin_user_role as c left join 72crm_admin_role as d on c.role_id = d.role_id where c.user_id = a.user_id) as roleId,
-       (select group_concat(d.role_name) from 72crm_admin_user_role as c left join 72crm_admin_role as d on c.role_id = d.role_id where c.user_id = a.user_id) as roleName
+
+    select
+        a.job_number,a.rank,a.condition,
+        (select name from 72crm_admin_dept where dept_id = a.area) area,
+        a.realname,a.username,a.user_id,a.sex,a.mobile,a.email,e.name as deptName,a.status,a.create_time,a.dept_id,
+        a.post,a.parent_id,a.img,
+        (select b.realname from 72crm_admin_user b where b.user_id = a.parent_id) as parentName,
+        a.post,a.parent_id,a.img,
+        (select b.realname from 72crm_admin_user as b where b.user_id = a.parent_id) as parentName,
+        (select group_concat(d.role_id) from 72crm_admin_user_role as c left join 72crm_admin_role as d on c.role_id = d.role_id where c.user_id = a.user_id) as roleId,
+        (select group_concat(d.role_name) from 72crm_admin_user_role as c left join 72crm_admin_role as d on c.role_id = d.role_id where c.user_id = a.user_id) as roleName
         from 72crm_admin_user a
         left join 72crm_admin_dept e on a.dept_id = e.dept_id
         #if(roleId)
@@ -77,6 +81,9 @@
         #end
         #if(roleId)
           and g.role_id = #para(roleId)
+        #end
+        #if(isResources)
+            and is_resources=#para(isResources)
         #end
         #if(search)
           and (a.realname like concat('%', #para(search), '%')

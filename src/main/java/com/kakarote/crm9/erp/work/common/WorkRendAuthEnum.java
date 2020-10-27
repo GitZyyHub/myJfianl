@@ -8,7 +8,8 @@ public enum WorkRendAuthEnum {
     DEMAND(448),
     TASK(472),
     SUBTASKS(494),
-    HOURS(499)
+    HOURS(499),
+    WORKCONFIG(564),
     ;
 
     private Integer menuId;

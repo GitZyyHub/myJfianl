@@ -135,4 +135,13 @@ public abstract class BaseWorkTaskHistorical<M extends BaseWorkTaskHistorical<M>
 		return get("create_time");
 	}
 
+	public M setWorkId(Long workId) {
+		set("work_id", workId);
+		return (M)this;
+	}
+
+	public Long getWorkId() {
+		return getLong("work_id");
+	}
+
 }

@@ -131,9 +131,12 @@ public class MilestoneService extends AbstractBasePageList {
             entity.update();
             Record after = Db.findFirst("SELECT * FROM 72crm_milestone WHERE milestone_id=?", entity.getMilestoneId());
             //添加变更记录
-            workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.UPDATE, entity.getMilestoneNum(),first,after,entity.getMilestoneId());
+            workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.UPDATE, entity.getMilestoneNum(),after,first,entity.getMilestoneId());
         }
-        WorkService.setWorkRelation(Arrays.asList(entity.getMainUserId()), entity.getTaskId(), WorkUserEnum.MILESTONE.getType(),entity.getWorkId());
+        HashSet<Long> set = new HashSet<>();
+        set.add(entity.getMainUserId());
+
+        WorkService.setWorkRelation(set, entity.getMilestoneId(), WorkUserEnum.MILESTONE.getType(),entity.getWorkId());
         return setting ? R.ok() : R.error();
     }
 

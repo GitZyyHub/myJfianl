@@ -85,7 +85,11 @@ public class WorkProductService extends AbstractBasePageList {
         return Db.findFirst("select * from 72crm_work_product where product_id=?",id);
     }
 
-
+    /**
+     * 查询产品使用统计
+     * @param basePageRequest
+     * @return
+     */
     public R queryStatistics(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         if(jsonObject.get("excel") != null){

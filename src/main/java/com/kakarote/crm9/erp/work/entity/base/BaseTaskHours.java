@@ -68,8 +68,8 @@ public abstract class BaseTaskHours<M extends BaseTaskHours<M>> extends Model<M>
 		return (M)this;
 	}
 	
-	public Integer getSubtasksId() {
-		return getInt("subtasks_id");
+	public Long getSubtasksId() {
+		return getLong("subtasks_id");
 	}
 
 	public M setStartTime(java.util.Date startTime) {

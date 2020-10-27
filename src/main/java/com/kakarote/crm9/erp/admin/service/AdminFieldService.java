@@ -101,6 +101,9 @@ public class AdminFieldService {
                     record = workProductFuntionService.queryById(id);
                 }else if(CrmEnum.TASK_HOURS.equals(crmEnum)){
                     record = taskHoursServicel.queryById(id);
+                    if(record.getInt("task_id")==record.getInt("subtasks_id")){
+                        record.remove("subtasks_id");
+                    }
                 }
             }
 

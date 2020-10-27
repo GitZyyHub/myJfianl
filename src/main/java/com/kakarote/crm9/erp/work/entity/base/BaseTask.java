@@ -27,7 +27,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		return getStr("task_num");
 	}
 
-	public M setWorkId(Integer workId) {
+	public M setWorkId(Long workId) {
 		set("work_id", workId);
 		return (M)this;
 	}

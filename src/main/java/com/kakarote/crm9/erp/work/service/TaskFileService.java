@@ -37,9 +37,9 @@ public class TaskFileService {
      */
     public R queryPageList(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
-        Kv by = Kv.by("taskId", jsonObject.get("taskId"));
+        Kv by = Kv.by("taskId", jsonObject.get("taskId")).set("workId",jsonObject.get("workId"));
         Integer fileAttr = jsonObject.getInteger("fileAttr");
-        if (fileAttr == 1) {
+        if (fileAttr == null) {
             by.set("fileAttr", "任务资料");
         } else {
             by.set("fileAttr", "资料成果");
@@ -55,7 +55,7 @@ public class TaskFileService {
             List<Record> list = paginate.getList();
             for (Record record : list) {
                 try {
-                    if (record.getStr("subtasks_name").equals(record.getStr("task_name"))) {
+                    if (record.getStr("subtasks_id").equals(record.getStr("task_id"))) {
                         record.set("subtasks_name", null);
                     }
                 } catch (NullPointerException e) {
@@ -83,6 +83,17 @@ public class TaskFileService {
             taskFile.setSubtasksId(taskFile.getTaskId());
         }
         if (taskFile.getFileId() == null) {
+            if("资料成果".equals(taskFile.getFileAttr())){
+                int temp ;
+                if(taskFile.getSubtasksId()==null){
+                    temp = Db.queryInt("select conut(1) from 72crm_task_hours where subtasks_id =?",taskFile.getTaskId());
+                }else {
+                    temp = Db.queryInt("select conut(1) from 72crm_task_hours where subtasks_id =?",taskFile.getSubtasksId());
+                }
+                if(temp == 0){
+                    return R.error("该任务没有存在的工时");
+                }
+            }
             taskFile.setCreateUserId(BaseUtil.getUserId());
             taskFile.setCreateTime(new Date());
             taskFile.save();
@@ -136,7 +147,12 @@ public class TaskFileService {
         if (id == null) {
             return R.error("id参数为空");
         }
-        return R.ok().put("data", Db.find(Db.getSql("task.file.queryById"), id));
+        Record first = Db.findFirst(Db.getSql("task.file.queryById"), id);
+        if(first.getInt("task_id")==first.getInt("subtasks_id")){
+            first.set("subtasks_id",null);
+            first.set("subtasks_name",null);
+        }
+        return R.ok().put("data", first);
     }
 
     /**

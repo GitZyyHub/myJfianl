@@ -69,7 +69,7 @@ public class WorkResourcesSettingService {
             }
             entity.update();
             Record after = Db.findFirst(Db.getSql("work.queryResourceById"), entity.getResourcesId());
-            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.RESOURCE, BehaviorEnum.UPDATE, entity.getResourcesId(),first,after,  entity.getResourcesId());
+            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.RESOURCE, BehaviorEnum.UPDATE, entity.getResourcesId(),after,first,  entity.getResourcesId());
         }
         HashSet<Long> set = new HashSet<>();
         set.add(entity.getMainUserId());

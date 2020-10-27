@@ -4,11 +4,11 @@
         SELECT
             hours_id,
             task_id,
-            task_name,
+            (select task_name from 72crm_task where task_id=h.task_id) task_name,
             main_user_id,
             (select realname from 72crm_admin_user where user_id=h.main_user_id) main_user_name,
             subtasks_id,
-            subtasks_name,
+            (select task_name from 72crm_task where task_id=h.subtasks_id) subtasks_name,
             start_time,
             end_time,
             working_hours,
@@ -31,13 +31,45 @@
         #if(workId)
         and work_id = #para(workId)
         #end
+        #if(task)
+            and subtasks_id in #fori(task)
+        #end
         #for(query:queryList)
             #(query.get("sql"))
         #end
+
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
         #if(page&&limit)
             LIMIT #(page),#(limit)
         #end
+    #end
+    #sql("queryMyHoursList")
+    SELECT
+            hours_id,
+            task_id,
+            (select task_name from 72crm_task where task_id=h.task_id) task_name,
+            main_user_id,
+            (select realname from 72crm_admin_user where user_id=h.main_user_id) main_user_name,
+            subtasks_id,
+            (select task_name from 72crm_task where task_id=h.subtasks_id) subtasks_name,
+            start_time,
+            end_time,
+            working_hours,
+            hours_type,
+            progress_content,
+            check_user_id,
+            (select realname from 72crm_admin_user where user_id=h.check_user_id) check_user_name,
+            create_user_id,
+            (select realname from 72crm_admin_user where user_id=h.create_user_id) create_user_name,
+            h.create_time,
+            h.examine_time,
+            (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) check_status,
+            create_time
+        FROM
+        72crm_task_hours h
+        where 1=1
+        and create_user_id = #para(userId)
+        ORDER BY update_time desc
     #end
 
     #sql ("queryPageListCount")

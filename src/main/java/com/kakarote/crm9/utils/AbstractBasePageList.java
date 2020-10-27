@@ -446,9 +446,11 @@ public abstract class AbstractBasePageList {
         AdminUser user = BaseUtil.getUser();
         List<Integer> roles = user.getRoles();
         Long userId = user.getUserId();
-        /*if (BaseUtil.getSuperUser().equals(userId) || roles.contains(BaseUtil.getSuperRole()) || crmEnum.equals(CrmEnum.CRM_PRODUCT) || crmEnum.equals(CrmEnum.CRM_CUSTOMER_POOL)) {
-            return;
-        }*/
+        if (BaseUtil.getSuperUser().equals(userId) || roles.contains(BaseUtil.getSuperRole()) || crmEnum.equals(CrmEnum.CRM_PRODUCT) || crmEnum.equals(CrmEnum.CRM_CUSTOMER_POOL)) {
+            if(integer == null){
+                integer = 5;
+            }
+        }
         if(integer == null){
             integer = Db.queryInt(Db.getSql("admin.role.queryRoleDataType"), userId, workRendAuthEnum.getMenuId());
         }else {

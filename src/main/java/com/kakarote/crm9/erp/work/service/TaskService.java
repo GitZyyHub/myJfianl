@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -52,6 +53,10 @@ public class TaskService extends AbstractBasePageList {
     @Before(Tx.class)
     public R setTask(JSONObject jsonObject) {
         Task task = jsonObject.getObject("entity", Task.class);
+        if(task.getPid()!=null&&task.getWorkId()==null){
+            Task byId = Aop.get(Task.class).dao().findById(task.getPid());
+            task.setWorkId(byId.getWorkId());
+        }
         Set<Long> longs = null;
         if (!StringUtils.isNullOrEmpty(task.getOwnerUserId())) {
             longs = TagUtil.toLongSet(task.getOwnerUserId());
@@ -78,7 +83,7 @@ public class TaskService extends AbstractBasePageList {
             Record first = Db.findFirst(Db.getSql("work.task.queryById"), task.getTaskId());
             task.update();
             Record update = Db.findFirst(Db.getSql("work.task.queryById"), task.getTaskId());
-            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.TASK, BehaviorEnum.UPDATE, task.getTaskNum(), first, update,task.getTaskId());
+            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.TASK, BehaviorEnum.UPDATE, task.getTaskNum(),update, first, task.getTaskId());
         }
         //设置任务关联人员
         WorkService.setWorkRelation(longs, task.getTaskId(),WorkUserEnum.TYPE_1.getType(),task.getWorkId());
@@ -123,13 +128,33 @@ public class TaskService extends AbstractBasePageList {
         return R.ok().put("data",resultJsonObject);
     }
 
+    public R querySubtasksByTaskHours(BasePageRequest basePageRequest) {
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        Integer taskId = jsonObject.getInteger("pid");
+        List<Record> records = Db.find(Db.getSql("work.task.querySubtasksByTaskHours"), taskId);
+        for (int i = 0; i < records.size(); i++) {
+            if(records.get(i).getInt("task_id") == taskId){
+                records.remove(i);
+            }
+        }
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("list",records);
+        return R.ok().put("data",jsonObject1);
+    }
+
+    /**
+     *
+     */
+
     /**
      * 查询待办任务
      */
     public R waiting(BasePageRequest basePageRequest, boolean isDataAuth){
         CrmEnum task = CrmEnum.TASK;
         Kv kv = getKv(basePageRequest, task, isDataAuth);
+        JSONObject jsonObject = basePageRequest.getJsonObject();
         kv.set("_userId", BaseUtil.getUserId());
+        kv.set("isWaiting", jsonObject.get("isWaiting"));
         queryDataAuth(WorkUserEnum.TYPE_1,kv,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,1);
         if(kv == null){
             return R.error("无权访问");
@@ -161,6 +186,8 @@ public class TaskService extends AbstractBasePageList {
         ids.forEach(id->{
             stringBuffer.append(id.getStr("realname")+",");
         });*/
+        Integer checkStatus = Db.queryInt("select check_status from 72crm_task_hours where subtasks_id =?", first.getStr("task_id"));
+        first.set("check_status",checkStatus);
         first.set("owner_user_id",records);
         return first;
     }

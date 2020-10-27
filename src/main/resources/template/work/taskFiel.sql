@@ -5,7 +5,9 @@
             `name`,
             file_attr,
             task_id,
+            (select task_name from 72crm_task where task_id=f.task_id) task_name,
             subtasks_id,
+            (select task_name from 72crm_task where task_id=f.subtasks_id) subtasks_name,
             file_path,
             file_name,
             size,
@@ -25,6 +27,9 @@
     #if(fileAttr)
         and file_attr=#para(fileAttr)
     #end
+    #if(workId)
+        and work_id =#para(workId)
+    #end
     ORDER BY create_time desc
     #end
 
@@ -35,9 +40,12 @@
             file_attr,
             (SELECT realname FROM 72crm_admin_user WHERE user_id = f.main_user_id) main_user_id,
             `status`,
-            (SELECT task_name FROM 72crm_task WHERE task_id=f.task_id) task_id,
-            (SELECT task_name FROM 72crm_task WHERE task_id=f.subtasks_id) subtasks_id,
-            (SELECT realname FROM 72crm_admin_user WHERE user_id = f.create_user_id) create_user_id,
+            task_id,
+            (SELECT task_name FROM 72crm_task WHERE task_id=f.task_id) task_name,
+            subtasks_id,
+            (SELECT task_name FROM 72crm_task WHERE task_id=f.subtasks_id) subtasks_name,
+            create_user_id,
+            (SELECT realname FROM 72crm_admin_user WHERE user_id = f.create_user_id) create_user_name,
             create_time,
             batch_id
         FROM 72crm_task_file f

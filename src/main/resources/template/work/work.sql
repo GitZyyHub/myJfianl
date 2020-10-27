@@ -99,6 +99,9 @@
         #if(dataAuth)
             and work_id in (#fori(dataAuth))
         #end
+        #if(isWaiting)
+            and status!='已完成'
+        #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
         #if(page&&limit)
           LIMIT #(page),#(limit)
@@ -380,10 +383,11 @@
 
     #sql ("queryHistoricalRecordList")
         SELECT * FROM 72crm_work_historical_record WHERE module=#para(type)
-        #if(operationId)
-            and operation_id=#para(operationId)
+        #if(workId)
+            and work_id=#para(workId)
         #end
-        order by create_time
+
+        order by create_time desc
     #end
     #sql ("queryHistoricalList")
         SELECT * FROM 72crm_work_historical WHERE 1=1
@@ -393,7 +397,7 @@
         #if(operationId)
             and operation_id=#para(operationId)
         #end
-        order by create_time
+        order by create_time desc
     #end
     #sql ("queryTaskHistoricalList")
         SELECT * FROM 72crm_work_task_historical WHERE 1=1
@@ -406,7 +410,7 @@
         #if(operationId)
             and operation_id=#para(operationId)
         #end
-        order by create_time
+        order by create_time desc
     #end
 
 
@@ -425,17 +429,41 @@
         #if(associatedId)
             and c.associated_id=#para(associatedId)
         #end
-        #if(search)
-            and (config_items like concat('%',#para(search),'%') or associated_name like concat('%',#para(search),'%'))
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        #if(orderByKey)
+        ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
+        #else
+        ORDER BY update_time desc
         #end
         #if(page&&limit)
             LIMIT #(page),#(limit)
         #end
-        order by update_time desc
+    #end
+    #sql ("queryConfigCount")
+        SELECT
+           count(1)
+        FROM 72crm_work_config c WHERE 1=1
+        #if(type)
+            and c.type=#para(type)
+        #end
+        #if(workId)
+            and c.work_id=#para(workId)
+        #end
+        #if(associatedId)
+            and c.associated_id=#para(associatedId)
+        #end
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
     #end
 
     #sql ("queryTaskConfigById")
-        SELECT config_items,plan_time,main_user_id,associated_name,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
+        SELECT config_items,plan_time,main_user_id,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = c.create_user_id) create_user_name,
+        associated_name,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
     #end
 
 

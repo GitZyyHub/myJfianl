@@ -27,7 +27,8 @@
             (select task_name from 72crm_task where t1.before_id=task_id) before_name,
             (select milestone_name from 72crm_milestone where t1.milestone_id=milestone_id) milestone_name,
             (select realname from 72crm_admin_user where t1.main_user_id=user_id) main_user_name,
-            (select realname from 72crm_admin_user where t1.create_user_id=user_id) create_user_name
+            (select realname from 72crm_admin_user where t1.create_user_id=user_id) create_user_name,
+            (select check_status from 72crm_task_hours where subtasks_id =t1.task_id) check_status
         FROM
             72crm_task AS t1
             #if(_status)
@@ -45,6 +46,8 @@
         #end
         #if(_pid)
          and t1.pid=#para(_pid)
+        #else
+         and t1.pid is null
         #end
         #if(_work_id)
             and t1.work_id=#para(_work_id)
@@ -53,7 +56,7 @@
             and t1.before_id=#para(_before_id)
         #end
         #for(query:queryList)
-                    #(query.get("sql"))
+            #(query.get("sql"))
         #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
         #if(page&&limit)
@@ -97,7 +100,43 @@
         #if(dataAuth)
             and task_id in (#fori(dataAuth))
         #end
+        #if(isWaiting)
+            and status!='已完成'
+        #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
+    #end
+
+    #sql("querySubtasksByTaskHours")
+    select
+            t1.task_id,
+            t1.class_id,
+            t1.task_name,
+            t1.milestone_id,
+            t1.task_num,
+            t1.completeness,
+            t1.start_time,
+            t1.end_time,
+            t1.description,
+            t1.create_time,
+            t1.update_time,
+            t1.before_id,
+            t1.status,
+            t1.priority,
+            t1.difficulty,
+            t1.degree,
+            t1.batch_id,
+            t1.main_user_id,
+            t1.pid,
+            (select task_name from 72crm_task where t1.pid=task_id) p_name,
+            (select work_name from 72crm_work where t1.work_id=work_id) work_name,
+            (select task_name from 72crm_task where t1.before_id=task_id) before_name,
+            (select milestone_name from 72crm_milestone where t1.milestone_id=milestone_id) milestone_name,
+            (select realname from 72crm_admin_user where t1.main_user_id=user_id) main_user_name,
+            (select realname from 72crm_admin_user where t1.create_user_id=user_id) create_user_name,
+            (select check_status from 72crm_task_hours where subtasks_id = t1.task_id) check_status
+        FROM
+        72crm_task AS t1
+        where task_id in (select subtasks_id from 72crm_task_hours where task_id = ? group by subtasks_id)
     #end
 
     #sql ("queryTaskPageListCount")

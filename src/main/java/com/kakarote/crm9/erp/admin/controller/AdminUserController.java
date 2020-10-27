@@ -1,5 +1,9 @@
 package com.kakarote.crm9.erp.admin.controller;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
+import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -18,12 +22,18 @@ import com.kakarote.crm9.erp.admin.entity.AdminUserConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminUserHisTable;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.email.entity.EmailAccount;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author hmb
@@ -70,7 +80,8 @@ public class AdminUserController extends Controller {
     public void queryUserList(BasePageRequest<AdminUser> basePageRequest){
         String roleId = getPara("roleId");
         String search = getPara("search");
-        renderJson(adminUserService.queryUserList(basePageRequest,roleId,search));
+        String isResources = getPara("isResources");
+        renderJson(adminUserService.queryUserList(basePageRequest,roleId,search,isResources));
     }
 
     /**
@@ -208,6 +219,22 @@ public class AdminUserController extends Controller {
     }
 
     /**
+     * excel导入员工
+     */
+    public void userExcelImport(){
+        UploadFile file = getFile("file", "/excel/");
+        renderJson(adminUserService.userExcelImport(file,false));
+    }
+
+    /**
+     * excel导入人力资源员工
+     */
+    public void userImport(){
+        UploadFile file = getFile("file", "/excel/");
+        renderJson(adminUserService.userExcelImport(file,true));
+    }
+
+    /**
      * 下载错误模板
      * @author zhangzhiwei
      */
@@ -219,6 +246,118 @@ public class AdminUserController extends Controller {
             renderFile(file,"import_error.xlsx");
         }else {
             renderNull();
+        }
+    }
+
+    /**
+     * 导出
+     */
+    public void  excelexport(BasePageRequest<AdminUser> basePageRequest){
+        String roleId = getPara("roleId");
+        String search = getPara("search");
+        String isResources = getPara("isResources");
+        JSONObject json = basePageRequest.getJsonObject();
+        basePageRequest.setPageType(0);
+        json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
+        try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
+            List<Record> records = (List<Record> )adminUserService.queryUserList(basePageRequest,roleId,search,isResources).get("data");
+            List<Map<String, Object>> list = new ArrayList<>();
+            String[] s = new String[]{"username","user_id","status","roleId","parent_id","img","dept_id","create_time"};
+            for (Record record : records) {
+                record.remove(s);
+                list.add(record.getColumns());
+            }
+            List<Record> headList = new ArrayList<>();
+            getFields(headList);
+            headList.forEach(head -> {
+                if (!Objects.equals(head.getStr("fieldName"), head.getStr("name"))) {
+                    writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("fieldName")), head.getStr("name"));
+                } else {
+                    writer.addHeaderAlias(head.getStr("fieldName"), head.getStr("name"));
+                }
+            });
+
+            writer.write(list, true);
+            writer.setRowHeight(0, 20);
+            writer.setRowHeight(1, 20);
+
+            for (int i = 0; i < headList.size(); i++) {
+                writer.setColumnWidth(i, 25);
+            }
+
+            HttpServletResponse response = getResponse();
+
+            response.setCharacterEncoding("UTF-8");
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=taskFile.xls");
+
+            ServletOutputStream out = response.getOutputStream();
+            writer.flush(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        renderNull();
+    }
+
+    /**
+     * 下载上传模版
+     */
+    public void updateTemplate(){
+        List<Record> fields = new ArrayList<>();
+        getFields(fields);
+        //列标题
+        List<String> handers = new ArrayList<>();
+        //下拉框数据(数组)
+        List<String[]> downData = new ArrayList<>();
+        //下拉列的序号
+        List<String> downRows = new ArrayList<>();
+
+        int temp = 0;
+        for (Record field : fields) {
+
+            handers.add(field.getStr("name"));
+            if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
+                String[] options = field.getStr("options").split(",");
+                downData.add(options);
+                downRows.add(temp+"");
+            }
+            temp++;
+        }
+        try(HSSFWorkbook wb = com.kakarote.crm9.utils.ExcelUtil.createExcelTemplate("系统用户导入模板为必填项",handers, downData, downRows,null,null);) {
+
+            HttpServletResponse response = getResponse();
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=customer_import.xls");
+
+            wb.write(response.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        renderNull();
+    }
+
+    private void getFields(List<Record> fields){
+        List<String> names = Arrays.asList("手机号(*)", "登录密码(*)", "姓名(*)", "性别", "邮箱", "岗位", "部门", "区域", "工号", "职级","状态","角色");
+        List<String> fieldName = Arrays.asList("mobile", "password", "realname", "sex", "email", "post", "deptName", "area", "job_number", "rank", "condition","roleName");
+        for (int i = 0; i < names.size(); i++) {
+            Record record = new Record();
+            record.set("fieldName",fieldName.get(i));
+            record.set("name",names.get(i));
+            record.set("type",FormTypeEnum.TEXT.getType());
+            if(i==3){
+                record.set("type",FormTypeEnum.SELECT.getType());
+                record.set("options","男,女");
+            }
+            if(i==10){
+                record.set("type",FormTypeEnum.SELECT.getType());
+                record.set("options","请假,空闲,任务中");
+            }
+            fields.add(record);
         }
     }
 
@@ -267,7 +406,7 @@ public class AdminUserController extends Controller {
     /**
      * 标记人员为人力资源
      */
-    public void setResources(@Para("memeberIds") String userIds , @Para("isResources")String isResources){
+    public void setResources(@Para("memeberIds") String userIds , @Para("isResources")Integer isResources){
         renderJson(adminUserService.setResources(userIds,isResources));
     }
 }

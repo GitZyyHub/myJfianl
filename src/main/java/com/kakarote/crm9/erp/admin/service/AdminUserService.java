@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.poi.excel.BigExcelWriter;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
@@ -50,6 +51,10 @@ public class AdminUserService {
             Integer count = Db.queryInt("select count(*) from 72crm_admin_user where username = ?", adminUser.getUsername());
             if (count > 0) {
                 return R.error("手机号重复！");
+            }
+            Integer integer = Db.queryInt("select count(*) from 72crm_admin_user where job_number = ?", adminUser.getJobNumber());
+            if(count>0){
+                return R.error("工号重复");
             }
             String salt = IdUtil.fastSimpleUUID();
             adminUser.setNum(RandomUtil.randomNumbers(15));
@@ -154,8 +159,9 @@ public class AdminUserService {
         return adminUser;
     }
 
-    public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search) {
+    public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search,String isResources) {
         List<Integer> deptIdList = new ArrayList<>();
+        JSONObject jsonObject = request.getJsonObject();
         if (request.getData().getDeptId() != null) {
             deptIdList.add(request.getData().getDeptId());
             deptIdList.addAll(queryChileDeptIds(request.getData().getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
@@ -180,6 +186,9 @@ public class AdminUserService {
                 }
                 kv.set("pinyinSearch", pinyinSearchList);
             }
+        }
+        if(isResources!=null){
+            kv.set("isResources",1);
         }
         kv.set("label", request.getData().getLabel());
         SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserList", kv);
@@ -577,6 +586,128 @@ public class AdminUserService {
     }
 
     @Before(Tx.class)
+    public R userExcelImport(UploadFile file,boolean temp) {
+        List<String> sqlList = new ArrayList<>();
+        List<List<Object>> errList = new ArrayList<>();
+        if (file.getFile() == null || !file.getFile().exists()) {
+            return R.ok();
+        }
+        AtomicReference<Integer> num = new AtomicReference<>(0);
+        ExcelUtil.readBySax(file.getFile().getAbsolutePath(), 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
+            if (rowIndex > 1) {
+                num.getAndSet(num.get() + 1);
+                if (StrUtil.isEmptyIfStr(rowList.get(0))) {
+                    rowList.add(0, "用户名不能为空");
+                    errList.add(rowList);
+                    return;
+                }
+                if (StrUtil.isEmptyIfStr(rowList.get(1))) {
+                    rowList.add(0, "密码不能为空");
+                    errList.add(rowList);
+                    return;
+                }
+                if (!ReUtil.isMatch("^(?=.*[a-zA-Z])(?=.*\\d).{6,20}$", rowList.get(1).toString())) {
+                    rowList.add(0, "密码必须由 6-20位字母、数字组成");
+                    errList.add(rowList);
+                    return;
+                }
+                if (StrUtil.isEmptyIfStr(rowList.get(2))) {
+                    rowList.add(0, "姓名不能为空");
+                    errList.add(rowList);
+                    return;
+                }
+                String username = rowList.get(0).toString().trim();
+                Integer count = Db.queryInt("select count(1) from `72crm_admin_user` where username = ?", username);
+                if (count > 0) {
+                    rowList.add(0, "手机号已存在");
+                    errList.add(rowList);
+                    return;
+                }
+                if (!ReUtil.isMatch("^[1][3,4,5,6,7,8,9][0-9]{9}$", username)) {
+                    rowList.add(0, "手机号格式不正确");
+                    errList.add(rowList);
+                    return;
+                }
+
+                String password = rowList.get(1).toString().trim();
+                String realname = rowList.get(2).toString().trim();
+                String sex = null;
+                String email = null;
+                String post = null;
+                if (null != rowList.get(3)) {
+                    sex = rowList.get(3).toString().trim();
+                }
+                if (null != rowList.get(4)) {
+                    email = rowList.get(4).toString().trim();
+                }
+                if (null != rowList.get(5)) {
+                    post = rowList.get(5).toString().trim();
+                }
+                AdminUser adminUser = new AdminUser();
+                String salt = IdUtil.fastSimpleUUID();
+                adminUser.setUsername(username);
+                adminUser.setPassword(BaseUtil.sign((adminUser.getUsername().trim() + password.trim()), salt));
+                adminUser.setSalt(salt);
+                adminUser.setNum(RandomUtil.randomNumbers(15));
+                adminUser.setCreateTime(new Date());
+                adminUser.setRealname(realname);
+                adminUser.setMobile(username);
+                adminUser.setEmail(email);
+                adminUser.setPost(post);
+                adminUser.setStatus(0);
+                if(temp){
+                    adminUser.setIsResources(1);
+                }
+                if (StrUtil.isNotEmpty(sex)) {
+                    if ("女".equals(sex)) {
+                        adminUser.setSex(2);
+                    } else {
+                        adminUser.setSex(1);
+                    }
+                }
+                adminUser.save();
+                sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '电话无人接听', '跟进记录常用语')");
+                sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '客户无意向', '跟进记录常用语')");
+                sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '客户意向度适中，后续继续跟进', '跟进记录常用语')");
+                sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '客户意向度较强，成交几率较大', '跟进记录常用语')");
+            }
+        });
+        Db.batch(sqlList, 500);
+        R result = R.ok().put("totalSize", num.get()).put("errSize", 0);
+        if (errList.size() > 0) {
+            BigExcelWriter writer = null;
+            try {
+                String token = IdUtil.simpleUUID();
+                writer = ExcelUtil.getBigWriter(file.getUploadPath() + "/" + token);
+
+
+                for (int i = 0; i < 7; i++) {
+                    writer.setColumnWidth(i, 20);
+                }
+                writer.setDefaultRowHeight(20);
+                Cell cell = writer.getCell(0, 0);
+                CellStyle cellStyle = cell.getCellStyle();
+                cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+                cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                Font font = writer.createFont();
+                font.setBold(true);
+                font.setFontHeightInPoints((short) 16);
+                cellStyle.setFont(font);
+                cell.setCellStyle(cellStyle);
+                writer.writeHeadRow(Arrays.asList("错误信息", "手机号(*)", "登录密码(*)", "姓名(*)", "性别", "邮箱", "岗位"));
+                writer.write(errList);
+                result.put("errSize", errList.size()).put("token", token);
+            } finally {
+                if (writer != null) {
+                    writer.close();
+                }
+            }
+        }
+        return result;
+    }
+
+
+    @Before(Tx.class)
     public R excelImport(UploadFile file) {
         List<String> sqlList = new ArrayList<>();
         List<List<Object>> errList = new ArrayList<>();
@@ -699,19 +830,31 @@ public class AdminUserService {
     }
 
     /**
-     * 设置用户是否是人力资源
+     * 设置用户是否是人力资源???
      * @param userIds
      * @param isResources
      * @return
      */
-    public R setResources(String userIds, String isResources) {
+    @Before(Tx.class)
+    public R setResources(String userIds, Integer isResources) {
         List<String> strings = Arrays.asList(userIds.split(","));
         for (String str : strings) {
-            Integer integer = Db.queryInt("select status from 72crm_admin_user where user_id=?", str);
-            if(integer == 0){
-                return R.error("该用户被禁用不能添加人力资源");
+            if(isResources ==0){
+                Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='结束'", str, str);
+                Integer taskUserCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE task_id in(" +
+                        "SELECT num_id FROM 72crm_work_user_record WHERE user_id=?" +
+                        ") and status!='结束'", str);
+                if (taskCount != 0 || taskUserCount != 0) {
+                    return R.error("存在没有完成的任务不能删除");
+                }
+            }else {
+                Integer integer = Db.queryInt("select status from 72crm_admin_user where user_id=?", str);
+                if(integer == 0){
+                    return R.error("该用户被禁用不能添加人力资源");
+                }
+
             }
-            Db.update("update 72crm_admin_user SET status=? WHERE user_id=?",isResources,str);
+            Db.update("update 72crm_admin_user SET is_resources=? WHERE user_id=?",isResources,str);
         }
         return R.ok();
     }

@@ -67,6 +67,13 @@ public class TaskHoursController extends Controller {
     }
 
     /**
+     * 查询当前用户提报的工时
+     */
+    public void queryMyHoursList(BasePageRequest basePageRequest){
+        renderJson(taskHoursService.queryMyHoursList(basePageRequest));
+    }
+
+    /**
      * 根据任务id查询工时状态
      */
     public void queryStatusByTaskId(@Para("taskId")String taskId){

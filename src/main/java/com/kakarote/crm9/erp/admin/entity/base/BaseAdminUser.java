@@ -162,31 +162,49 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		return getStr("last_login_ip");
 	}
 
-	public M setDingUserId(String dingUserId) {
-		set("ding_user_id", dingUserId);
+	public M setIsResources(Integer isResources) {
+		set("is_resources", isResources);
 		return (M)this;
 	}
 	
-	public String getDingUserId() {
-		return getStr("ding_user_id");
+	public Integer getIsResources() {
+		return getInt("is_resources");
 	}
 
-	public M setDingDeptId(String dingDeptId) {
-		set("ding_dept_id", dingDeptId);
+	public M setJobNumber(String jobNumber) {
+		set("job_number", jobNumber);
 		return (M)this;
 	}
 	
-	public String getDingDeptId() {
-		return getStr("ding_dept_id");
+	public String getJobNumber() {
+		return getStr("job_number");
 	}
 
-	public M setDingUnionId(String dingUnionId) {
-		set("ding_union_id", dingUnionId);
+	public M setRank(String rank) {
+		set("rank", rank);
 		return (M)this;
 	}
 	
-	public String getDingUnionId() {
-		return getStr("ding_union_id");
+	public String getRank() {
+		return getStr("rank");
+	}
+
+	public M setCondition(String condition) {
+		set("condition", condition);
+		return (M)this;
+	}
+	
+	public String getCondition() {
+		return getStr("condition");
+	}
+
+	public M setArea(Integer area) {
+		set("area", area);
+		return (M)this;
+	}
+	
+	public Integer getArea() {
+		return getInt("area");
 	}
 
 }

@@ -124,21 +124,7 @@ public class WorkRiskController extends Controller {
      */
     @Permissions({"project:risk:excelexport"})
     public void riskExport(BasePageRequest basePageRequest,@Para("riskIds") String riskIds){
-        /*List<String> strings = null;
-        if(!StrUtil.isEmpty(riskIds)){
-            strings = Arrays.asList(riskIds.split(","));
-        }
-        try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
 
-            List<Record> records = Db.find(Db.getSqlPara("work.queryRiskByIdExport", Kv.by("riskIds", strings)));
-
-            List<Map<String, Object>> list = new ArrayList<>();
-            records.forEach(record -> {
-                list.add(record.getColumns());
-            });
-
-            List<Record> headList = new ArrayList<>();
-            addField(headList);*/
         JSONObject json = basePageRequest.getJsonObject();
         json.fluentPut("excel", "yes");
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {

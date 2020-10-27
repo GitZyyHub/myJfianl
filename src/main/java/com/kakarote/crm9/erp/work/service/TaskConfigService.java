@@ -75,6 +75,8 @@ public class TaskConfigService {
             workConfig.setCreateTime(new Date());
             workConfig.setUpdateTime(new Date());
             temp = workConfig.save();
+            workHistoricalRecordService.add(workConfig.getWorkId(), WorkRecordEnum.TASK_CONFIG, BehaviorEnum.SAVE, workConfig.getConfigId(), null,null, workConfig.getConfigId());
+
         } else {
             workConfig.setUpdateTime(new Date());
             List<Map<String, Object>> list = new ArrayList<>();
@@ -84,7 +86,7 @@ public class TaskConfigService {
                 workConfig.update();
                 Record update = Db.findFirst(Db.getSql("work.queryTaskConfigById"), workConfig.getConfigId());
                 //添加变更记录
-                workHistoricalRecordService.add(workConfig.getWorkId(), WorkRecordEnum.TASK_CONFIG, BehaviorEnum.UPDATE, workConfig.getConfigId(), first, update, workConfig.getConfigId());
+                workHistoricalRecordService.add(workConfig.getWorkId(), WorkRecordEnum.TASK_CONFIG, BehaviorEnum.UPDATE, workConfig.getConfigId(), update,first, workConfig.getConfigId());
             } catch (Exception e) {
                 e.printStackTrace();
             }

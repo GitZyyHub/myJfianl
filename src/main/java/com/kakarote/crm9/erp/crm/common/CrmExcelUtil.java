@@ -611,7 +611,7 @@ public class CrmExcelUtil {
                     try {
 
                         Task task = new Task();
-                        task.setWorkId(Integer.parseInt(workId));
+                        task.setWorkId(Long.parseLong(workId));
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
 
                         for (int i = 0; i < rowList.size(); i++) {
@@ -642,7 +642,7 @@ public class CrmExcelUtil {
                             }
                         }
 
-                        Integer workId = Db.queryInt("select work_id from 72crm_work where work_num=?", rowList.get(0).toString().trim());
+                        Long workId = Db.queryLong("select work_id from 72crm_work where work_num=?", rowList.get(0).toString().trim());
                         if (workId == null) {
                             rowList.add(0, "该项目不存在");
                             errorList.add(rowList);

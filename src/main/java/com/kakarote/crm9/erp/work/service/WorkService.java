@@ -101,11 +101,11 @@ public class WorkService extends AbstractBasePageList {
      * 查询我的待办项目
      */
     public R waiting(BasePageRequest basePageRequest, boolean isDataAuth){
-        Long userId = BaseUtil.getUserId();
         CrmEnum work = CrmEnum.WORK;
         Kv kv = getKv(basePageRequest, work, isDataAuth);
         JSONObject jsonObject = basePageRequest.getJsonObject();
         kv.set("userId", BaseUtil.getUserId());
+        kv.set("isWaiting", jsonObject.get("isWaiting"));
         queryDataAuth(WorkUserEnum.WORK,kv,CrmEnum.WORK,null, WorkRendAuthEnum.WORK,1);
         if(kv == null){
             return R.error("无权限");
@@ -163,7 +163,6 @@ public class WorkService extends AbstractBasePageList {
             temp = work.save();
             workHistoricalRecordService.add(work.getWorkId(),WorkRecordEnum.WORK, BehaviorEnum.SAVE, work.getWorkNum(), null, null,work.getWorkId());
         } else {
-//            if (!WorkPermissions.isPermissions(CrmEnum.WORK.getTableName(), CrmEnum.WORK.getTableId(), work.getWorkId())) return R.error("无权操作");
             //修改
             Record first = Db.findFirst(Db.getSql("work.findWorkById"), work.getWorkId());
             if ("结项".equals(first.getStr("phase"))) {
@@ -172,7 +171,7 @@ public class WorkService extends AbstractBasePageList {
             temp = true;
             work.update();
             Record after = Db.findFirst(Db.getSql("work.findWorkById"), work.getWorkId());
-            workHistoricalRecordService.add(work.getWorkId(),WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(), first, after,work.getWorkId());
+            workHistoricalRecordService.add(work.getWorkId(),WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(),  after,first,work.getWorkId());
         }
         HashSet<Long> set = new HashSet<>();
         set.add(work.getSalesId());
@@ -193,8 +192,8 @@ public class WorkService extends AbstractBasePageList {
      * 批量修改项目阶段
      */
     @Before(Tx.class)
-    public R updateWorkPhase(String workIds, String phase, Long checkUserId) {
-        List<String> strings = Arrays.asList(workIds.split(","));
+    public R updateWorkPhase(String ids, String phase, Long checkUserId) {
+        List<String> strings = Arrays.asList(ids.split(","));
         for (String string : strings) {
 //            if (!WorkPermissions.isPermissions(CrmEnum.WORK.getTableName(), CrmEnum.WORK.getTableId(), Integer.parseInt(string))) return R.error("无权操作");
         }
@@ -249,7 +248,6 @@ public class WorkService extends AbstractBasePageList {
         String[] split = workIds.split(",");
         boolean temp = false;
         for (String workId : split) {
-//            if (!WorkPermissions.isPermissions(CrmEnum.WORK.getTableName(), CrmEnum.WORK.getTableId(), workId)) return R.error("无权操作");
             temp = false;
             Db.delete("DELETE FROM 72crm_task_hours WHERE task_id in (SELECT task_id from 72crm_task WHERE work_id = ?)", workId);
             Db.delete("DELETE FROM 72crm_task WHERE work_id =?", workId);

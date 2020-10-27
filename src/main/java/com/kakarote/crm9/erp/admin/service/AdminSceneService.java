@@ -185,6 +185,8 @@ public class AdminSceneService{
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
+        }else if(CrmEnum.TASK_HOURS.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
         }else{
             return R.error("场景label不符合要求！");
         }

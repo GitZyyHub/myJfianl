@@ -33,7 +33,7 @@ public class WorkHistoricalRecordController extends Controller {
      * @param basePageRequest
      */
     public void queryPageList(BasePageRequest basePageRequest){
-        renderJson(workHistoricalRecordService.queryRecordList(basePageRequest));
+        renderJson(workHistoricalRecordService.queryRecordList(basePageRequest,false));
     }
 
     /**
@@ -44,7 +44,7 @@ public class WorkHistoricalRecordController extends Controller {
         JSONObject json = basePageRequest.getJsonObject();
         json.fluentPut("excel", "yes");
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
-            JSONObject jsonObject = (JSONObject)workHistoricalRecordService.queryRecordList(basePageRequest).get("data");
+            JSONObject jsonObject = (JSONObject)workHistoricalRecordService.queryRecordList(basePageRequest,false).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
             String[] s = new String[]{"create_time","id","operation_id","operation_user_id","work_id","task_id"};

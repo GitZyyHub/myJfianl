@@ -58,9 +58,23 @@ public class TaskController extends Controller {
     }
 
     /**
+     * 根据主任务ID查询已经提报工时的子任务
+     */
+    public void querySubtasksByTaskHours(BasePageRequest basePageRequest){
+        renderJson(taskService.querySubtasksByTaskHours(basePageRequest));
+    }
+
+    /**
      * 查询待办任务
      */
     public void waiting(BasePageRequest basePageRequest){
+        renderJson(taskService.waiting(basePageRequest,false));
+    }
+
+    /**
+     * 查询我的任务
+     */
+    public void myTask(BasePageRequest basePageRequest){
         renderJson(taskService.waiting(basePageRequest,false));
     }
 
@@ -206,7 +220,7 @@ public class TaskController extends Controller {
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.TASK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
             JSONObject jsonObject ;
-            if(json.get("isToDo")!=null){
+            if(json.get("isWaiting")!=null){
                 jsonObject = (JSONObject)taskService.waiting(basePageRequest, false).get("data");
             }else {
                 jsonObject = (JSONObject)taskService.queryPageList(basePageRequest, false).get("data");

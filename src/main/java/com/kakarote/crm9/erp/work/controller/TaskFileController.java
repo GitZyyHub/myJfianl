@@ -81,13 +81,6 @@ public class TaskFileController extends Controller {
         renderJson(taskFileService.deleteByIds(strings));
     }*/
 
-    /**
-     * 导出任务资料!!!
-     */
-    @Permissions({"project:taskFile:excelexport"})
-    public void excelexport(){
-
-    }
 
     /**
      * 上传附件，同时清除之前同一batchId的附件

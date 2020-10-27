@@ -29,12 +29,13 @@ public class WorkHistoricalRecordService {
 
     /**
      * 查询不同模块历史变更记录
-     *
+     * @param temp 是否是查询汇总项目历史记录
      * @param
      */
-    public R queryRecordList(BasePageRequest basePageRequest) {
+    public R queryRecordList(BasePageRequest basePageRequest,boolean temp) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Integer type = jsonObject.getInteger("type");
+        Integer workId = jsonObject.getInteger("workId");
         Integer operationId = jsonObject.getInteger("operationId");
         Object excel = jsonObject.get("excel");
 
@@ -50,9 +51,9 @@ public class WorkHistoricalRecordService {
         } else if (type == WorkRecordEnum.WORK_CONFIG.getType()) {
             auth = WorkAuthVerify.isPermissions("project:workConfig:readHistorical");
         } else if (type == WorkRecordEnum.TASK.getType()) {
-            auth = WorkAuthVerify.isPermissions("project:task:excelexportHistorical");
+            auth = WorkAuthVerify.isPermissions("project:task:readHistorical");
         } else if (type == WorkRecordEnum.WORK.getType()) {
-            auth = true;
+            auth = WorkAuthVerify.isPermissions("project:projectManage:readHistorical");
         }
         if (!auth) {
             return R.error("无权限");
@@ -66,15 +67,20 @@ public class WorkHistoricalRecordService {
         SqlPara sqlPara = null;
         if (integers.contains(parse.getType())) {
             sqlPara = Db.getSqlPara("work.queryHistoricalRecordList",
-                    Kv.by("type", parse.getTypeName()).set("operationId", operationId));
+                    Kv.by("type", parse.getTypeName()).set("operationId", operationId).set("workId",workId));
         } else if (task.contains(parse.getType())) {
             sqlPara = Db.getSqlPara("work.queryTaskHistoricalList",
-                    Kv.by("type", parse.getTypeName()).set("taskId", jsonObject.get("taskId")).set("operationId", operationId));
+                    Kv.by("type", parse.getTypeName()).set("taskId", jsonObject.get("taskId")).set("operationId", operationId).set("workId",workId));
             tag = 1;
         } else {
-            sqlPara = Db.getSqlPara("work.queryHistoricalList",
-                    Kv.by("workId", jsonObject.get("workId")));
-            tag = 2;
+            if(temp){
+                sqlPara = Db.getSqlPara("work.queryHistoricalList",
+                        Kv.by("workId", jsonObject.get("workId")));
+                tag = 2;
+            }else {
+                sqlPara = Db.getSqlPara("work.queryHistoricalRecordList",
+                        Kv.by("type", parse.getTypeName()).set("operationId", operationId).set("workId",workId));
+            }
         }
         if(excel != null){
             records = Db.find(sqlPara);
@@ -150,6 +156,10 @@ public class WorkHistoricalRecordService {
             workTaskHistorical.setNumber(getId);
             workTaskHistorical.setCreateTime(new Date());
             workTaskHistorical.setOperationId(operationId);
+            workTaskHistorical.setWorkId(workId);
+            if(after!=null){
+                workTaskHistorical.setTaskId(after.getLong("task_id"));
+            }
             Long temp = null;
             if (workRecordEnum.getType() == 11) {
                 records = Db.find(Db.getSql("admin.field.queryField"), CrmEnum.SUBTASKS.getType());
@@ -171,7 +181,7 @@ public class WorkHistoricalRecordService {
             workHistoricalRecord.setNumber(getId);
             workHistoricalRecord.setCreateTime(new Date());
             workHistoricalRecord.setOperationId(operationId);
-
+            workHistoricalRecord.setWorkId(workId);
             if (workRecordEnum.getType() == 2) {
                 records = Db.find(Db.getSql("admin.field.queryField"), CrmEnum.MILESTONE.getType());
             } else if (workRecordEnum.getType() == 3) {
@@ -185,18 +195,18 @@ public class WorkHistoricalRecordService {
                 records.add(new Record().set("field_name", "actual_time").set("name", "实际时间"));
                 records.add(new Record().set("field_name", "resources_status").set("name", "资源状态"));
             } else if (workRecordEnum.getType() == 4 || workRecordEnum.getType() == 5) {
-                records.add(new Record().set("field_name", "task_config_items").set("name", "配置项"));
+                records.add(new Record().set("field_name", "config_items").set("name", "配置项"));
                 records.add(new Record().set("field_name", "plan_time").set("name", "计划时间"));
                 records.add(new Record().set("field_name", "main_user_id").set("name", "负责人"));
                 records.add(new Record().set("field_name", "version").set("name", "版本"));
                 records.add(new Record().set("field_name", "version_time").set("name", "版本时间"));
                 records.add(new Record().set("field_name", "version_describe").set("name", "版本说明"));
                 if (workRecordEnum.getType() == 4) {
-                    records.add(new Record().set("field_name", "task_name").set("name", "任务名称"));
-                    records.add(new Record().set("field_name", "task_num").set("name", "任务编号"));
+                    records.add(new Record().set("field_name", "associated_name").set("name", "任务名称"));
+                    records.add(new Record().set("field_name", "associated_num").set("name", "任务编号"));
                 } else if (workRecordEnum.getType() == 5) {
-                    records.add(new Record().set("field_name", "work_name").set("name", "项目名称"));
-                    records.add(new Record().set("field_name", "work_num").set("name", "项目编号"));
+                    records.add(new Record().set("field_name", "associated_name").set("name", "项目名称"));
+                    records.add(new Record().set("field_name", "associated_num").set("name", "项目编号"));
                 }
             } else if (workRecordEnum.getType() == 8) {
                 List<Record> structures = Db.find(Db.getSql("work.queryStructure"), "72crm_work_risk");

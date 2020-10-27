@@ -128,7 +128,7 @@ public class WorkRiskService {
             Record first = Db.findFirst("select * from 72crm_work_risk where risk_id =?", entity.getRiskId());
             entity.update();
             Record update = Db.findFirst("select * from 72crm_work_risk where risk_id =?", entity.getRiskId());
-            workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.UPDATE, entity.getRiskId(), first, update,entity.getRiskId());
+            workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.UPDATE, entity.getRiskId(),  update,first,entity.getRiskId());
         }
         List<String> founds = Arrays.asList(entity.getFoundUserId().split(","));
         List<String> solves = Arrays.asList(entity.getSolveUserId().split(","));

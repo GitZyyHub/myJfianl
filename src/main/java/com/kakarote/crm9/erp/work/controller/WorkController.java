@@ -32,6 +32,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -47,6 +49,32 @@ public class WorkController extends Controller {
 
     @Inject
     AdminFileService adminFileService;
+
+    public void test(){
+        LocalDateTime now = LocalDateTime.now();
+        ArrayList<Work> objects = new ArrayList<>();
+        JSONObject jsonObject = new JSONObject();
+
+        for (int y = 0; y < 100000; y++) {
+            Work work = new Work();
+            work.setWorkName("测试100000");
+            work.setWorkPhase("项目立项");
+            work.setWorkType("销售开拓");
+            work.setDeptId(16672);
+            work.setArea(16671);
+            work.setManagerId(16362);
+            work.setSalesId(16362L);
+            work.setStartTime(new Date());
+            work.setEndTime(new Date());
+            jsonObject.put("entity",work);
+            workService.setWork(jsonObject);
+            /*for (int i = 0; i < 500; i++) {
+                objects.add(work);
+            }
+            Db.batchSave(objects,500);*/
+        }
+        System.out.println(Duration.between(now,LocalDateTime.now()));
+    }
 
     /**
      * 分页查询项目
@@ -86,8 +114,8 @@ public class WorkController extends Controller {
      * 批量修改项目阶段
      */
     @Permissions({"project:projectManage:updatePhase"})
-    public void updateWorkPhase(@Para("workIds")String workIds,@Para("phase") String phase,@Para("checkUserId") Long checkUserId){
-        renderJson(workService.updateWorkPhase(workIds,phase,checkUserId));
+    public void updateWorkPhase(@Para("ids")String ids,@Para("phase") String phase,@Para("checkUserId") Long checkUserId){
+        renderJson(workService.updateWorkPhase(ids,phase,checkUserId));
     }
 
     /**
@@ -124,7 +152,7 @@ public class WorkController extends Controller {
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
             JSONObject jsonObject ;
-            if(json.get("isToDo")!=null){ //是否是查询带我审核的
+            if(json.get("isWaiting")!=null){ //是否是查询带我审核的
                 jsonObject = (JSONObject)workService.waiting(basePageRequest, false).get("data");
             }else {
                 jsonObject = (JSONObject)workService.queryPageList(basePageRequest, false).get("data");
