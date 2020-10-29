@@ -13,7 +13,7 @@
             size,
             file_type,
             (SELECT realname FROM 72crm_admin_user WHERE user_id = f.main_user_id) main_user_name,
-            `status`,
+            (case (select check_status from 72crm_task_hours where subtasks_id = f.subtasks_id) when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) status,
             (SELECT task_name FROM 72crm_task WHERE task_id=f.task_id) task_name,
             (SELECT task_name FROM 72crm_task WHERE task_id=f.subtasks_id) subtasks_name,
             (SELECT realname FROM 72crm_admin_user WHERE user_id = f.create_user_id) create_user_name,

@@ -52,15 +52,12 @@ public class WorkChangeService {
             kv.set("search", jsonObject.get("search"));
 
         if (jsonObject.get("excel") == null) {
-            kv.set("page", basePageRequest.getPage());
+            kv.set("page", basePageRequest.getPage()-1);
             kv.set("limit", basePageRequest.getLimit());
         }
         SqlPara sqlPara = Db.getSqlPara("work.queryChangePageList", kv);
         Integer integer = Db.template("work.queryChangePageListCount", kv).queryInt();
         List<Record> records = Db.find(sqlPara);
-
-        //Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.queryChangePageList", kv));
-        //List<Record> records = paginate.getList();
         records.forEach(record -> {
             List<Record> ownerUser = Db.find(Db.getSql("work.queryWorkUserByNumId"), record.getStr("change_id"), WorkUserEnum.TYPE_2.getType());
             record.set("owner_user", ownerUser);

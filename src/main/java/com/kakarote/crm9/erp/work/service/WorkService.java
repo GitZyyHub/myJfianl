@@ -199,7 +199,7 @@ public class WorkService extends AbstractBasePageList {
         }
         if ("结项".equals(phase)) {
             R r = addExamine(strings, phase, checkUserId);
-            if(!"0".equals(r.get("code"))){
+            if((int)r.get("code") != 0){
                 throw new RuntimeException("项目结项修改回滚");
             }
             return r;
@@ -215,6 +215,7 @@ public class WorkService extends AbstractBasePageList {
         Record examineData = new Record();
         for (String string : strings) {
             Work work = Work.dao.findById(string);
+            work.setWorkPhase(phase);
             if (work.getCheckStatus() == 1) {
                 continue;
             }

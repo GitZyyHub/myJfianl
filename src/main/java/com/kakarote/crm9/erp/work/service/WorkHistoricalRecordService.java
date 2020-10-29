@@ -54,6 +54,8 @@ public class WorkHistoricalRecordService {
             auth = WorkAuthVerify.isPermissions("project:task:readHistorical");
         } else if (type == WorkRecordEnum.WORK.getType()) {
             auth = WorkAuthVerify.isPermissions("project:projectManage:readHistorical");
+        } else if (type == WorkRecordEnum.SUBTASKS.getType()) {
+            auth = WorkAuthVerify.isPermissions("project:task:readHistorical");
         }
         if (!auth) {
             return R.error("无权限");

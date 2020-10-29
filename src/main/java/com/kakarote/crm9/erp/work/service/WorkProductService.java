@@ -3,16 +3,19 @@ package com.kakarote.crm9.erp.work.service;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.crm.common.AbstractBasePageList;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.entity.WorkProduct;
+import com.kakarote.crm9.erp.work.entity.WorkProductHistory;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.ToolUtils;
@@ -46,6 +49,7 @@ public class WorkProductService extends AbstractBasePageList {
      * @param jsonObject
      * @return
      */
+    @Before(Tx.class)
     public R setWorkProduct(JSONObject jsonObject) {
         WorkProduct entity = jsonObject.getObject("entity", WorkProduct.class);
         boolean temp = false;
@@ -65,9 +69,39 @@ public class WorkProductService extends AbstractBasePageList {
             if(byId == null){
                 return R.error("产品不存在");
             }
+            if((byId.getProductVersion()==null&&entity.getProductVersion()!=null) ||
+                    (byId.getProductVersion()!=null&&entity.getProductVersion()==null) ||
+                    (!byId.getProductVersion().equals(entity.getProductVersion()))
+            ){
+                setVersionHistorical(byId.getProductVersion(),entity.getProductVersion(),entity.getVersionDescribe(),entity.getProductId());
+            }
             entity.update();
         }
         return temp?R.ok():R.error("更新失败");
+    }
+
+    /**
+     * 添加产品修改历史记录
+     */
+    public void setVersionHistorical(String oldVersion,String newVersion,String describe,Integer productId){
+        WorkProductHistory workProductHistory = new WorkProductHistory();
+        workProductHistory.setOldVersion(oldVersion);
+        workProductHistory.setNewVersion(newVersion);
+        workProductHistory.setDescribe(describe);
+        workProductHistory.setProductId(productId);
+        workProductHistory.setCreateTime(new Date());
+        workProductHistory.save();
+    }
+
+    /**
+     * 查询产品版本历史记录
+     * @param basePageRequest
+     * @return
+     */
+    public R queryVersionHistorical(BasePageRequest basePageRequest) {
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.product.queryVersionHistorical", Kv.by("productId", jsonObject.get("productId"))));
+        return R.ok().put("data",paginate);
     }
 
     /**
@@ -107,5 +141,6 @@ public class WorkProductService extends AbstractBasePageList {
     public JSONObject appendSqlSearch(String search) {
         return null;
     }
+
 
 }

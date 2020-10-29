@@ -16,6 +16,11 @@ import java.util.List;
 public class WorkTaskHistoricalService {
 
 
+    /**
+     * 任务历史记录
+     * @param basePageRequest
+     * @return
+     */
     public R queryPageList(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Kv by = Kv.by("taskId", jsonObject.get("taskId"));

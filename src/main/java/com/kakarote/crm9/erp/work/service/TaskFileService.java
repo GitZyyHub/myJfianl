@@ -79,21 +79,21 @@ public class TaskFileService {
         int i = name.lastIndexOf(".");
         name = name.substring(0, i);
         taskFile.setName(name);
+        if("资料成果".equals(taskFile.getFileAttr())){
+            int temp ;
+            if(taskFile.getSubtasksId()==null){
+                temp = Db.queryInt("select count(1) from 72crm_task_hours where subtasks_id =?",taskFile.getTaskId());
+            }else {
+                temp = Db.queryInt("select count(1) from 72crm_task_hours where subtasks_id =?",taskFile.getSubtasksId());
+            }
+            if(temp == 0){
+                return R.error("该任务没有存在的工时");
+            }
+        }
         if (taskFile.getSubtasksId() == null) {
             taskFile.setSubtasksId(taskFile.getTaskId());
         }
         if (taskFile.getFileId() == null) {
-            if("资料成果".equals(taskFile.getFileAttr())){
-                int temp ;
-                if(taskFile.getSubtasksId()==null){
-                    temp = Db.queryInt("select conut(1) from 72crm_task_hours where subtasks_id =?",taskFile.getTaskId());
-                }else {
-                    temp = Db.queryInt("select conut(1) from 72crm_task_hours where subtasks_id =?",taskFile.getSubtasksId());
-                }
-                if(temp == 0){
-                    return R.error("该任务没有存在的工时");
-                }
-            }
             taskFile.setCreateUserId(BaseUtil.getUserId());
             taskFile.setCreateTime(new Date());
             taskFile.save();

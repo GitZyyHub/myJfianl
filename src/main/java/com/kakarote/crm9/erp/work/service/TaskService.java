@@ -75,15 +75,23 @@ public class TaskService extends AbstractBasePageList {
             task.setUpdateTime(new Date());
             task.setCreateUserId(BaseUtil.getUserId());
             temp = task.save();
-            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.TASK, BehaviorEnum.SAVE, task.getTaskNum(), null, null,task.getTaskId());
-
+            if(task.getTaskId()!=null){
+                workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.SUBTASKS, BehaviorEnum.SAVE, task.getTaskNum(), null, null,task.getTaskId());
+            }else {
+                workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.TASK, BehaviorEnum.SAVE, task.getTaskNum(), null, null,task.getTaskId());
+            }
         } else {
             temp = true;
             task.setUpdateTime(date);
             Record first = Db.findFirst(Db.getSql("work.task.queryById"), task.getTaskId());
             task.update();
             Record update = Db.findFirst(Db.getSql("work.task.queryById"), task.getTaskId());
-            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.TASK, BehaviorEnum.UPDATE, task.getTaskNum(),update, first, task.getTaskId());
+            if(task.getTaskId()!=null){
+                workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.SUBTASKS, BehaviorEnum.UPDATE, task.getTaskNum(),update, first, task.getTaskId());
+            }else {
+                workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.TASK, BehaviorEnum.UPDATE, task.getTaskNum(),update, first, task.getTaskId());
+            }
+
         }
         //设置任务关联人员
         WorkService.setWorkRelation(longs, task.getTaskId(),WorkUserEnum.TYPE_1.getType(),task.getWorkId());

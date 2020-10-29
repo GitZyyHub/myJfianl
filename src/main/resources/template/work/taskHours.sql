@@ -74,6 +74,15 @@
 
     #sql ("queryPageListCount")
         SELECT count(1) FROM 72crm_task_hours h where 1=1
+        #if(taskId)
+            and task_id = #para(taskId)
+        #end
+        #if(workId)
+        and work_id = #para(workId)
+        #end
+        #if(task)
+            and subtasks_id in #fori(task)
+        #end
         #for(query:queryList)
             #(query.get("sql"))
         #end

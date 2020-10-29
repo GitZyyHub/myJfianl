@@ -92,7 +92,7 @@
 
     #sql ("queryAssociatedFunction")
         SELECT function_name,function_number FROM 72crm_work_product_function WHERE function_id in (
-            SELECT product_id FROM 72crm_work_demand_product WHERE demand_id =?)
+            SELECT function_id FROM 72crm_work_demand_function WHERE demand_id =?)
     #end
 
 #end

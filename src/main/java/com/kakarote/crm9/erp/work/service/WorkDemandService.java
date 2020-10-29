@@ -93,14 +93,14 @@ public class WorkDemandService extends AbstractBasePageList {
     public void setRecord(Record record, String demand_id) {
         //查询关联的产品
         List<Record> products = Db.find(Db.getSql("work.demand.queryAssociatedProduct"), demand_id);
-        record.set("product_name", products.stream().map(product -> product.getStr("product_name")).collect(Collectors.toList()));
-        record.set("product_version", products.stream().map(product -> product.getStr("product_version")).collect(Collectors.toList()));
-        record.set("product_number", products.stream().map(product -> product.getStr("product_number")).collect(Collectors.toList()));
+        record.set("product_name", products.stream().map(product -> product.getStr("product_name")+",").collect(Collectors.toList()));
+        record.set("product_version", products.stream().map(product -> product.getStr("product_version")+",").collect(Collectors.toList()));
+        record.set("product_number", products.stream().map(product -> product.getStr("product_number")+",").collect(Collectors.toList()));
 
         //查询关联的产品功能
         List<Record> functions = Db.find(Db.getSql("work.demand.queryAssociatedFunction"), demand_id);
-        record.set("function_name", functions.stream().map(function -> function.getStr("function_name")).collect(Collectors.toList()));
-        record.set("function_number", functions.stream().map(function -> function.getStr("function_number")).collect(Collectors.toList()));
+        record.set("function_name", functions.stream().map(function -> function.getStr("function_name")+",").collect(Collectors.toList()));
+        record.set("function_number", functions.stream().map(function -> function.getStr("function_number")+",").collect(Collectors.toList()));
     }
 
 

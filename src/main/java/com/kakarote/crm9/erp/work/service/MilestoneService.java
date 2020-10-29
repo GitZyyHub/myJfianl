@@ -141,10 +141,7 @@ public class MilestoneService extends AbstractBasePageList {
     }
 
     public R updateDegree(String ids, String degree) {
-        /*List<String> strings = Arrays.asList(ids.split(","));
-        for (String string : strings) {
-//            if(!WorkPermissions.isPermissions(CrmEnum.MILESTONE.getTableName(),CrmEnum.MILESTONE.getTableId(),Integer.parseInt(string))) return R.error("无权操作");
-        }*/
+
         Db.update(Db.getSqlPara("work.updateMilestoneDegree", Kv.by("ids",ids).set("degree",degree)));
         return R.ok();
     }

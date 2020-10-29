@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.work.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
@@ -131,11 +132,13 @@ public class WorkRiskService {
             workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.UPDATE, entity.getRiskId(),  update,first,entity.getRiskId());
         }
         List<String> founds = Arrays.asList(entity.getFoundUserId().split(","));
-        List<String> solves = Arrays.asList(entity.getSolveUserId().split(","));
         List<String> trachings = Arrays.asList(entity.getTrackingUserId().split(","));
         HashSet<Long> set = new HashSet<>();
+        if(!StrUtil.isEmpty(entity.getSolveUserId())){
+            List<String> solves = Arrays.asList(entity.getSolveUserId().split(","));
+            solves.forEach(found->set.add(Long.parseLong(found)));
+        }
         founds.forEach(found->set.add(Long.parseLong(found)));
-        solves.forEach(found->set.add(Long.parseLong(found)));
         trachings.forEach(found->set.add(Long.parseLong(found)));
         WorkService.setWorkRelation(set,entity.getRiskId(), WorkUserEnum.HOURS.getType(),entity.getWorkId());
         return R.ok();

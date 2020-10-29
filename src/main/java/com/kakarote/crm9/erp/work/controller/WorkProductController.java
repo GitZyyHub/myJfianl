@@ -63,6 +63,13 @@ public class WorkProductController extends Controller {
     }
 
     /**
+     * 查询产品版本历史记录???
+     */
+    public void queryVersionHistorical(BasePageRequest basePageRequest){
+        renderJson(workProductService.queryVersionHistorical(basePageRequest));
+    }
+
+    /**
      * !!!产品使用统计
      */
     public void queryStatistics(BasePageRequest basePageRequest){

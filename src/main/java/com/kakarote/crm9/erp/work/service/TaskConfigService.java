@@ -67,9 +67,12 @@ public class TaskConfigService {
         boolean temp;
         workConfig.setType(1);
         Task byId = Aop.get(Task.class).findById(workConfig.getAssociatedId());
-        workConfig.setAssociatedId(byId.getTaskId());
-        workConfig.setAssociatedName(byId.getTaskName());
-        workConfig.setAssociatedNum(byId.getTaskNum());
+        if(byId !=null){
+            workConfig.setAssociatedId(byId.getTaskId());
+            workConfig.setAssociatedName(byId.getTaskName());
+            workConfig.setAssociatedNum(byId.getTaskNum());
+        }
+
         if (workConfig.getConfigId() == null) {
             workConfig.setCreateUserId(BaseUtil.getUserId());
             workConfig.setCreateTime(new Date());

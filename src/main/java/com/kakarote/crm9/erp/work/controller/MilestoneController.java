@@ -50,7 +50,10 @@ public class MilestoneController extends Controller {
      * 批量修改完成程度
      */
     @Permissions({"project:milestone:updateDegree"})
-    public void updateDegree(@Para("ids") String ids,String degree){
+    public void updateDegree(){
+        JSONObject jsonObject = JSONObject.parseObject(getRawData());
+        String ids = jsonObject.getString("ids");
+        String degree = jsonObject.getString("degree");
         renderJson(milestoneService.updateDegree(ids,degree));
     }
 

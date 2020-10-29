@@ -27,6 +27,17 @@
         #end
     #end
 
+    #sql("queryVersionHistorical")
+        SELECT
+        product_id,
+        (SELECT product_name from 72crm_work_product WHERE product_id=h.product_id) product_name,
+        old_version,
+        new_version,
+        `describe`
+        FROM
+        72crm_work_product_history h WHERE product_id=#para(productId)
+
+    #end
 
     /*----------产品功能-----------*/
     #sql ("queryFuntionPageList")
@@ -74,8 +85,8 @@
     #end
 
     #sql("queryStatistics")
-        SELECT work_name,work_type
-        (SELECT realname FROM 72crm_admin_user where user_id=w.sales_id) sales_name,
+        SELECT work_name,work_type,
+        (SELECT realname FROM 72crm_admin_user where user_id=w.sales_id) sales_name
         ,work_phase from 72crm_work w
         WHERE work_id in (
             SELECT work_id from 72crm_work_demand WHERE demand_id in (

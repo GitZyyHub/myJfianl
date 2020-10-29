@@ -20,12 +20,10 @@ public class _MappingKit {
 
 		arp.addMapping("72crm_admin_field", "field_id", AdminField.class);
 		arp.addMapping("72crm_admin_file", "file_id", AdminFile.class);
-//		arp.addMapping("72crm_admin_official_img", "official_img_id", AdminOfficialImg.class);
 		arp.addMapping("72crm_admin_user", "user_id", TestAdminUser.class);
 
 
 		arp.addMapping("72crm_milestone", "milestone_id", Milestone.class);
-//		arp.addMapping("72crm_sork_record", "record_id", SorkRecord.class);
 		arp.addMapping("72crm_task", "task_id", Task.class);
 		arp.addMapping("72crm_task_data", "id", TaskData.class);
 
@@ -54,6 +52,7 @@ public class _MappingKit {
 		arp.addMapping("72crm_work_demand_product", "id", WorkDemandProduct.class);
 		arp.addMapping("72crm_work_product", "product_id", WorkProduct.class);
 		arp.addMapping("72crm_work_product_function", "function_id", WorkProductFunction.class);
+		arp.addMapping("72crm_work_product_history", "id", WorkProductHistory.class);
 		arp.addMapping("72crm_work_historical", "id", WorkHistorical.class);
 		arp.addMapping("72crm_work_historical_record", "id", WorkHistoricalRecord.class);
 		arp.addMapping("72crm_work_user_record", "id", WorkUserRecord.class);
