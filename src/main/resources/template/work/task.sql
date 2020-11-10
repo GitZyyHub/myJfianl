@@ -52,6 +52,9 @@
         #if(_work_id)
             and t1.work_id=#para(_work_id)
         #end
+        #if(_front)
+            and t1.task_id!=#para(_front)
+        #end
         #if(_before_id)
             and t1.before_id=#para(_before_id)
         #end
@@ -484,6 +487,9 @@
       #end
       #if(priority)
        and a.priority = #para(priority)
+      #end
+      #if(_front)
+       and a.task_id!=#para(_front)
       #end
       #if(date)
        and date_format(a.stop_time,'%Y-%m-%d') = #para(date)

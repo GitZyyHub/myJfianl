@@ -149,7 +149,7 @@ public class WorkService extends AbstractBasePageList {
         }
         Date startTime = work.getStartTime();
         Date endTime = work.getEndTime();
-        if (startTime != null && endTime != null && startTime.compareTo(endTime) > 0) {
+        if (startTime != null && endTime != null && !startTime.before(endTime)) {
             return R.error("结束时间应大于开始时间");
         }
         Long userId = BaseUtil.getUserId();

@@ -33,7 +33,7 @@ public class WorkHistoricalRecordController extends Controller {
      * @param basePageRequest
      */
     public void queryPageList(BasePageRequest basePageRequest){
-        renderJson(workHistoricalRecordService.queryRecordList(basePageRequest,false));
+        renderJson(workHistoricalRecordService.queryRecordList(basePageRequest,true));
     }
 
     /**

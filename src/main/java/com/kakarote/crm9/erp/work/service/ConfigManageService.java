@@ -85,9 +85,9 @@ public class ConfigManageService extends AbstractBasePageList {
         workConfig.setType(2);
         boolean temp;
         Record first1 = Db.findFirst("select work_id,work_name,work_num from 72crm_work where work_num=?", workConfig.getAssociatedNum());
-        workConfig.setAssociatedId(first1.get("work_id"));
-        workConfig.setAssociatedName(first1.get("work_name"));
-        workConfig.setAssociatedNum(first1.get("work_num"));
+        workConfig.setAssociatedId(first1.getLong("work_id"));
+        workConfig.setAssociatedName(first1.getStr("work_name"));
+        workConfig.setAssociatedNum(first1.getStr("work_num"));
         if (workConfig.getConfigId() == null) {
             workConfig.setCreateUserId(BaseUtil.getUserId());
             workConfig.setCreateTime(new Date());

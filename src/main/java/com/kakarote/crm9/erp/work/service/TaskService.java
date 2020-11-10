@@ -108,6 +108,7 @@ public class TaskService extends AbstractBasePageList {
         CrmEnum task = CrmEnum.TASK;
         Kv kv = getKv(basePageRequest, task, isDataAuth);
         kv.set("_work_id",basePageRequest.getJsonObject().getInteger("workId"));
+        kv.set("_front",basePageRequest.getJsonObject().getInteger("front"));
         kv.set("_milestone_id",basePageRequest.getJsonObject().getInteger("milestoneId"));
         kv.set("_before_id",basePageRequest.getJsonObject().getInteger("beforeId"));
         kv.set("_pid",basePageRequest.getJsonObject().getInteger("pid"));
