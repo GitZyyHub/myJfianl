@@ -49,6 +49,10 @@ public class WorkDemandController extends Controller {
        renderJson(workDemandService.queryPageList(basePageRequest,false));
     }
 
+    public void queryById(@Para("id")Integer id){
+        renderJson(workDemandService.queryById(id));
+    }
+
     /**
      * 设置需求表
      */
@@ -95,13 +99,15 @@ public class WorkDemandController extends Controller {
         List<String> downRows = new ArrayList<>();
 
         int temp = 0;
-        for (Record field : fields) {
+        for (int i = 0; i < fields.size(); i++) {
+            Record field = fields.get(i);
             String fieldName = field.getStr("field_name");
             if("productName".equals(field.getStr("field_name"))||"productVersion".equals(field.getStr("field_name"))||
-            "productNumber".equals(field.getStr("field_name"))||"functionName".equals(field.getStr("field_name"))||
-            "functionNumber".equals(field.getStr("field_name"))){
+                    "productNumber".equals(field.getStr("field_name"))||"functionName".equals(field.getStr("field_name"))||
+                    "functionNumber".equals(field.getStr("field_name"))){
                 continue;
             }
+            Arrays.asList("");
             handers.add(field.getStr("name"));
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
@@ -110,6 +116,7 @@ public class WorkDemandController extends Controller {
             }
             temp++;
         }
+
         try (HSSFWorkbook wb = com.kakarote.crm9.utils.ExcelUtil.createExcelTemplate("需求导入模版",handers, downData, downRows,null,null);) {
 
             HttpServletResponse response = getResponse();

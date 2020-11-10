@@ -147,11 +147,17 @@ public class WorkService extends AbstractBasePageList {
         if (Arrays.asList(work._getAttrNames()).contains("name") && StrUtil.isEmpty(work.getWorkName())) {
             return R.error("项目名称不能为空！");
         }
+        Date startTime = work.getStartTime();
+        Date endTime = work.getEndTime();
+        if (startTime != null && endTime != null && startTime.compareTo(endTime) > 0) {
+            return R.error("结束时间应大于开始时间");
+        }
         Long userId = BaseUtil.getUserId();
         boolean temp;
         if (work.getWorkId() == null) {
             //添加
             if (StringUtils.isNullOrEmpty(work.getWorkNum())) {
+
                 AdminConfig adminConfig = AdminConfig.dao.findFirst("select setting_id,status,value from 72crm_admin_config where name = 'numberSetting' and value = 19");
                 String result = Aop.get(ToolUtils.class).generateNumber(adminConfig, null);
                 work.setWorkNum(result);
@@ -165,7 +171,7 @@ public class WorkService extends AbstractBasePageList {
         } else {
             //修改
             Record first = Db.findFirst(Db.getSql("work.findWorkById"), work.getWorkId());
-            if ("结项".equals(first.getStr("phase"))) {
+            if ("结项".equals(first.getStr("work_phase"))&&"结项".equals(work.getWorkPhase())) {
                 return R.error("当前项目阶段为结项，如果需要修改信息请先修改项目阶段！");
             }
             temp = true;
@@ -173,15 +179,16 @@ public class WorkService extends AbstractBasePageList {
             Record after = Db.findFirst(Db.getSql("work.findWorkById"), work.getWorkId());
             workHistoricalRecordService.add(work.getWorkId(),WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(),  after,first,work.getWorkId());
         }
+        Work byId = Aop.get(Work.class).dao().findById(work.getWorkId());
         HashSet<Long> set = new HashSet<>();
-        set.add(work.getSalesId());
-        set.add(work.getManagerId());
-        set.add(work.getCreateUserId());
+        set.add(byId.getSalesId());
+        set.add(byId.getManagerId());
+        set.add(byId.getCreateUserId());
         setWorkRelation(set,work.getWorkId(), WorkUserEnum.WORK.getType(),work.getWorkId());
         if ("结项".equals(work.getWorkPhase())) {
             R checkUserId = addExamine(Arrays.asList(work.getWorkId().toString()), work.getWorkPhase(), jsonObject.getLong("checkUserId"));
             if((int)(checkUserId.get("code"))!=0){
-                return R.error("项目设置错误");
+                return R.error("项目设置错误,添加审核失败");
             }
             return checkUserId;
         }
@@ -195,16 +202,23 @@ public class WorkService extends AbstractBasePageList {
     public R updateWorkPhase(String ids, String phase, Long checkUserId) {
         List<String> strings = Arrays.asList(ids.split(","));
         for (String string : strings) {
-//            if (!WorkPermissions.isPermissions(CrmEnum.WORK.getTableName(), CrmEnum.WORK.getTableId(), Integer.parseInt(string))) return R.error("无权操作");
+            Record first = Db.findFirst(Db.getSql("work.findWorkById"), string);
+            Db.update(Db.getSqlPara("work.updateWorkPhase", Kv.by("id", string).set("phase", phase)));
+            Record after = Db.findFirst(Db.getSql("work.findWorkById"),string);
+            Work work = Aop.get(Work.class).findById(string);
+            workHistoricalRecordService.add(work.getWorkId(),WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(),  after,first,work.getWorkId());
         }
         if ("结项".equals(phase)) {
+
             R r = addExamine(strings, phase, checkUserId);
             if((int)r.get("code") != 0){
                 throw new RuntimeException("项目结项修改回滚");
             }
             return r;
         }
-        Db.update(Db.getSqlPara("work.updateWorkPhase", Kv.by("ids", strings).set("phase", phase)));
+
+
+
         return R.ok();
     }
 
@@ -469,8 +483,8 @@ public class WorkService extends AbstractBasePageList {
      * 查询项目详情/项目扩展详情/项目历史记录/需求详情
      */
     public List<Record> findFieldDetails(Integer id) {
-        List<String> name = Arrays.asList("立项评审", "方案对标", "风险", "合同解读", "目标", "合同金额", "有效金额", "实施成本", "运维成本", "预算", "实际成本", "客户名称", "客户联系人", "客户联系电话", "预估工作量（人/时）");
-        List<String> fieldName = Arrays.asList("examine", "solution", "risk", "unscramble", "target", "contract_amount", "effective_amount", "implement_cost", "maintenance_cost", "budget", "practical_cost", "customer_name", "customer_contact", "customer_calls", "forecast_work");
+        List<String> name = Arrays.asList("项目名称","立项评审","项目类型", "方案对标", "风险", "合同解读", "目标", "合同金额", "有效金额", "实施成本", "运维成本", "预算", "实际成本", "客户名称", "客户联系人", "客户联系电话", "预估工作量（人/时）");
+        List<String> fieldName = Arrays.asList("work_name","examine", "work_type","solution", "risk", "unscramble", "target", "contract_amount", "effective_amount", "implement_cost", "maintenance_cost", "budget", "practical_cost", "customer_name", "customer_contact", "customer_calls", "forecast_work");
         List<Record> fields = adminFieldService.getFields(CrmEnum.WORK.getType(), id);
         Record first = Db.findFirst(Db.getSql("work.queryWorkExtensionById"), id);
         for (Map.Entry<String, Object> entry : first.getColumns().entrySet()) {
@@ -484,7 +498,7 @@ public class WorkService extends AbstractBasePageList {
             fields.add(record);
         }
 
-        List<String> progressName = Arrays.asList("需求总数", "需求完成数", "需求完成率（%）", "任务总数", "任务完成数",
+        /*List<String> progressName = Arrays.asList("需求总数", "需求完成数", "需求完成率（%）", "任务总数", "任务完成数",
                 "任务完成度（%）", "总工作量（人/时）", "已消耗工作量（人/时）", "消耗工作量比例（%）");
         List<String> progressFieldName = Arrays.asList("demand_total", "demand_completion", "demand_rate", "task_total", "task_completion",
                 "task_rate", "total_work", "consumption_work", "rate_work");
@@ -522,19 +536,65 @@ public class WorkService extends AbstractBasePageList {
                     .set("formType", "text").set("isNull", 0).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
                     .set("label", CrmEnum.WORK.getType()).set("type", 1).set("sorting", i).set("options", null).set("fieldType", 1);
             fields.add(record);
-        }
+        }*/
 
         return adminFieldService.findFieldDetails(CrmEnum.WORK, fields, id);
     }
 
+    public R progress(Integer id) {
+        List<String> progressName = Arrays.asList("需求总数", "需求完成数", "需求完成率（%）", "任务总数", "任务完成数",
+                "任务完成度（%）", "总工作量（人/时）", "已消耗工作量（人/时）", "消耗工作量比例（%）");
+        List<String> progressFieldName = Arrays.asList("demand_total", "demand_completion", "demand_rate", "task_total", "task_completion",
+                "task_rate", "total_work", "consumption_work", "rate_work");
+        Record record = new Record();
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        // 设置精确到小数点后2位
+        //numberFormat.setMaximumFractionDigits(1);
+
+        Record first = Db.findFirst(Db.getSql("work.queryWorkExtensionById"), id);
+        Record demand = Db.findFirst("select ifnull(count(1),0) demand_completion,(select ifnull(count(1),0) demand_total from 72crm_work_demand where work_id=?) demand_total " +
+                "from 72crm_work_demand where work_id=? and demand_status='100%'", id, id);
+        String demandTotal = demand.getStr("demand_total");
+        String demandCompletion = demand.getStr("demand_completion");
+        double v1 = Double.parseDouble(demandCompletion) / Double.parseDouble(demandTotal) * 100;
+        String demandRate = Double.isNaN(v1) ? "0" : numberFormat.format(v1);
+        record.set("demandTotal",demandTotal).set("demandCompletion",demandCompletion).set("demandRate",demandRate);
+
+
+        String forecastWork = first.getStr("forecast_work");
+        String consumptionWork = Db.queryStr("SELECT ifnull(sum(working_hours),0) from 72crm_task_hours WHERE subtasks_id in (SELECT task_id from 72crm_task WHERE work_id=?)", id);
+        double v2 = Double.parseDouble(forecastWork) / Double.parseDouble(consumptionWork) * 100;
+        String rateWork = Double.isNaN(v2) ? "0" : numberFormat.format(v2);
+        record.set("forecastWork",forecastWork).set("consumptionWork",consumptionWork).set("rateWork",rateWork);
+
+        Record task = Db.findFirst("SELECT ifnull(count(1),0) task_completion,(SELECT ifnull(COUNT(1),0) FROM 72crm_task WHERE work_id=?) " +
+                " task_total FROM 72crm_task WHERE work_id=? AND completeness='100%'", id, id);
+        String taskCompletion = task.getStr("task_completion");
+        String taskTotal = task.getStr("task_total");
+        double v3 = Double.parseDouble(taskCompletion) / Double.parseDouble(taskTotal) * 100;
+        String taskRate = Double.isNaN(v3) ? "0" : numberFormat.format(v3);
+        record.set("taskTotal",taskTotal).set("taskCompletion",taskCompletion).set("taskRate",taskRate);
+
+
+       /* List<String> progressData = Arrays.asList(demandTotal, demandCompletion, demandRate, taskTotal, taskCompletion, taskRate, forecastWork, consumptionWork, rateWork);
+
+        for (int i = 0; i < progressName.size(); i++) {
+            Record record = new Record();
+            record.set("authLevel", 3).set("sysInformation", 3).set("fieldName", progressFieldName.get(i)).set("name", progressName.get(i)).set("value", progressData.get(i))
+                    .set("formType", "text").set("isNull", 0).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
+                    .set("label", CrmEnum.WORK.getType()).set("type", 1).set("sorting", i).set("options", null).set("fieldType", 1);
+            fields.add(record);
+        }*/
+        return R.ok().put("data",record);
+    }
 
 
     /**
      * 拼接
      *
-     * @param isDataAuth
-     * @param kv
-     * @param crmEnum
+     * @param
+     * @param
+     * @param
      * @return
      */
     /*@Override
@@ -545,6 +605,50 @@ public class WorkService extends AbstractBasePageList {
         jsonObject.put("sql", jsonObject.getString("sql") + conditions);*//*
         return jsonObject;
     }*/
+    public List<Integer> toList(List<String> labelList) {
+        List<Integer> list = new ArrayList<>();
+        if (labelList == null || labelList.size() == 0) {
+            return list;
+        }
+        labelList.forEach(ids -> {
+            if (StrUtil.isNotEmpty(ids)) {
+                for (String id : ids.split(",")) {
+                    if (StrUtil.isNotEmpty(id)) {
+                        list.add(Integer.valueOf(id));
+                    }
+                }
+            }
+        });
+        return list;
+    }
 
 
+    public R setLabel(String workId, String labelId) {
+        Db.update("update 72crm_work set label_id=? where work_id=?",labelId,workId);
+        return R.ok();
+    }
+
+    public R queryLabel(String workId) {
+        String labelId = Aop.get(Work.class).findById(workId).getLabelId();
+        if(labelId !=null){
+            List<String> strings = Arrays.asList(labelId.split(","));
+            List<Record> records = Db.find(Db.getSqlPara("work.queryLabel",Kv.by("ids",strings)));
+            return R.ok().put("data",records);
+        }else {
+            return R.ok();
+        }
+    }
+
+    public R delLabel(String workId, String labelId) {
+        String label = Aop.get(Work.class).findById(workId).getLabelId();
+        String[] list = label.split(",");
+        StringBuffer stringBuffer = new StringBuffer();
+        for(int i = 0; i < list.length; i++){
+            String item = list[i];
+            if(!labelId.equals(item)){
+                stringBuffer.append(list[i]+",");
+            }
+        }
+        return setLabel(workId,stringBuffer.toString());
+    }
 }

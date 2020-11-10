@@ -36,6 +36,9 @@
         `describe`
         FROM
         72crm_work_product_history h WHERE product_id=#para(productId)
+    #end
+
+    #sql("count")
 
     #end
 
@@ -85,9 +88,22 @@
     #end
 
     #sql("queryStatistics")
-        SELECT work_name,work_type,
-        (SELECT realname FROM 72crm_admin_user where user_id=w.sales_id) sales_name
-        ,work_phase from 72crm_work w
+        SELECT (select product_name from 72crm_work_product where product_id =#para(productId)) product_name,work_name,work_type,
+        (SELECT realname FROM 72crm_admin_user where user_id=w.sales_id) sales_name,work_phase
+        from 72crm_work w
+        WHERE work_id in (
+            SELECT work_id from 72crm_work_demand WHERE demand_id in (
+                SELECT demand_id FROM 72crm_work_demand_product WHERE product_id =#para(productId)
+            )
+        )
+        #if(page&&limit)
+          LIMIT #(page),#(limit)
+        #end
+    #end
+
+     #sql("queryStatisticsCount")
+        SELECT count(1)
+        from 72crm_work w
         WHERE work_id in (
             SELECT work_id from 72crm_work_demand WHERE demand_id in (
                 SELECT demand_id FROM 72crm_work_demand_product WHERE product_id =#para(productId)

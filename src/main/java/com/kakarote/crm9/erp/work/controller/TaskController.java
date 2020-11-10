@@ -79,6 +79,13 @@ public class TaskController extends Controller {
     }
 
     /**
+     * 根据用户ID查询任务
+     */
+    public void userTask(BasePageRequest basePageRequest){
+        renderJson(taskService.userTask(basePageRequest));
+    }
+
+    /**
      * 查询任务详情信息
      */
     @Permissions({"project:task:readDetails"})

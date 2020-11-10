@@ -84,10 +84,10 @@ public class ConfigManageService extends AbstractBasePageList {
         WorkConfig workConfig = jsonObject.getObject("entity", WorkConfig.class);
         workConfig.setType(2);
         boolean temp;
-        Work byId = Aop.get(Work.class).findById(workConfig.getAssociatedId());
-        workConfig.setAssociatedId(byId.getWorkId());
-        workConfig.setAssociatedName(byId.getWorkName());
-        workConfig.setAssociatedNum(byId.getWorkNum());
+        Record first1 = Db.findFirst("select work_id,work_name,work_num from 72crm_work where work_num=?", workConfig.getAssociatedNum());
+        workConfig.setAssociatedId(first1.get("work_id"));
+        workConfig.setAssociatedName(first1.get("work_name"));
+        workConfig.setAssociatedNum(first1.get("work_num"));
         if (workConfig.getConfigId() == null) {
             workConfig.setCreateUserId(BaseUtil.getUserId());
             workConfig.setCreateTime(new Date());
@@ -107,9 +107,10 @@ public class ConfigManageService extends AbstractBasePageList {
                 e.printStackTrace();
             }
         }
+        WorkConfig byId = Aop.get(WorkConfig.class).dao().findById(workConfig.getConfigId());
         HashSet<Long> set = new HashSet<>();
-        set.add(workConfig.getMainUserId());
-        set.add(workConfig.getCreateUserId());
+        set.add(byId.getMainUserId());
+        set.add(byId.getCreateUserId());
         WorkService.setWorkRelation(set,workConfig.getConfigId(), WorkUserEnum.CONFIGURATION.getType(),workConfig.getWorkId());
         return temp?R.ok():R.error("更新失败");
     }
@@ -117,8 +118,11 @@ public class ConfigManageService extends AbstractBasePageList {
     /**
      * 根据ID查询任务配置计划
      */
-    public R queryById(Integer id){
+    /*public R queryById(Integer id){
         return R.ok().put("data",Db.findFirst(Db.getSql("work.queryTaskConfigById"),id));
+    }*/
+    public Record queryById(Integer id){
+        return Db.findFirst(Db.getSql("work.queryTaskConfigById"),id);
     }
 
     /**
@@ -127,8 +131,10 @@ public class ConfigManageService extends AbstractBasePageList {
      * @return
      */
     public R delConfig(@Para("ids") String ids){
-        String[] split = ids.split(",");
-        Db.delete("DELETE FROM 72crm_work_config WHERE config_id in ("+split.toString()+")");
+        List<String> strings = Arrays.asList(ids.split(","));
+        for (String string : strings) {
+            Aop.get(WorkConfig.class).deleteById(string);
+        }
         return R.ok();
     }
 

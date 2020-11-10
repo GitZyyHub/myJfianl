@@ -9,6 +9,10 @@
         SELECT create_time,create_user_id,update_time FROM #para(tableName) WHERE #para(tableId)=#para(id)
     #end
 
+    #sql("queryConfigNumStatus")
+        select status,value from 72crm_admin_config where value in (#fori(val))
+    #end
+
 
 
 

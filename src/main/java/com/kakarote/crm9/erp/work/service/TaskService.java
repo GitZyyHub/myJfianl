@@ -57,7 +57,8 @@ public class TaskService extends AbstractBasePageList {
             Task byId = Aop.get(Task.class).dao().findById(task.getPid());
             task.setWorkId(byId.getWorkId());
         }
-        Set<Long> longs = null;
+        Set<Long> longs = new HashSet<>();
+        longs.add(task.getMainUserId());
         if (!StringUtils.isNullOrEmpty(task.getOwnerUserId())) {
             longs = TagUtil.toLongSet(task.getOwnerUserId());
             task.setOwnerUserId(TagUtil.fromLongSet(longs));
@@ -230,7 +231,6 @@ public class TaskService extends AbstractBasePageList {
             if(byId==null){
                 continue;
             }
-//            if(!WorkPermissions.isPermissions(CrmEnum.TASK.getTableName(),CrmEnum.TASK.getTableId(),Integer.parseInt(string))) return R.error("无权操作");
             Record first = Db.findFirst("select before_id from 72crm_task where task_id=?", string);
             if(StrUtil.isEmpty(first.getStr("before_id"))){
                 return R.error("任务："+first.getStr("task_name")+"存在前置任务");
@@ -356,7 +356,13 @@ public class TaskService extends AbstractBasePageList {
         return R.ok().put("data",paginate);
     }
 
-
+    public R userTask(BasePageRequest basePageRequest) {
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        Integer userId = jsonObject.getInteger("userId");
+        List<Integer> query = Db.query("select num_id from 72crm_work_user_record where user_id=? and type=?", userId,WorkUserEnum.TYPE_1.getType());
+        Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.task.queryTaskByIds", Kv.by("ids", query)));
+        return R.ok().put("data",page);
+    }
 
 
     /**

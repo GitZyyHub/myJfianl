@@ -85,6 +85,9 @@
         #if(isResources)
             and is_resources=#para(isResources)
         #end
+        #if(workId)
+            and work_id=#para(workId)
+        #end
         #if(search)
           and (a.realname like concat('%', #para(search), '%')
           #if(pinyinSearch)

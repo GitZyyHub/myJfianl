@@ -26,10 +26,8 @@ public class WorkRouter extends Routes {
         add("/task/historical",WorkTaskHistoricalController.class);
         add("/task/hoursLock",TaskHoursLockController.class);
         add("/task/hoursRecord",TaskHoursRecordController.class);
-
-
-        /*add("/taskLabel", LabelController.class);
-        add("/workbench", WorkbenchController.class);
+        add("/taskLabel",LabelsController.class);
+       /* add("/workbench", WorkbenchController.class);
         add("/workTrash", TrashController.class);*/
     }
 

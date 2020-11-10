@@ -81,6 +81,14 @@ public class WorkProductService extends AbstractBasePageList {
     }
 
     /**
+     * 删除产品
+     */
+    public R delWorkProduct(String ids) {
+        Db.find("");
+        return R.ok();
+    }
+
+    /**
      * 添加产品修改历史记录
      */
     public void setVersionHistorical(String oldVersion,String newVersion,String describe,Integer productId){
@@ -107,8 +115,11 @@ public class WorkProductService extends AbstractBasePageList {
     /**
      * 设置产品状态
      */
-    public R setWorkProductStatus(Integer status,String ids){
-        Db.update("update 72crm_work_product set product_status="+status+" where product_id in ("+ids+")");
+    public R setWorkProductStatus(String status,String ids){
+        String[] split = ids.split(",");
+        for (String s : split) {
+            Db.update("update 72crm_work_product set product_status=? where product_id =?",status,s);
+        }
         return R.ok();
     }
 
@@ -116,7 +127,9 @@ public class WorkProductService extends AbstractBasePageList {
      * 根据ID查询产品状态
      */
     public Record queryById(Integer id){
-        return Db.findFirst("select * from 72crm_work_product where product_id=?",id);
+        return Db.findFirst("select p.*,(select realname from 72crm_admin_user where user_id=p.main_user_id) main_user_name," +
+                "(select realname from 72crm_admin_user where user_id=p.exploit_user_id) exploit_user_name" +
+                " from 72crm_work_product p where product_id=?",id);
     }
 
     /**
@@ -126,21 +139,27 @@ public class WorkProductService extends AbstractBasePageList {
      */
     public R queryStatistics(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
+        Kv by = Kv.by("productId", jsonObject.get("productId"));
         if(jsonObject.get("excel") != null){
-            List<Record> records = Db.find(Db.getSqlPara("work.product.queryStatistics", Kv.by("productId", jsonObject.get("productId"))));
-            JSONObject jsonObject1 = new JSONObject();
-            jsonObject1.put("list",records);
-            return R.ok().put("data",jsonObject1);
+            by.set("page",basePageRequest.getPage()).set("limit",basePageRequest.getLimit());
         }
-        Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit()
-                , Db.getSqlPara("work.product.queryStatistics", Kv.by("productId", jsonObject.get("productId"))));
-        return R.ok().put("data",paginate);
+        List<Record> records = Db.find(Db.getSqlPara("work.product.queryStatistics",by));
+        Integer integer = Db.template("work.product.queryStatisticsCount", by).queryInt();
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("list",records);
+        jsonObject1.put("totalRow",integer);
+        return R.ok().put("data",jsonObject1);
+/*        Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit()
+                , Db.getSqlPara("work.product.queryStatistics", Kv.by("productId", jsonObject.get("productId"))));*/
+        //return R.ok().put("data",paginate1);
     }
+
 
     @Override
     public JSONObject appendSqlSearch(String search) {
         return null;
     }
+
 
 
 }

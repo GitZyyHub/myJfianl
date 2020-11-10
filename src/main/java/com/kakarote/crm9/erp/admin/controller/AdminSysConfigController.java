@@ -18,6 +18,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminNumberSetting;
 import com.kakarote.crm9.erp.admin.entity.AdminUserConfig;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -246,6 +247,26 @@ public class AdminSysConfigController extends Controller {
                 }
             }
         }
+        List<Record> records = Db.find(Db.getSqlPara("admin.field.queryConfigNumStatus", Kv.by("val", new Integer[]{19, 20, 21, 23, 27})));
+        records.forEach(record -> {
+            Integer value = Integer.parseInt(record.getStr("value"));
+            Integer status = record.getInt("status");
+            if(status == 1){
+                status = 0;
+            }else {
+                status = 1;
+            }
+            if(value.equals(CrmEnum.WORK.getType())){
+                Db.update("update 72crm_admin_field set is_null=? where field_id=1229903",status);
+            }else if(value.equals(CrmEnum.MILESTONE.getType())){
+                Db.update("update 72crm_admin_field set is_null=? where field_id=1229844",status);
+            }else if(value.equals(CrmEnum.TASK.getType())){
+                Db.update("update 72crm_admin_field set is_null=? where field_id=1229877",status);
+            }else if(value.equals(CrmEnum.PRODUCT.getType())){
+                Db.update("update 72crm_admin_field set is_null=? where field_id=1229893",status);
+            }
+        });
+
         renderJson(R.ok());
     }
 }

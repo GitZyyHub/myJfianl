@@ -187,6 +187,12 @@ public class AdminSceneService{
                     .add("create_time", "创建时间", "datetime", settingArr);
         }else if(CrmEnum.TASK_HOURS.getType() == label){
             fieldUtil = new FieldUtil(fieldList);
+        }else if(CrmEnum.WORKCONFIG.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+        }else if(CrmEnum.PRODUCT.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
+        }else if(CrmEnum.PRODUCT_FUNCTIONE.getType() == label){
+            fieldUtil = new FieldUtil(fieldList);
         }else{
             return R.error("场景label不符合要求！");
         }
@@ -391,6 +397,8 @@ public class AdminSceneService{
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.fluentPut("is_associated",new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "1"));
                 systemScene.setSceneId(null).setName("未对标需求").setData(jsonObject1.toString()).save();
+            } else if(CrmEnum.WORKCONFIG.getType() == type){
+                systemScene.setName("全部配置").save();
             } else if(CrmEnum.SUBTASKS.getType() == type){
                 systemScene.setName("全部任务").save();
                 JSONObject jsonObject = new JSONObject();

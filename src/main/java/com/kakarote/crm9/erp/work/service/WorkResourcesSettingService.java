@@ -1,6 +1,7 @@
 package com.kakarote.crm9.erp.work.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
@@ -71,9 +72,10 @@ public class WorkResourcesSettingService {
             Record after = Db.findFirst(Db.getSql("work.queryResourceById"), entity.getResourcesId());
             workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.RESOURCE, BehaviorEnum.UPDATE, entity.getResourcesId(),after,first,  entity.getResourcesId());
         }
+        WorkResourcesSetting byId = Aop.get(WorkResourcesSetting.class).dao().findById(entity.getResourcesId());
         HashSet<Long> set = new HashSet<>();
-        set.add(entity.getMainUserId());
-        set.add(entity.getCreateUserId());
+        set.add(byId.getMainUserId());
+        set.add(byId.getCreateUserId());
         WorkService.setWorkRelation(set,entity.getResourcesId(), WorkUserEnum.TASKCONFIG.getType(),entity.getWorkId());
         return R.ok();
     }

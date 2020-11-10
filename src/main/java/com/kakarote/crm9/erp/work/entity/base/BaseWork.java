@@ -387,4 +387,13 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		return getStr("customer_calls");
 	}
 
+	public M setLabelId(java.lang.String labelId) {
+		set("label_id", labelId);
+		return (M)this;
+	}
+
+	public java.lang.String getLabelId() {
+		return getStr("label_id");
+	}
+
 }

@@ -62,7 +62,6 @@ public class AdminUserService {
             adminUser.setPassword(BaseUtil.sign((adminUser.getUsername().trim() + adminUser.getPassword().trim()), salt));
             adminUser.setCreateTime(new Date());
             adminUser.setMobile(adminUser.getUsername());
-            adminUser.setRealname(adminUser.getUsername());
             bol = adminUser.save();
             List<String> sqlList = new ArrayList<>();
             sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '电话无人接听', '跟进记录常用语')");
@@ -159,7 +158,7 @@ public class AdminUserService {
         return adminUser;
     }
 
-    public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search,String isResources) {
+    public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search,String isResources,String workId) {
         List<Integer> deptIdList = new ArrayList<>();
         JSONObject jsonObject = request.getJsonObject();
         if (request.getData().getDeptId() != null) {
@@ -187,8 +186,11 @@ public class AdminUserService {
                 kv.set("pinyinSearch", pinyinSearchList);
             }
         }
-        if(isResources!=null){
+        if(jsonObject.get("isResources")!=null){
             kv.set("isResources",1);
+        }
+        if(jsonObject.get("workId")!=null){
+            kv.set("workId",jsonObject.get("workId"));
         }
         kv.set("label", request.getData().getLabel());
         SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserList", kv);
@@ -342,10 +344,10 @@ public class AdminUserService {
                     return R.error("超级管理员用户不可禁用");
                 }
                 //查询是否有未完成的任务
-                Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='结束'", id, id);
+                Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='已完成'", id, id);
                 Integer taskUserCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE task_id in(" +
                         "SELECT num_id FROM 72crm_work_user_record WHERE user_id=?" +
-                        ") and status!='结束'", id);
+                        ") and status!='已完成'", id);
                 if (taskCount != 0 || taskUserCount != 0) {
                     return R.error("存在没有完成的任务不能删除");
                 }
@@ -836,14 +838,14 @@ public class AdminUserService {
      * @return
      */
     @Before(Tx.class)
-    public R setResources(String userIds, Integer isResources) {
+    public R setResources(String userIds, Integer isResources,String workId) {
         List<String> strings = Arrays.asList(userIds.split(","));
         for (String str : strings) {
             if(isResources ==0){
-                Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='结束'", str, str);
+                Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='已完成'", str, str);
                 Integer taskUserCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE task_id in(" +
                         "SELECT num_id FROM 72crm_work_user_record WHERE user_id=?" +
-                        ") and status!='结束'", str);
+                        ") and status!='已完成'", str);
                 if (taskCount != 0 || taskUserCount != 0) {
                     return R.error("存在没有完成的任务不能删除");
                 }
@@ -854,7 +856,7 @@ public class AdminUserService {
                 }
 
             }
-            Db.update("update 72crm_admin_user SET is_resources=? WHERE user_id=?",isResources,str);
+            Db.update("update 72crm_admin_user SET is_resources=?,work_id=? WHERE user_id=?",isResources,workId,str);
         }
         return R.ok();
     }

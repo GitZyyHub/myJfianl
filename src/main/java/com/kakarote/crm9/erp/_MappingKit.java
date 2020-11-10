@@ -184,7 +184,8 @@ public class _MappingKit {
 		arp.addMapping("72crm_crm_product_detail_img", "img_id", CrmProductDetailImg.class);
 		arp.addMapping("72crm_crm_product_user", "product_user_id", CrmProductUser.class);
 
-
+		arp.addMapping("72crm_work_task_label", "label_id", WorkTaskLabel.class);
+		arp.addMapping("72crm_work_task_label_order", "order_id", WorkTaskLabelOrder.class);
 
 
 

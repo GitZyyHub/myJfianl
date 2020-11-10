@@ -81,7 +81,8 @@ public class AdminUserController extends Controller {
         String roleId = getPara("roleId");
         String search = getPara("search");
         String isResources = getPara("isResources");
-        renderJson(adminUserService.queryUserList(basePageRequest,roleId,search,isResources));
+        String workId = getPara("workId");
+        renderJson(adminUserService.queryUserList(basePageRequest,roleId,search,isResources,workId));
     }
 
     /**
@@ -256,11 +257,12 @@ public class AdminUserController extends Controller {
         String roleId = getPara("roleId");
         String search = getPara("search");
         String isResources = getPara("isResources");
+        String workId = getPara("workId");
         JSONObject json = basePageRequest.getJsonObject();
         basePageRequest.setPageType(0);
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
-            List<Record> records = (List<Record> )adminUserService.queryUserList(basePageRequest,roleId,search,isResources).get("data");
+            List<Record> records = (List<Record> )adminUserService.queryUserList(basePageRequest,roleId,search,isResources,workId).get("data");
             List<Map<String, Object>> list = new ArrayList<>();
             String[] s = new String[]{"username","user_id","status","roleId","parent_id","img","dept_id","create_time"};
             for (Record record : records) {
@@ -406,7 +408,7 @@ public class AdminUserController extends Controller {
     /**
      * 标记人员为人力资源
      */
-    public void setResources(@Para("memeberIds") String userIds , @Para("isResources")Integer isResources){
-        renderJson(adminUserService.setResources(userIds,isResources));
+    public void setResources(@Para("userIds") String userIds , @Para("isResources")Integer isResources,@Para("workId")String workId){
+        renderJson(adminUserService.setResources(userIds,isResources,workId));
     }
 }

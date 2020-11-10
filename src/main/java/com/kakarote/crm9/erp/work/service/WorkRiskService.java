@@ -66,7 +66,7 @@ public class WorkRiskService {
             list.set("solveUser", solveUsers);
             list.set("foundUser", foundUsers);
 
-            StringBuffer stringBuffer = new StringBuffer();
+            /*StringBuffer stringBuffer = new StringBuffer();
             for (Record record : trackingUser) {
                 stringBuffer.append(record.getStr("realname")+",");
             }
@@ -82,7 +82,7 @@ public class WorkRiskService {
             for (Record record : foundUsers) {
                 stringBuffer.append(record.getStr("realname")+",");
             }
-            list.set("found_user",stringBuffer.toString());
+            list.set("found_user",stringBuffer.toString());*/
         }
         if (jsonObject.get("excel") != null) {
             JSONObject resultJsonObject = new JSONObject();

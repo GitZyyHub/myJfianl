@@ -64,7 +64,10 @@ public class WorkProductFuntionService  extends AbstractBasePageList {
      * @return
      */
     public R delProductFuntion(String ids){
-        Db.delete("DELETE FROM 72crm_work_product_function in ("+ids+")");
+        String[] split = ids.split(",");
+        for (String s : split) {
+            Db.delete("DELETE FROM 72crm_work_product_function where function_id =?",s);
+        }
         return R.ok();
     }
 

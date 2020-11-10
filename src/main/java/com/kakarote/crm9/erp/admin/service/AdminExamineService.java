@@ -121,7 +121,7 @@ public class AdminExamineService {
                 record.set("deptIds", new ArrayList<>());
             }
         });
-        return R.ok().put("data", page);
+          return R.ok().put("data", page);
     }
 
     /**

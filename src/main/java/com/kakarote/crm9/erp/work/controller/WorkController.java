@@ -23,6 +23,7 @@ import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.work.entity.Work;
+import com.kakarote.crm9.erp.work.service.WorkHistoricalRecordService;
 import com.kakarote.crm9.erp.work.service.WorkService;
 import com.kakarote.crm9.utils.R;
 import com.mysql.jdbc.StringUtils;
@@ -49,6 +50,9 @@ public class WorkController extends Controller {
 
     @Inject
     AdminFileService adminFileService;
+
+    @Inject
+    WorkHistoricalRecordService workHistoricalRecordService;
 
     public void test(){
         LocalDateTime now = LocalDateTime.now();
@@ -119,6 +123,26 @@ public class WorkController extends Controller {
     }
 
     /**
+     * 添加项目标签
+     */
+    public void setLabel(@Para("workId")String workId,@Para("labelId")String labelId){
+        renderJson(workService.setLabel(workId,labelId));
+    }
+
+    /**
+     * 删除项目标签
+     */
+    public void delLabel(@Para("workId")String workId,@Para("labelId")String labelId){
+        renderJson(workService.delLabel(workId,labelId));
+    }
+
+    /**
+     * 查询项目的标签
+     */
+    public void queryLabel(@Para("workId")String workId){
+        renderJson(workService.queryLabel(workId));
+    }
+    /**
      * 根据ID查询项目基本信息
      */
     public void queryById(@Para("id") Integer id) {
@@ -141,6 +165,20 @@ public class WorkController extends Controller {
     @Permissions({"project:projectManage:readDetails"})
     public void findFieldDetails(@Para("id")Integer id){
         renderJson(R.ok().put("data",workService.findFieldDetails(id)));
+    }
+
+    /**
+     * 项目进展
+     */
+    public void progress(@Para("id")Integer id){
+        renderJson(workService.progress(id));
+    }
+
+    /**
+     * 查询项目汇总历史记录
+     */
+    public void totalRecords(BasePageRequest basePageRequest){
+        renderJson(workHistoricalRecordService.queryRecordList(basePageRequest,true));
     }
 
     /**

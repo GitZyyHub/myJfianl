@@ -81,7 +81,7 @@ public class WorkHistoricalRecordService {
                 tag = 2;
             }else {
                 sqlPara = Db.getSqlPara("work.queryHistoricalRecordList",
-                        Kv.by("type", parse.getTypeName()).set("operationId", operationId).set("workId",workId));
+                        Kv.by("type", parse.getTypeName()).set("operationId", operationId).set("workId",operationId));
             }
         }
         if(excel != null){
@@ -186,6 +186,11 @@ public class WorkHistoricalRecordService {
             workHistoricalRecord.setWorkId(workId);
             if (workRecordEnum.getType() == 2) {
                 records = Db.find(Db.getSql("admin.field.queryField"), CrmEnum.MILESTONE.getType());
+            }else if (workRecordEnum.getType() == 1) {
+                List<Record> structures = Db.find(Db.getSql("work.queryStructure"), "72crm_work");
+                for (Record structure : structures) {
+                    records.add(new Record().set("field_name", structure.getStr("column_name")).set("name", structure.getStr("column_comment")));
+                }
             } else if (workRecordEnum.getType() == 3) {
                 records = Db.find(Db.getSql("admin.field.queryField"), CrmEnum.DEMAND.getType());
             } else if (workRecordEnum.getType() == 6) {

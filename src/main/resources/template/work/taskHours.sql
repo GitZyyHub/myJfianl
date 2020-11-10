@@ -43,7 +43,7 @@
             LIMIT #(page),#(limit)
         #end
     #end
-    #sql("queryMyHoursList")
+    #sql("queryHoursByUserId")
     SELECT
             hours_id,
             task_id,

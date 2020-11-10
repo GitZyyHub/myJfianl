@@ -133,8 +133,9 @@ public class WorkDemandService extends AbstractBasePageList {
             //添加变更记录
             workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.UPDATE, entity.getDemandNumber(), update,first, entity.getDemandId());
         }
+        WorkDemand byId = Aop.get(WorkDemand.class).dao().findById(entity.getDemandId());
         HashSet<Long> set = new HashSet<>();
-        set.add(entity.getCreateUserId());
+        set.add(byId.getCreateUserId());
         WorkService.setWorkRelation(set,entity.getDemandId(), WorkUserEnum.DEMAND.getType(),entity.getWorkId());
         return temp ? R.ok() : R.error("更新失败");
     }

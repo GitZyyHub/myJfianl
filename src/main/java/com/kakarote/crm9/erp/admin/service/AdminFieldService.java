@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
@@ -15,6 +16,8 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
+import com.kakarote.crm9.common.constant.BehaviorEnum;
+import com.kakarote.crm9.common.constant.WorkRecordEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldStyle;
@@ -25,6 +28,7 @@ import com.kakarote.crm9.erp.crm.entity.CrmCustomerPoolFieldStyle;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPoolRule;
 import com.kakarote.crm9.erp.work.entity.Milestone;
 import com.kakarote.crm9.erp.work.entity.TaskHours;
+import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.service.*;
 import com.kakarote.crm9.utils.*;
 import com.mysql.jdbc.StringUtils;
@@ -57,6 +61,12 @@ public class AdminFieldService {
 
     @Inject
     TaskHoursService taskHoursServicel;
+
+    @Inject
+    ConfigManageService configManageService;
+
+    @Inject
+    WorkHistoricalRecordService workHistoricalRecordService;
 
     /**
      * 查询字段详情
@@ -104,6 +114,8 @@ public class AdminFieldService {
                     if(record.getInt("task_id")==record.getInt("subtasks_id")){
                         record.remove("subtasks_id");
                     }
+                }else if(CrmEnum.WORKCONFIG.equals(crmEnum)){
+                    record = configManageService.queryById(id);
                 }
             }
 
@@ -172,6 +184,7 @@ public class AdminFieldService {
      * @param jsonObject
      * @return
      */
+    @Before(Tx.class)
     public R updateInformation(JSONObject jsonObject) {
         Integer id = jsonObject.getInteger("id");
         String batchId = jsonObject.getString("batchId");
@@ -186,7 +199,11 @@ public class AdminFieldService {
             Object value = field.get("value");
             record.set(fieldName,value);
         }
+        Record first = Db.findFirst(Db.getSql("work.findWorkById"), id);
         Db.update(parse.getTableName(),parse.getTableId(),record);
+        Record after = Db.findFirst(Db.getSql("work.findWorkById"),id);
+        Work work = Aop.get(Work.class).findById(id);
+        workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(),  after,first,work.getWorkId());
         return R.ok();
     }
 
@@ -761,17 +778,20 @@ public class AdminFieldService {
                          .add("check_status", "审核状态", FormTypeEnum.TEXT.getType());
             } else if(CrmEnum.SUBTASKS.getType() == adminFieldSort.getLabel()){
                 fieldUtil.add("task_num", "子任务编号", FormTypeEnum.TEXT.getType());
+            }else if(CrmEnum.MILESTONE.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4);
             }
 
 
             if (CrmEnum.TASK.getType() != adminFieldSort.getLabel()&&CrmEnum.CRM_RETURN_VISIT.getType() != adminFieldSort.getLabel()
                     &&CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()&&CrmEnum.MILESTONE.getType()!=adminFieldSort.getLabel()
-                    &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()) {
+                    &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()&&CrmEnum.WORK.getType() != adminFieldSort.getLabel()) {
                 fieldUtil.add("ownerUserName", "负责人", 1);
             }
             if(CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()
                     &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()
                     &&CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()
+                    &&CrmEnum.MILESTONE.getType() != adminFieldSort.getLabel()
             ){
                 fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4)
                         .add("createUserName", "创建人", 1);
@@ -819,6 +839,10 @@ public class AdminFieldService {
                     fieldSort.setFieldName("subtasksName");
                 }else if("pid".equals(fieldSort.getFieldName())){
                     fieldSort.setFieldName("pName");
+                }else if("associatedId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("associatedName");
+                }else if("exploitUserId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("exploitUserName");
                 }
 
             });

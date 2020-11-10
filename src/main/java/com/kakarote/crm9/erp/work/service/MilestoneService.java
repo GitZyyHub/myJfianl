@@ -68,10 +68,9 @@ public class MilestoneService extends AbstractBasePageList {
     public R delMilestone(String milestoneIds) {
         String[] split = milestoneIds.split(",");
         for (String id : split) {
-//            if(!WorkPermissions.isPermissions(CrmEnum.MILESTONE.getTableName(),CrmEnum.MILESTONE.getTableId(),id)) return R.error("无权操作");
-            Integer integer = Db.queryInt("SELECT COUNT(1) FROM 72crm_task WHERE milestone_id =? AND ishidden=1", id);
+            Integer integer = Db.queryInt("SELECT COUNT(1) FROM 72crm_task WHERE milestone_id =?", id);
             if (integer != 0) {
-                return R.error("编号为：" + integer + "的里程碑下存在未完成的任务");
+                return R.error("里程碑下存在任务");
             }
             Milestone byId = Aop.get(Milestone.class).dao().findById(id);
             boolean milestone_id = Db.deleteById("72crm_milestone", "milestone_id", id);
@@ -107,6 +106,12 @@ public class MilestoneService extends AbstractBasePageList {
         JSONObject data = jsonObject.getJSONObject("entity");
         Milestone entity = jsonObject.getObject("entity", Milestone.class);
         Long userId = BaseUtil.getUserId();
+
+        Date startTime = entity.getStartTime();
+        Date endTime = entity.getEndTime();
+        if (startTime != null && endTime != null && startTime.compareTo(endTime) > 0) {
+            return R.error("结束时间应大于开始时间");
+        }
         boolean setting;
         if (entity.getMilestoneId() == null) {
             if (StrUtil.isEmpty(entity.getMilestoneNum())) {
@@ -135,7 +140,6 @@ public class MilestoneService extends AbstractBasePageList {
         }
         HashSet<Long> set = new HashSet<>();
         set.add(entity.getMainUserId());
-
         WorkService.setWorkRelation(set, entity.getMilestoneId(), WorkUserEnum.MILESTONE.getType(),entity.getWorkId());
         return setting ? R.ok() : R.error();
     }

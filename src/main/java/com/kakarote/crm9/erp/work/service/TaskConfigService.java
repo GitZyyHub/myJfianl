@@ -94,9 +94,10 @@ public class TaskConfigService {
                 e.printStackTrace();
             }
         }
+        WorkConfig wbyId = Aop.get(WorkConfig.class).dao().findById(workConfig.getConfigId());
         HashSet<Long> set = new HashSet<>();
-        set.add(workConfig.getMainUserId());
-        set.add(workConfig.getCreateUserId());
+        set.add(wbyId.getMainUserId());
+        set.add(wbyId.getCreateUserId());
         WorkService.setWorkRelation(set, workConfig.getConfigId(), WorkUserEnum.TASKCONFIG.getType(), workConfig.getWorkId());
         return temp ? R.ok() : R.error("更新失败");
     }

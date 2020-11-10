@@ -55,11 +55,22 @@ public class WorkProductController extends Controller {
     }
 
     /**
+     * 产品删除
+     */
+    public void delWorkProduct(String ids){
+        renderJson(workProductService.delWorkProduct(ids));
+    }
+
+    /**
      * 修改产品状态
      */
-    @Permissions({"project:product:edition","project:product:plan"})
-    public void setWorkProductStatus(@Para("status")Integer status,@Para("ids")String ids){
+    @Permissions({"project:product:status"})
+    public void setWorkProductStatus(@Para("status")String status,@Para("ids")String ids){
         renderJson(workProductService.setWorkProductStatus(status,ids));
+    }
+
+    public void queryById(Integer id){
+        renderJson(R.ok().put("data",workProductService.queryById(id)));
     }
 
     /**
@@ -221,9 +232,9 @@ public class WorkProductController extends Controller {
     }
 
     private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("项目名称","项目类型","项目负责人","项目阶段");
-        List<String> fieldName = Arrays.asList("work_name","work_type","sales_name","work_phase");
-        for (int i = 0; i < 7; i++) {
+        List<String> names = Arrays.asList("产品名称","项目名称","项目类型","项目负责人","项目阶段");
+        List<String> fieldName = Arrays.asList("product_name","work_name","work_type","sales_name","work_phase");
+        for (int i = 0; i < names.size(); i++) {
             Record record = new Record();
             record.set("fieldName",fieldName.get(i));
             record.set("name",names.get(i));

@@ -207,4 +207,12 @@ public abstract class BaseAdminUser<M extends BaseAdminUser<M>> extends Model<M>
 		return getInt("area");
 	}
 
+	public M setWorkId(java.lang.Integer workId) {
+		set("work_id", workId);
+		return (M)this;
+	}
+
+	public java.lang.Integer getWorkId() {
+		return getInt("work_id");
+	}
 }

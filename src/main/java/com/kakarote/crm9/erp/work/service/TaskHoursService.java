@@ -93,9 +93,10 @@ public class TaskHoursService extends AbstractBasePageList {
     /**
      * 查询当前用户提报的工时
      */
-    public R queryMyHoursList(BasePageRequest basePageRequest) {
-        Long userId = BaseUtil.getUserId();
-        Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("task.hours.queryMyHoursList", Kv.by("userId", userId)));
+    public R queryHoursByUserId(BasePageRequest basePageRequest) {
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        Integer userId = jsonObject.getInteger("userId");
+        Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("task.hours.queryHoursByUserId", Kv.by("userId", userId)));
         return R.ok().put("data",page);
     }
 
@@ -203,10 +204,11 @@ public class TaskHoursService extends AbstractBasePageList {
             Record after = queryById(taskHours.getHoursId());
             workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.HOURS, BehaviorEnum.UPDATE, taskHours.getHoursId(), after,first, taskHours.getHoursId());
         }
+        TaskHours byId = Aop.get(TaskHours.class).dao().findById(taskHours.getHoursId());
         HashSet<Long> set = new HashSet<>();
-        set.add(taskHours.getCheckUserId());
-        set.add(taskHours.getMainUserId());
-        set.add(taskHours.getCreateUserId());
+        set.add(byId.getCheckUserId());
+        set.add(byId.getMainUserId());
+        set.add(byId.getCreateUserId());
         WorkService.setWorkRelation(set,taskHours.getHoursId(), WorkUserEnum.HOURS.getType(),taskHours.getWorkId());
         return R.ok();
     }

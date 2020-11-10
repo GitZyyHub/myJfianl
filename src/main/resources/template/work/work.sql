@@ -153,7 +153,7 @@
     #end
 
     #sql ("queryWorkExtensionById")
-        SELECT examine,solution,risk,unscramble,target,contract_amount,effective_amount,implement_cost,
+        SELECT work_name,examine,work_type,solution,risk,unscramble,target,contract_amount,effective_amount,implement_cost,
         maintenance_cost,budget,practical_cost,customer_name,customer_contact,customer_calls,ifnull(forecast_work,0) forecast_work
         FROM 72crm_work WHERE work_id=?
     #end
@@ -163,7 +163,7 @@
     #end
 
     #sql("updateWorkPhase")
-        update 72crm_work set work_phase=#para(phase) where work_id in (#fori(ids))
+        update 72crm_work set work_phase=#para(phase) where work_id = #para(id)
     #end
 
 
@@ -185,12 +185,32 @@
             w.manager_id,
             w.start_time,
             w.end_time,
-            w.update_time
+            w.update_time,
+            w.unscramble,
+            w.examine,
+            w.solution,
+            w.risk,
+            w.target,
+            w.contract_amount,
+            w.effective_amount,
+            w.implement_cost,
+            w.maintenance_cost,
+            w.budget,
+            w.practical_cost,
+            w.customer_name,
+            w.customer_contact,
+            w.forecast_work,
+            w.customer_calls,
+            w.label_id,
+            w.check_status,
+            w.examine_record_id
         FROM
             `72crm_work` w
         WHERE
             work_id = ?
     #end
+
+
 
     #sql ("queryWorkUserByNumId")
         select user_id,realname from 72crm_admin_user WHERE user_id in (SELECT user_id FROM `72crm_work_user_record` WHERE num_id =? and type=?)
@@ -366,7 +386,7 @@
         LEFT JOIN 72crm_admin_user u ON s.main_user_id=u.user_id
         WHERE 1=1
         #if(_workId)
-            and work_id=#para(_workId)
+            and s.work_id=#para(_workId)
         #end
         #if(search)
             and resources_name LIKE concat('%', #para(search), '%')
@@ -385,6 +405,9 @@
         SELECT * FROM 72crm_work_historical_record WHERE module=#para(type)
         #if(workId)
             and work_id=#para(workId)
+        #end
+        #if(operationId)
+            and operation_Id=#para(operationId)
         #end
 
         order by create_time desc
@@ -463,7 +486,11 @@
         SELECT config_items,plan_time,main_user_id,
         (SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name,
         (SELECT realname FROM 72crm_admin_user WHERE user_id = c.create_user_id) create_user_name,
-        associated_name,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
+        associated_name,associated_num,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
+    #end
+
+    #sql("queryLabel")
+    select label_id,name,color from 72crm_work_task_label where label_id in(#fori(ids))
     #end
 
 
