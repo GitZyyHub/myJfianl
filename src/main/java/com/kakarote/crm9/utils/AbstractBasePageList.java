@@ -47,8 +47,8 @@ public abstract class AbstractBasePageList {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         JSONObject sceneData = queryScene(jsonObject);
         if(sceneData.get("scene")!=null){
+            kv.set("scene",sceneData.get("scene"));//???只有任务有查询下属场景
             sceneData = new JSONObject();
-            kv.set("scene",sceneData.get("data"));//???只有任务有查询下属场景
         }
         Map<String, AdminField> fieldMap = getAdminFieldMap(crmEnum);
         if (!appendSqlCondition(kv, fieldMap, queryList, sceneData)) {
@@ -461,8 +461,9 @@ public abstract class AbstractBasePageList {
         }
         if(integer == 2||integer==1){
             List<Object> strings = null;
+            String subUserId =null;
             if(integer == 2) {
-                String subUserId = getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+                 subUserId = getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
                 strings = Arrays.asList(subUserId.split(","));
             }else if(integer == 1) {
                 strings = Arrays.asList(userId);
@@ -476,7 +477,11 @@ public abstract class AbstractBasePageList {
             List<Integer> numId = records.stream().map(record -> {
                 return record.getInt("num_id");
             }).collect(Collectors.toList());
-            kv.set("dataAuth",numId);
+            if (integer == 2 && subUserId.equals(BaseUtil.getUserId().toString())){
+                kv.set("dataAuth",-1);
+            }else {
+                kv.set("dataAuth",numId);
+            }
         }else if(integer == 5){
             return;
         }else {

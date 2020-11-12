@@ -115,7 +115,7 @@ public class TaskService extends AbstractBasePageList {
         kv.set("_status",basePageRequest.getJsonObject().get("status"));
         kv.set("_userId", BaseUtil.getUserId());
         if(kv.get("scene")!=null){
-            queryDataAuth(WorkUserEnum.TYPE_1,kv,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,kv.getInt("scene"));
+            queryDataAuth(WorkUserEnum.TYPE_1,kv,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,Integer.valueOf(kv.getStr("scene")));
         }else {
             queryDataAuth(WorkUserEnum.TYPE_1,kv,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,null);
         }
