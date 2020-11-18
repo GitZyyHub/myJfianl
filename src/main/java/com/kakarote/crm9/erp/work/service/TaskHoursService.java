@@ -318,6 +318,4 @@ public class TaskHoursService extends AbstractBasePageList {
         return Db.findFirst("select * from 72crm_task_hours where hours_id=?", id);
     }
 
-
-
 }

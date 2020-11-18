@@ -581,18 +581,14 @@ public class CrmExcelUtil {
                         workResourcesSetting.setResourcesDescribe(rowList.get(1).toString().trim());
                         workResourcesSetting.setResourcesProvide(rowList.get(2).toString().trim());
                         workResourcesSetting.setMainUserId(Integer.parseInt(rowList.get(3).toString().trim()));
-                        if(StrUtil.isEmpty(rowList.get(4).toString())){
+                        if(!StrUtil.isEmpty(rowList.get(4).toString())){
                             workResourcesSetting.setPlanTime(sdf.parse(rowList.get(4).toString().trim()));
                         }
-                        if(StrUtil.isEmpty(rowList.get(5).toString())){
+                        if(!StrUtil.isEmpty(rowList.get(5).toString())){
                             workResourcesSetting.setActualTime(sdf.parse(rowList.get(5).toString().trim()));
                         }
                         workResourcesSetting.setResourcesStatus(rowList.get(6).toString().trim());
-                        WorkResourcesSettingService workResourcesSettingService = new WorkResourcesSettingService();
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",workResourcesSetting);
-                        R r = workResourcesSettingService.setResources(jsonObject);
-                        if ((int)r.get("code") == 0) {
+                        if (workResourcesSetting.save()) {
                             updateNum++;
                         }
                     } catch (Exception e) {

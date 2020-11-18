@@ -502,6 +502,10 @@
         associated_name,associated_num,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
     #end
 
+    #sql("delete")
+
+    #end
+
     #sql("queryLabel")
     select label_id,name,color from 72crm_work_task_label where label_id in(#fori(ids))
     #end

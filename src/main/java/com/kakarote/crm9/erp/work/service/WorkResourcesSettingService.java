@@ -2,12 +2,14 @@ package com.kakarote.crm9.erp.work.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BehaviorEnum;
 import com.kakarote.crm9.common.constant.WorkRecordEnum;
@@ -56,6 +58,7 @@ public class WorkResourcesSettingService {
      * @param jsonObject
      * @return
      */
+    @Before(Tx.class)
     public R setResources(JSONObject jsonObject) {
         WorkResourcesSetting entity = jsonObject.getObject("entity", WorkResourcesSetting.class);
         if(entity.getResourcesId() == null){

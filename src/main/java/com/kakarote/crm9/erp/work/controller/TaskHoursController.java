@@ -84,7 +84,7 @@ public class TaskHoursController extends Controller {
      * 根据工时ID查询工时详情
      */
     public void queryHoursById(@Para("taskHoursId")String taskHoursId){
-        renderJson(taskHoursService.queryById(taskHoursId));
+        renderJson(R.ok().put("data",taskHoursService.queryById(taskHoursId)));
     }
 
     /**
