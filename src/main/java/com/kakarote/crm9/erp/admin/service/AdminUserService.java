@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.poi.excel.BigExcelWriter;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
@@ -22,12 +23,15 @@ import com.kakarote.crm9.erp.admin.common.PinyinEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminAttention;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
+import com.kakarote.crm9.erp.work.common.WorkUserEnum;
 import com.kakarote.crm9.utils.BaseUtil;
+import com.kakarote.crm9.utils.ParamsUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.TagUtil;
 import org.apache.poi.ss.usermodel.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Struct;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,7 +57,7 @@ public class AdminUserService {
                 return R.error("手机号重复！");
             }
             Integer integer = Db.queryInt("select count(*) from 72crm_admin_user where job_number = ?", adminUser.getJobNumber());
-            if(count>0){
+            if (count > 0) {
                 return R.error("工号重复");
             }
             String salt = IdUtil.fastSimpleUUID();
@@ -158,7 +162,7 @@ public class AdminUserService {
         return adminUser;
     }
 
-    public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search,String isResources,String workId) {
+    public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search, String isResources, String workId) {
         List<Integer> deptIdList = new ArrayList<>();
         JSONObject jsonObject = request.getJsonObject();
         if (request.getData().getDeptId() != null) {
@@ -186,13 +190,76 @@ public class AdminUserService {
                 kv.set("pinyinSearch", pinyinSearchList);
             }
         }
-        if(jsonObject.get("isResources")!=null){
-            kv.set("isResources",1);
+        if (jsonObject.get("isResources") != null) {
+            kv.set("isResources", 1);
         }
-        if(jsonObject.get("workId")!=null){
-            kv.set("workId",jsonObject.get("workId"));
+        if (jsonObject.get("workId") != null) {
+            kv.set("workId", jsonObject.get("workId"));
         }
         kv.set("label", request.getData().getLabel());
+
+        StringBuilder conditions = new StringBuilder("1=1");
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (data != null) {
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                JSONObject json = JSON.parseObject(entry.getValue().toString());
+                String condition = json.getString("condition");
+                String value = json.getString("value");
+                String name = json.getString("name");
+                String formType = json.getString("formType");
+                if (!ParamsUtil.isValid(name)) {
+                    return R.error("参数包含非法字段");
+                }
+                if (StrUtil.isNotEmpty(value) && !ParamsUtil.isValid(value)) {
+                    return R.error("参数包含非法字段");
+                }
+                if (StrUtil.isNotEmpty(json.getString("start")) && !ParamsUtil.isValid(json.getString("start"))) {
+                    return R.error("参数包含非法字段");
+                }
+                if (StrUtil.isNotEmpty(json.getString("end")) && !ParamsUtil.isValid(json.getString("end"))) {
+                    return R.error("参数包含非法字段");
+                }
+                boolean isNull = Arrays.asList("isNull", "isNotNull").contains(condition);
+                boolean isTime = StrUtil.isEmpty(json.getString("start")) || StrUtil.isEmpty(json.getString("end"));
+                if (formType.equals("date") && isTime) {
+                    return R.error("需选择起始和结束时间");
+                } else if (!formType.equals("date") && !isNull && StrUtil.isEmpty(value)) {
+                    return R.error("value不能为空");
+                }
+                conditions.append(" and ").append(StrUtil.toUnderlineCase(name));
+                if ("date".equals(formType)) {
+                    conditions.append(" between '").append(json.getString("start")).append("' and '").append(json.getString("end")).append("'");
+                } else if ("is".equals(condition)) {
+                    conditions.append(" = '").append(value).append("'");
+                } else if ("isNot".equals(condition)) {
+                    conditions.append(" != '").append(value).append("'");
+                } else if ("contains".equals(condition)) {
+                    conditions.append(" like '%").append(value).append("%'");
+                } else if ("notContains".equals(condition)) {
+                    conditions.append(" not like '%").append(value).append("%'");
+                } else if ("isNull".equals(condition)) {
+                    conditions.append(" is null");
+                } else if ("isNotNull".equals(condition)) {
+                    conditions.append(" is not null");
+                } else if ("gt".equals(condition)) {
+                    conditions.append(" > ").append(value);
+                } else if ("egt".equals(condition)) {
+                    conditions.append(" >= ").append(value);
+                } else if ("lt".equals(condition)) {
+                    conditions.append(" < ").append(value);
+                } else if ("elt".equals(condition)) {
+                    conditions.append(" <= ").append(value);
+                } else if ("in".equals(condition)) {
+                    conditions.append(" in (").append(value).append(")");
+                } else if ("not in".equals(condition)) {
+                    conditions.append(" not in (").append(value).append(")");
+                }
+            }
+            Kv by = Kv.by("conditions", conditions.toString());
+            List<Object> query = Db.template("work.task.queryTaskBySearch", by).query();
+            query.addAll(Db.template("work.task.queryTaskIdByIds", Kv.by("ids",query)).query());
+            kv.set("userIds",Db.template("work.queryDataUserId", Kv.by("ids",query).set("by", WorkUserEnum.TYPE_1.getType())).query());
+        }
         SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserList", kv);
         if (request.getPageType() == 0) {
             List<Record> recordList = Db.find(sqlPara);
@@ -588,7 +655,7 @@ public class AdminUserService {
     }
 
     @Before(Tx.class)
-    public R userExcelImport(UploadFile file,boolean temp) {
+    public R userExcelImport(UploadFile file, boolean temp) {
         List<String> sqlList = new ArrayList<>();
         List<List<Object>> errList = new ArrayList<>();
         if (file.getFile() == null || !file.getFile().exists()) {
@@ -657,7 +724,7 @@ public class AdminUserService {
                 adminUser.setEmail(email);
                 adminUser.setPost(post);
                 adminUser.setStatus(0);
-                if(temp){
+                if (temp) {
                     adminUser.setIsResources(1);
                 }
                 if (StrUtil.isNotEmpty(sex)) {
@@ -833,15 +900,16 @@ public class AdminUserService {
 
     /**
      * 设置用户是否是人力资源???
+     *
      * @param userIds
      * @param isResources
      * @return
      */
     @Before(Tx.class)
-    public R setResources(String userIds, Integer isResources,String workId) {
+    public R setResources(String userIds, Integer isResources, String workId) {
         List<String> strings = Arrays.asList(userIds.split(","));
         for (String str : strings) {
-            if(isResources ==0){
+            if (isResources == 0) {
                 Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='已完成'", str, str);
                 Integer taskUserCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE task_id in(" +
                         "SELECT num_id FROM 72crm_work_user_record WHERE user_id=?" +
@@ -849,14 +917,14 @@ public class AdminUserService {
                 if (taskCount != 0 || taskUserCount != 0) {
                     return R.error("存在没有完成的任务不能删除");
                 }
-            }else {
+            } else {
                 Integer integer = Db.queryInt("select status from 72crm_admin_user where user_id=?", str);
-                if(integer == 0){
+                if (integer == 0) {
                     return R.error("该用户被禁用不能添加人力资源");
                 }
 
             }
-            Db.update("update 72crm_admin_user SET is_resources=?,work_id=? WHERE user_id=?",isResources,workId,str);
+            Db.update("update 72crm_admin_user SET is_resources=?,work_id=? WHERE user_id=?", isResources, workId, str);
         }
         return R.ok();
     }

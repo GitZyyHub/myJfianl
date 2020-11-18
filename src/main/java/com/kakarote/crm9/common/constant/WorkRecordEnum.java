@@ -19,6 +19,7 @@ public enum   WorkRecordEnum {
     WORKFILE(10,"资料成果"),
     SUBTASKS(11,"子任务模块"),
     HOURS(12,"工时提报"),
+    WORK_DETAILS(13,"项目详情模块"),
     NULL(0, "null");
     ;
 

@@ -47,18 +47,18 @@ public class AdminUserController extends Controller {
     private AdminFileService adminFileService;
 
     /**
+     * @param adminUser
      * @author hmb
      * 设置系统用户
-     * @param adminUser
      */
     @Permissions("manage:users:userSave")
-    public void addUser(@Para("") AdminUser adminUser){
-        renderJson(adminUserService.setUser(adminUser,getPara("roleIds")));
+    public void addUser(@Para("") AdminUser adminUser) {
+        renderJson(adminUserService.setUser(adminUser, getPara("roleIds")));
     }
 
     @Permissions("manage:users:userUpdate")
-    public void setUser(@Para("") AdminUser adminUser){
-        renderJson(adminUserService.setUser(adminUser,getPara("roleIds")));
+    public void setUser(@Para("") AdminUser adminUser) {
+        renderJson(adminUserService.setUser(adminUser, getPara("roleIds")));
     }
 
     /**
@@ -66,31 +66,31 @@ public class AdminUserController extends Controller {
      * 更新状态
      */
     @Permissions("manage:users:userEnables")
-    public void setUserStatus(){
+    public void setUserStatus() {
         String ids = getPara("userIds");
         String status = getPara("status");
-        renderJson(adminUserService.setUserStatus(ids,status));
+        renderJson(adminUserService.setUserStatus(ids, status));
     }
 
     /**
+     * @param basePageRequest 分页对象
      * @author hmb
      * 查询系统用户列表
-     * @param basePageRequest 分页对象
      */
-    public void queryUserList(BasePageRequest<AdminUser> basePageRequest){
+    public void queryUserList(BasePageRequest<AdminUser> basePageRequest) {
         String roleId = getPara("roleId");
         String search = getPara("search");
         String isResources = getPara("isResources");
         String workId = getPara("workId");
-        renderJson(adminUserService.queryUserList(basePageRequest,roleId,search,isResources,workId));
+        renderJson(adminUserService.queryUserList(basePageRequest, roleId, search, isResources, workId));
     }
 
     /**
+     * @param basePageRequest 分页对象
      * @author zxy
      * 查询系统用户列表
-     * @param basePageRequest 分页对象
      */
-    public void queryUserMiNiList(BasePageRequest<AdminUser> basePageRequest){
+    public void queryUserMiNiList(BasePageRequest<AdminUser> basePageRequest) {
         renderJson(adminUserService.queryUserMiNiList(basePageRequest));
     }
 
@@ -99,10 +99,10 @@ public class AdminUserController extends Controller {
      * 重置密码
      */
     @Permissions("manage:users:userEnables")
-    public void resetPassword(){
+    public void resetPassword() {
         String ids = getPara("userIds");
         String pwd = getPara("password");
-        renderJson(adminUserService.resetPassword(ids,pwd));
+        renderJson(adminUserService.resetPassword(ids, pwd));
     }
 
     /**
@@ -110,68 +110,73 @@ public class AdminUserController extends Controller {
      * 查询上级列表
      */
     @Permissions("manage:users:read")
-    public void querySuperior(){
+    public void querySuperior() {
         String realName = getPara("realName");
         renderJson(adminUserService.querySuperior(realName));
     }
 
     /**
      * 查询所有用户列表
+     *
      * @author hmb
      */
     @Permissions("manage:users:read")
-    public void queryAllUserList(){
+    public void queryAllUserList() {
         renderJson(adminUserService.queryAllUserList());
     }
+
     /**
      * @author zxy
      * 查询系统所有用户名称
      */
     @SysLog({LogEnum.ALL_ADDRESS_BOOK, LogEnum.MY_FOLLOW_ADDRESS_BOOK})
-    public void queryListName(BasePageRequest<AdminUser> basePageRequest){
+    public void queryListName(BasePageRequest<AdminUser> basePageRequest) {
         renderJson(adminUserService.queryListName(basePageRequest));
     }
 
     /**
      * 查询当前登录的用户
+     *
      * @author zhangzhiwei
      */
-    public void queryLoginUser(){
+    public void queryLoginUser() {
 
-        AdminUserHisTable userHisTable = AdminUserHisTable.dao.findFirst("select * from 72crm_admin_user_his_table where  type = ? and user_id = ? and his_table = 1",3, BaseUtil.getUserId());
+        AdminUserHisTable userHisTable = AdminUserHisTable.dao.findFirst("select * from 72crm_admin_user_his_table where  type = ? and user_id = ? and his_table = 1", 3, BaseUtil.getUserId());
         boolean flag = false;
-        if (userHisTable != null){
+        if (userHisTable != null) {
             flag = true;
         }
-        EmailAccount account= EmailAccount.getEmailAccount(BaseUtil.getUserId());
+        EmailAccount account = EmailAccount.getEmailAccount(BaseUtil.getUserId());
         Integer isReadNotice = Db.queryInt("select status from 72crm_admin_user_config where user_id = ? and name = 'readNotice'", BaseUtil.getUserId());
         AdminUser user = adminUserService.resetUser(getRequest());
-        renderJson(R.ok().put("data",user)
-                .put("isAdmin",user.getUserId().equals(BaseUtil.getSuperUser()))
+        renderJson(R.ok().put("data", user)
+                .put("isAdmin", user.getUserId().equals(BaseUtil.getSuperUser()))
                 .put("isReadNotice", isReadNotice).put("cardAuth", flag)
                 .put("emailId", account != null ? account.getId() : null)
         );
     }
+
     @Clear
-    public void updateImg(){
-        String prefix= BaseUtil.getDate();
-        UploadFile uploadFile=getFile("file",prefix);
+    public void updateImg() {
+        String prefix = BaseUtil.getDate();
+        UploadFile uploadFile = getFile("file", prefix);
         BaseUtil.setUser(getParaToLong("userId"));
-        R r=adminFileService.upload(uploadFile,null,"file","/"+prefix);
-        if(r.isSuccess()){
-            String url= (String) r.get("url");
-            if(adminUserService.updateImg(url,getParaToLong("userId"))){
+        R r = adminFileService.upload(uploadFile, null, "file", "/" + prefix);
+        if (r.isSuccess()) {
+            String url = (String) r.get("url");
+            if (adminUserService.updateImg(url, getParaToLong("userId"))) {
                 renderJson(R.ok());
                 return;
             }
         }
         renderJson(R.error("修改头像失败"));
     }
-    public void updatePassword(){
-        String oldPass=getPara("oldPwd");
-        String newPass=getPara("newPwd");
-        AdminUser adminUser= BaseUtil.getUser();
-        if(!BaseUtil.verify(adminUser.getUsername()+oldPass,adminUser.getSalt(),adminUser.getPassword())){
+
+    public void updatePassword() {
+        String oldPass = getPara("oldPwd");
+        String newPass = getPara("newPwd");
+        AdminUser adminUser = BaseUtil.getUser();
+        if (!BaseUtil.verify(adminUser.getUsername() + oldPass, adminUser.getSalt(), adminUser.getPassword())) {
             renderJson(R.error("密码输入错误"));
             return;
         }
@@ -179,42 +184,42 @@ public class AdminUserController extends Controller {
         renderJson(adminUserService.updateUser(adminUser));
     }
 
-    @NotNullValidate(value = "realname",message = "姓名不能为空")
-    @NotNullValidate(value = "username",message = "用户名不能为空")
-    public void updateUser(@Para("") AdminUser adminUser){
+    @NotNullValidate(value = "realname", message = "姓名不能为空")
+    @NotNullValidate(value = "username", message = "用户名不能为空")
+    public void updateUser(@Para("") AdminUser adminUser) {
         renderJson(adminUserService.updateUser(adminUser));
     }
 
     /**
-     *
-     * @author zhangzhiwei
-     * @param id 用户ID
+     * @param id       用户ID
      * @param username 用户新账号
      * @param password 用户新密码
+     * @author zhangzhiwei
      */
     @Permissions("manage:users:userUpdate")
-    @NotNullValidate(value = "username",message = "账号不能为空")
-    @NotNullValidate(value = "password",message = "密码不能为空")
+    @NotNullValidate(value = "username", message = "账号不能为空")
+    @NotNullValidate(value = "password", message = "密码不能为空")
     @NotNullValidate("id")
-    public void usernameEdit(@Para("id")Integer id,@Para("username")String username,@Para("password")String password){
-        renderJson(adminUserService.usernameEdit(id,username,password));
+    public void usernameEdit(@Para("id") Integer id, @Para("username") String username, @Para("password") String password) {
+        renderJson(adminUserService.usernameEdit(id, username, password));
     }
 
-    public void queryUserByDeptId(@Para("deptId")Integer deptId){
-        renderJson(R.ok().put("data",adminUserService.queryAllUserByDeptId(deptId)));
+    public void queryUserByDeptId(@Para("deptId") Integer deptId) {
+        renderJson(R.ok().put("data", adminUserService.queryAllUserByDeptId(deptId)));
     }
+
     /**
      * @author zxy
      * 关注和取消关注
      */
-    public void attention(@Para("userId")Long userId){
+    public void attention(@Para("userId") Long userId) {
         renderJson(adminUserService.attention(userId));
     }
 
     /**
      * excel导入员工
      */
-    public void excelImport(){
+    public void excelImport() {
         UploadFile file = getFile("file", "/excel/");
         renderJson(adminUserService.excelImport(file));
     }
@@ -222,30 +227,31 @@ public class AdminUserController extends Controller {
     /**
      * excel导入员工
      */
-    public void userExcelImport(){
+    public void userExcelImport() {
         UploadFile file = getFile("file", "/excel/");
-        renderJson(adminUserService.userExcelImport(file,false));
+        renderJson(adminUserService.userExcelImport(file, false));
     }
 
     /**
      * excel导入人力资源员工
      */
-    public void userImport(){
+    public void userImport() {
         UploadFile file = getFile("file", "/excel/");
-        renderJson(adminUserService.userExcelImport(file,true));
+        renderJson(adminUserService.userExcelImport(file, true));
     }
 
     /**
      * 下载错误模板
+     *
      * @author zhangzhiwei
      */
 
-    public void downExcel(){
-        String token=get("token");
-        File file=new File(BaseConstant.UPLOAD_PATH+"excel/"+token);
-        if(file.exists()){
-            renderFile(file,"import_error.xlsx");
-        }else {
+    public void downExcel() {
+        String token = get("token");
+        File file = new File(BaseConstant.UPLOAD_PATH + "excel/" + token);
+        if (file.exists()) {
+            renderFile(file, "import_error.xlsx");
+        } else {
             renderNull();
         }
     }
@@ -253,7 +259,7 @@ public class AdminUserController extends Controller {
     /**
      * 导出
      */
-    public void  excelexport(BasePageRequest<AdminUser> basePageRequest){
+    public void excelexport(BasePageRequest<AdminUser> basePageRequest) {
         String roleId = getPara("roleId");
         String search = getPara("search");
         String isResources = getPara("isResources");
@@ -262,9 +268,9 @@ public class AdminUserController extends Controller {
         basePageRequest.setPageType(0);
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
-            List<Record> records = (List<Record> )adminUserService.queryUserList(basePageRequest,roleId,search,isResources,workId).get("data");
+            List<Record> records = (List<Record>) adminUserService.queryUserList(basePageRequest, roleId, search, isResources, workId).get("data");
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"username","user_id","status","roleId","parent_id","img","dept_id","create_time"};
+            String[] s = new String[]{"username", "user_id", "status", "roleId", "parent_id", "img", "dept_id", "create_time"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -272,11 +278,7 @@ public class AdminUserController extends Controller {
             List<Record> headList = new ArrayList<>();
             getFields(headList);
             headList.forEach(head -> {
-                if (!Objects.equals(head.getStr("fieldName"), head.getStr("name"))) {
-                    writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("fieldName")), head.getStr("name"));
-                } else {
-                    writer.addHeaderAlias(head.getStr("fieldName"), head.getStr("name"));
-                }
+                writer.addHeaderAlias(head.getStr("fieldName"), head.getStr("name"));
             });
 
             writer.write(list, true);
@@ -307,7 +309,7 @@ public class AdminUserController extends Controller {
     /**
      * 下载上传模版
      */
-    public void updateTemplate(){
+    public void updateTemplate() {
         List<Record> fields = new ArrayList<>();
         getFields(fields);
         //列标题
@@ -321,14 +323,14 @@ public class AdminUserController extends Controller {
         for (Record field : fields) {
 
             handers.add(field.getStr("name"));
-            if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
+            if (Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()) {
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);
-                downRows.add(temp+"");
+                downRows.add(temp + "");
             }
             temp++;
         }
-        try(HSSFWorkbook wb = com.kakarote.crm9.utils.ExcelUtil.createExcelTemplate("系统用户导入模板为必填项",handers, downData, downRows,null,null);) {
+        try (HSSFWorkbook wb = com.kakarote.crm9.utils.ExcelUtil.createExcelTemplate("系统用户导入模板为必填项", handers, downData, downRows, null, null);) {
 
             HttpServletResponse response = getResponse();
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
@@ -343,21 +345,21 @@ public class AdminUserController extends Controller {
         renderNull();
     }
 
-    private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("手机号(*)", "登录密码(*)", "姓名(*)", "性别", "邮箱", "岗位", "部门", "区域", "工号", "职级","状态","角色");
-        List<String> fieldName = Arrays.asList("mobile", "password", "realname", "sex", "email", "post", "deptName", "area", "job_number", "rank", "condition","roleName");
+    private void getFields(List<Record> fields) {
+        List<String> names = Arrays.asList("手机号(*)", "登录密码(*)", "姓名(*)", "性别","上级人员", "邮箱", "岗位", "部门", "区域", "工号", "职级", "状态", "角色");
+        List<String> fieldName = Arrays.asList("mobile", "password", "realname", "sex", "parentName","email", "post", "deptName", "area", "job_number", "rank", "condition", "roleName");
         for (int i = 0; i < names.size(); i++) {
             Record record = new Record();
-            record.set("fieldName",fieldName.get(i));
-            record.set("name",names.get(i));
-            record.set("type",FormTypeEnum.TEXT.getType());
-            if(i==3){
-                record.set("type",FormTypeEnum.SELECT.getType());
-                record.set("options","男,女");
+            record.set("fieldName", fieldName.get(i));
+            record.set("name", names.get(i));
+            record.set("type", FormTypeEnum.TEXT.getType());
+            if (i == 3) {
+                record.set("type", FormTypeEnum.SELECT.getType());
+                record.set("options", "男,女");
             }
-            if(i==10){
-                record.set("type",FormTypeEnum.SELECT.getType());
-                record.set("options","请假,空闲,任务中");
+            if (i == 10) {
+                record.set("type", FormTypeEnum.SELECT.getType());
+                record.set("options", "请假,空闲,任务中");
             }
             fields.add(record);
         }
@@ -367,31 +369,32 @@ public class AdminUserController extends Controller {
      * @author wyq
      * 查询下属user
      */
-    public void querySubUserList(){
-        renderJson(R.ok().put("data",adminUserService.querySubUserList(BaseUtil.getUserId())));
+    public void querySubUserList() {
+        renderJson(R.ok().put("data", adminUserService.querySubUserList(BaseUtil.getUserId())));
     }
 
     /**
      * 查询用户信息，无需任何权限
+     *
      * @param userId 用户ID
      */
-    public void queryUserInfo(@Para("userId") Long userId){
-        AdminUser adminUser=adminUserService.queryUserInfo(userId);
-        renderJson(R.ok().put("data",adminUser));
+    public void queryUserInfo(@Para("userId") Long userId) {
+        AdminUser adminUser = adminUserService.queryUserInfo(userId);
+        renderJson(R.ok().put("data", adminUser));
     }
 
     /**
      * 如果是超级管理员查询全部用户
      * 若不是查询下级用户
      */
-    public void queryAuthUserList(){
+    public void queryAuthUserList() {
         List<Record> recordList;
-        if (BaseUtil.isAdmin()){
+        if (BaseUtil.isAdmin()) {
             recordList = Db.find("select user_id,realname,img from `72crm_admin_user` where status = 1");
-        }else {
+        } else {
             recordList = adminUserService.querySubUserList(BaseUtil.getUserId());
         }
-        renderJson(R.ok().put("data",recordList));
+        renderJson(R.ok().put("data", recordList));
     }
 
     public void readNotice() {
@@ -408,7 +411,7 @@ public class AdminUserController extends Controller {
     /**
      * 标记人员为人力资源
      */
-    public void setResources(@Para("userIds") String userIds , @Para("isResources")Integer isResources,@Para("workId")String workId){
-        renderJson(adminUserService.setResources(userIds,isResources,workId));
+    public void setResources(@Para("userIds") String userIds, @Para("isResources") Integer isResources, @Para("workId") String workId) {
+        renderJson(adminUserService.setResources(userIds, isResources, workId));
     }
 }

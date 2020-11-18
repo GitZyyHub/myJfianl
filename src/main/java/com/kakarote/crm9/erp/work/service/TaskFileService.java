@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.work.service;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.Prop;
@@ -16,6 +17,7 @@ import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.work.common.WorkUserEnum;
+import com.kakarote.crm9.erp.work.entity.Task;
 import com.kakarote.crm9.erp.work.entity.TaskFile;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -37,13 +39,8 @@ public class TaskFileService {
      */
     public R queryPageList(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
-        Kv by = Kv.by("taskId", jsonObject.get("taskId")).set("workId",jsonObject.get("workId"));
-        Integer fileAttr = jsonObject.getInteger("fileAttr");
-        if (fileAttr == null) {
-            by.set("fileAttr", "任务资料");
-        } else {
-            by.set("fileAttr", "资料成果");
-        }
+        Kv by = Kv.by("taskId", jsonObject.get("taskId")).set("workId",jsonObject.get("workId")).set("type",jsonObject.get("ty"));
+        by.set("fileAttr",jsonObject.get("fileAttr"));
         SqlPara sqlPara = Db.getSqlPara("task.file.queryPageList", by);
         if (jsonObject.get("excel") != null) {
             List<Record> records = Db.find(sqlPara);
@@ -93,6 +90,8 @@ public class TaskFileService {
         if (taskFile.getSubtasksId() == null) {
             taskFile.setSubtasksId(taskFile.getTaskId());
         }
+        Long workId = Aop.get(Task.class).findById(taskFile.getSubtasksId()).getWorkId();
+        taskFile.setWorkId(workId);
         if (taskFile.getFileId() == null) {
             taskFile.setCreateUserId(BaseUtil.getUserId());
             taskFile.setCreateTime(new Date());

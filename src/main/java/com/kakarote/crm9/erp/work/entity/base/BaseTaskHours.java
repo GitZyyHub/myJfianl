@@ -23,7 +23,7 @@ public abstract class BaseTaskHours<M extends BaseTaskHours<M>> extends Model<M>
 		return (M)this;
 	}
 
-	public M setWorkId(Integer workId) {
+	public M setWorkId(Long workId) {
 		set("work_id", workId);
 		return (M)this;
 	}

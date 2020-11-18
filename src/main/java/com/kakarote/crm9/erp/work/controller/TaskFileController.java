@@ -94,8 +94,8 @@ public class TaskFileController extends Controller {
      *
      * 通过ID查询
      */
-    public void queryById() {
-        renderJson(taskFileService.queryById(getPara("id")));
+    public void queryById(@Para("id")String id) {
+        renderJson(taskFileService.queryById(id));
     }
 
     /**

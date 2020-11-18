@@ -87,13 +87,12 @@ public abstract class AbstractBasePageList {
     private JSONObject queryScene(JSONObject jsonObject) {
         Integer sceneId = jsonObject.getInteger("sceneId");
         AdminScene byId = AdminScene.dao.findById(sceneId);
-        try {
-            JSONObject data = new JSONObject();
+        try { JSONObject data = new JSONObject();
             if("{}".equals(byId.getData())){
-                data.put("scene", "2");
+                data.put("scene", 2);
                 return data;
             }else if("{\"oneself\":\"oneself\"}".equals(byId.getData())){
-                data.put("scene", "1");
+                data.put("scene", 1);
                 return data;
             }
         } catch (NullPointerException e) {
@@ -225,6 +224,22 @@ public abstract class AbstractBasePageList {
                 String address = value.substring(0, value.length() - 1);
                 conditions.append(" and ").append(name).append(" like '%").append(address).append("%'");
                 sqlObject.put("type", 1);
+            }
+            else if ("task".equals(formType)) {
+                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
+                sqlObject.put("type", FormTypeEnum.TASK.getType());
+            } else if ("milestone".equals(formType)) {
+                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
+                sqlObject.put("type", FormTypeEnum.MILESTONE.getType());
+            } else if ("work".equals(formType)) {
+                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
+                sqlObject.put("type", FormTypeEnum.WORK.getType());
+            } else if ("subTask".equals(formType)) {
+                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
+                sqlObject.put("type", FormTypeEnum.SUBTASK.getType());
+            } else if ("structure".equals(formType)) {
+                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
+                sqlObject.put("type", FormTypeEnum.STRUCTURE.getType());
             } else {
                 //判断不为空和为空不校验value
                 boolean isNull = Arrays.asList("isNull", "isNotNull").contains(condition);
@@ -441,11 +456,16 @@ public abstract class AbstractBasePageList {
      * @param workId        项目id
      * @param workRendAuthEnum  查询权限ID
      * @param integer       是否为空（查询下属）
+     * @param s       查询人员任务时传
      */
-    public void queryDataAuth(WorkUserEnum workUserEnum, Kv kv, CrmEnum crmEnum, Integer workId, WorkRendAuthEnum workRendAuthEnum,Integer integer){
+    public void queryDataAuth(WorkUserEnum workUserEnum, Kv kv, CrmEnum crmEnum, Integer workId, WorkRendAuthEnum workRendAuthEnum,Integer integer,Long... s){
         AdminUser user = BaseUtil.getUser();
         List<Integer> roles = user.getRoles();
-        Long userId = user.getUserId();
+        Long userId = user.getUserId();;
+        if(s.length >0){
+            userId =s[0];
+        }
+
         if (BaseUtil.getSuperUser().equals(userId) || roles.contains(BaseUtil.getSuperRole()) || crmEnum.equals(CrmEnum.CRM_PRODUCT) || crmEnum.equals(CrmEnum.CRM_CUSTOMER_POOL)) {
             if(integer == null){
                 integer = 5;
@@ -461,26 +481,24 @@ public abstract class AbstractBasePageList {
         }
         if(integer == 2||integer==1){
             List<Object> strings = null;
-            String subUserId =null;
             if(integer == 2) {
-                 subUserId = getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+                String subUserId = getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
                 strings = Arrays.asList(subUserId.split(","));
             }else if(integer == 1) {
                 strings = Arrays.asList(userId);
             }
-            strings.removeAll(Collections.singleton(""));
             Kv set = Kv.by("ids", strings).set("ty", workUserEnum.getType());
             if(workId!=null){
                 set.set("workId", workId);
             }
             List<Record> records = Db.find(Db.getSqlPara("work.queryDataAuth", set));
-            List<Integer> numId = records.stream().map(record -> {
-                return record.getInt("num_id");
-            }).collect(Collectors.toList());
-            if (integer == 2 && subUserId.equals(BaseUtil.getUserId().toString())){
-                kv.set("dataAuth",-1);
-            }else {
+            if(records.size()>0){
+                List<Integer> numId = records.stream().map(record -> {
+                    return record.getInt("num_id");
+                }).collect(Collectors.toList());
                 kv.set("dataAuth",numId);
+            }else {
+                kv.set("dataAuth",Arrays.asList(0));
             }
         }else if(integer == 5){
             return;
@@ -498,12 +516,109 @@ public abstract class AbstractBasePageList {
             List<Long> list = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
             if(list != null && list.size() > 0){
                 for(Long l : list){
-                    ids.append(",").append(l).append(getSubUserId(l, deepness - 1));
+                    getSubUserId(l, deepness - 1);
+                    ids.append(l+",");
                 }
             }
         }
         return StrUtil.isNotEmpty(ids.toString().trim()) ? ids.toString() : userId.toString();
     }
+
+   /* *//**
+     * 比较两个实体属性值，返回一个boolean,true则表时两个对象中的属性值无差异
+     * @param oldObject 进行属性比较的对象1
+     * @param newObject 进行属性比较的对象2
+     * @return 属性差异比较结果boolean
+     *//*
+    public static boolean compareObject(Object oldObject, Object newObject) {
+        Map<String, Map<String,Object>> resultMap=compareFields(oldObject,newObject);
+
+        if(resultMap.size()>0) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    *//**
+     * 比较两个实体属性值，返回一个map以有差异的属性名为key，value为一个Map分别存oldObject,newObject此属性名的值
+     * @param oldObject 进行属性比较的对象1
+     * @param newObject 进行属性比较的对象2
+     * @return 属性差异比较结果map
+     *//*
+    @SuppressWarnings("rawtypes")
+    public static Map<String, Map<String,Object>> compareFields(Object oldObject, Object newObject) {
+        Map<String, Map<String, Object>> map = null;
+
+        try{
+            *//**
+             * 只有两个对象都是同一类型的才有可比性
+             *//*
+            if (oldObject.getClass() == newObject.getClass()) {
+                map = new HashMap<String, Map<String,Object>>();
+
+                Class clazz = oldObject.getClass();
+                //获取object的所有属性
+                PropertyDescriptor[] pds = Introspector.getBeanInfo(clazz,Object.class).getPropertyDescriptors();
+
+                for (PropertyDescriptor pd : pds) {
+                    //遍历获取属性名
+                    String name = pd.getName();
+
+                    //获取属性的get方法
+                    Method readMethod = pd.getReadMethod();
+
+                    // 在oldObject上调用get方法等同于获得oldObject的属性值
+                    Object oldValue = readMethod.invoke(oldObject);
+                    // 在newObject上调用get方法等同于获得newObject的属性值
+                    Object newValue = readMethod.invoke(newObject);
+
+                    if(oldValue instanceof List){
+                        continue;
+                    }
+
+                    if(newValue instanceof List){
+                        continue;
+                    }
+
+                    if(oldValue instanceof Timestamp){
+                        oldValue = new Date(((Timestamp) oldValue).getTime());
+                    }
+
+                    if(newValue instanceof Timestamp){
+                        newValue = new Date(((Timestamp) newValue).getTime());
+                    }
+
+                    if(oldValue == null && newValue == null){
+                        continue;
+                    }else if(oldValue == null && newValue != null){
+                        Map<String,Object> valueMap = new HashMap<String,Object>();
+                        valueMap.put("oldValue",oldValue);
+                        valueMap.put("newValue",newValue);
+
+                        map.put(name, valueMap);
+
+                        continue;
+                    }
+
+                    if (!oldValue.equals(newValue)) {// 比较这两个值是否相等,不等就可以放入map了
+                        Map<String,Object> valueMap = new HashMap<String,Object>();
+                        valueMap.put("oldValue",oldValue);
+                        valueMap.put("newValue",newValue);
+
+                        map.put(name, valueMap);
+                    }
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return map;
+    }
+*/
+
+
 
 }
 

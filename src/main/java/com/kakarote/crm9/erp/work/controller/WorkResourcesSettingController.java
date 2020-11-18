@@ -147,7 +147,6 @@ public class WorkResourcesSettingController extends Controller {
 
         int temp = 0;
         for (Record field : fields) {
-
             handers.add(field.getStr("name"));
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
@@ -174,7 +173,7 @@ public class WorkResourcesSettingController extends Controller {
 
 
     private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("资源名称", "资源描述", "资源提供方", "负责人", "计划时间", "实际时间", "资源状态");
+        List<String> names = Arrays.asList("资源名称(*)", "资源描述(*)", "资源提供方(*)", "负责人(*)", "计划时间", "实际时间", "资源状态");
         List<String> fieldName = Arrays.asList("resources_name", "resources_describe", "resources_provide", "main_user_name", "plan_time", "actual_time", "resources_status");
         for (int i = 0; i < 7; i++) {
             Record record = new Record();

@@ -101,6 +101,8 @@ public class WorkController extends Controller {
      *查询待办项目???
      */
     public void waiting(BasePageRequest<Work> basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        jsonObject.put("isWaiting","yes");
         renderJson(workService.waiting(basePageRequest, false));
     }
 
@@ -118,7 +120,7 @@ public class WorkController extends Controller {
      * 批量修改项目阶段
      */
     @Permissions({"project:projectManage:updatePhase"})
-    public void updateWorkPhase(@Para("ids")String ids,@Para("phase") String phase,@Para("checkUserId") Long checkUserId){
+    public void updateWorkPhase(@Para("ids")Long ids,@Para("phase") String phase,@Para("checkUserId") Long checkUserId){
         renderJson(workService.updateWorkPhase(ids,phase,checkUserId));
     }
 
@@ -259,8 +261,11 @@ public class WorkController extends Controller {
 
         int temp = 0;
         for (Record field : fields) {
-
-            handers.add(field.getStr("name"));
+            String name = field.getStr("name");
+            if(field.getInt("is_null")==1){
+                name += "(*)";
+            }
+            handers.add(name);
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);

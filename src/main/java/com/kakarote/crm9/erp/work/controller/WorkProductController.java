@@ -199,7 +199,11 @@ public class WorkProductController extends Controller {
         int temp = 0;
         for (Record field : fields) {
 
-            handers.add(field.getStr("name"));
+            String name = field.getStr("name");
+            if(field.getInt("is_null")==1){
+                name += "(*)";
+            }
+            handers.add(name);
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);

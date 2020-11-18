@@ -17,11 +17,16 @@ import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPool;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerPoolRule;
+import com.kakarote.crm9.erp.work.common.WorkRendAuthEnum;
+import com.kakarote.crm9.erp.work.common.WorkUserEnum;
+import com.kakarote.crm9.erp.work.service.WorkService;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
+import org.apache.poi.util.Internal;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,20 +51,24 @@ public class CrmBackLogService {
     @Inject
     private CrmReceivablesService crmReceivablesService;
 
+    @Inject
+    private WorkService workService;
+
     /**
      * 待办事项数量统计
      */
     public R num() {
         Long userId = BaseUtil.getUserId();
-        JSONObject jsonObject= Aop.get(AdminRoleService.class).auth(userId);
-        List<String> authList= AuthUtil.queryAuth(jsonObject, "");
-        Kv kv = RedisManager.getRedis().get("queryBackLogNum:"+userId.toString());;
-        if(kv!=null){
+        JSONObject jsonObject = Aop.get(AdminRoleService.class).auth(userId);
+        List<String> authList = AuthUtil.queryAuth(jsonObject, "");
+        Kv kv = RedisManager.getRedis().get("queryBackLogNum:" + userId.toString());
+        ;
+        if (kv != null) {
             return R.ok().put("data", kv);
-        }else {
-            kv=new Kv();
+        } else {
+            kv = new Kv();
         }
-        if (authList.contains("crm:customer:index")){
+        if (authList.contains("crm:customer:index")) {
             Integer todayCustomer = Db.queryInt(Db.getSql("crm.backLog.todayCustomerNum"), userId);
             Integer followCustomer = Db.queryInt(Db.getSql("crm.backLog.followCustomerNum"), userId);
             kv.set("todayCustomer", todayCustomer).set("followCustomer", followCustomer);
@@ -97,11 +106,11 @@ public class CrmBackLogService {
                 kv.set("putInPoolRemind", customerIdSet.size());
             }
         }
-        if (authList.contains("crm:leads:index")){
+        if (authList.contains("crm:leads:index")) {
             Integer followLeads = Db.queryInt(Db.getSql("crm.backLog.followLeadsNum"), userId);
             kv.set("followLeads", followLeads);
         }
-        if (authList.contains("crm:contract:index")){
+        if (authList.contains("crm:contract:index")) {
             AdminConfig adminConfig = AdminConfig.getConfig("expiringContractDays");
             if (1 == adminConfig.getStatus()) {
                 Integer endContract = Db.queryInt(Db.getSql("crm.backLog.endContractNum"), adminConfig.getValue(), userId);
@@ -117,12 +126,39 @@ public class CrmBackLogService {
             }
         }
 
-        if (authList.contains("crm:receivables:index")){
+        if (authList.contains("crm:receivables:index")) {
             Integer checkReceivables = Db.queryInt(Db.getSql("crm.backLog.checkReceivablesNum"), userId);
             Integer remindReceivablesPlan = Db.queryInt(Db.getSql("crm.backLog.remindReceivablesPlanNum"), userId);
             kv.set("checkReceivables", checkReceivables).set("remindReceivablesPlan", remindReceivablesPlan);
         }
-        RedisManager.getRedis().setex("queryBackLogNum:"+userId.toString(),60,kv);
+
+        if (authList.contains("project:task:index")) {
+            Kv by = Kv.by("userId",  BaseUtil.getUserId()).set("isWaiting",1);
+            workService.queryDataAuth(WorkUserEnum.TYPE_1,by,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,1);
+            if (by != null) {
+                //查询待办
+                Integer integer = Db.template("work.task.waitingCount", by).queryInt();
+                kv.set("taskWaitingNum", integer);
+            }
+        }
+        if (authList.contains("project:projectManage:index")) {
+            Kv by = Kv.by("userId", BaseUtil.getUserId()).set("workPhase","结项");
+            workService.queryDataAuth(WorkUserEnum.WORK, by, CrmEnum.WORK, null, WorkRendAuthEnum.WORK, 1);
+            if (by != null) {
+                //查询待办
+                Integer integer = Db.template("work.waitingCount", by).queryInt();
+                kv.set("workWaitingNum", integer);
+            }
+        }
+        if (authList.contains("project:projectManage:index")) {
+            Integer checkWorkNum = Db.queryInt(Db.getSql("work.checkWorkNum"), userId);
+            kv.set("checkWorkNum", checkWorkNum);
+        }
+        if (authList.contains("project:taskHours:index")) {
+            Integer checkHoursNum = Db.queryInt(Db.getSql("task.hours.checkHoursNum"), userId);
+            kv.set("checkHoursNum", checkHoursNum);
+        }
+        RedisManager.getRedis().setex("queryBackLogNum:" + userId.toString(), 60, kv);
         return R.ok().put("data", kv);
     }
 

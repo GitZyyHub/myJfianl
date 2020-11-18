@@ -581,8 +581,12 @@ public class CrmExcelUtil {
                         workResourcesSetting.setResourcesDescribe(rowList.get(1).toString().trim());
                         workResourcesSetting.setResourcesProvide(rowList.get(2).toString().trim());
                         workResourcesSetting.setMainUserId(Integer.parseInt(rowList.get(3).toString().trim()));
-                        workResourcesSetting.setPlanTime(sdf.parse(rowList.get(4).toString().trim()));
-                        workResourcesSetting.setActualTime(sdf.parse(rowList.get(5).toString().trim()));
+                        if(StrUtil.isEmpty(rowList.get(4).toString())){
+                            workResourcesSetting.setPlanTime(sdf.parse(rowList.get(4).toString().trim()));
+                        }
+                        if(StrUtil.isEmpty(rowList.get(5).toString())){
+                            workResourcesSetting.setActualTime(sdf.parse(rowList.get(5).toString().trim()));
+                        }
                         workResourcesSetting.setResourcesStatus(rowList.get(6).toString().trim());
                         WorkResourcesSettingService workResourcesSettingService = new WorkResourcesSettingService();
                         JSONObject jsonObject = new JSONObject();
@@ -972,26 +976,19 @@ public class CrmExcelUtil {
                             errorList.add(rowList);
                             return;
                         }
-                        workDemand.setDescribe(rowList.get(4).toString().trim());
+                        workDemand.setDemandDescribe(rowList.get(4).toString().trim());
                         workDemand.setDemandStatus(rowList.get(5).toString().trim());
                         workDemand.setDemandVersion(rowList.get(6).toString().trim());
                         workDemand.setPlan(rowList.get(7).toString().trim());
                         workDemand.setDemandNumber(rowList.get(8).toString().trim());
-                        workDemand.setProductPercentage(rowList.get(9).toString().trim());
-                        workDemand.setProductDescribe(rowList.get(10).toString().trim());
-                        if (StrUtil.isEmptyIfStr(rowList.get(11))) {
-                            rowList.add(0, "需求描述不能为空");
+
+                        if (StrUtil.isEmptyIfStr(rowList.get(9))) {
+                            rowList.add(0, "需求类型不能为空");
                             errorList.add(rowList);
                             return;
                         }
-                        workDemand.setDemandType(rowList.get(11).toString().trim());
-                        workDemand.save();
-
-                        WorkDemandService workDemandService = new WorkDemandService();
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",workDemand);
-                        R r = workDemandService.setDemand(jsonObject);
-                        if ((int)r.get("code") == 0) {
+                        workDemand.setDemandType(rowList.get(9).toString().trim());
+                        if(workDemand.save()){
                             updateNum++;
                         }
 

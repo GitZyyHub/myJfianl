@@ -266,7 +266,6 @@ public class AdminSysConfigController extends Controller {
                 Db.update("update 72crm_admin_field set is_null=? where field_id=1229893",status);
             }
         });
-
         renderJson(R.ok());
     }
 }

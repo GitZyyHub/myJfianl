@@ -80,7 +80,7 @@ public class WorkRiskController extends Controller {
      */
     @Permissions({"project:risk:excelImport"})
     public void updateRiskTemplate(){
-        List<String> handers = Arrays.asList("发生阶段","发现方式","方向","风险类型","风险等级","发现人员","发现日期","跟踪人员","详细说明","影响范围","解决建议","解决人员","解决日期","风险状态");
+        List<String> handers = Arrays.asList("发生阶段(*)","发现方式(*)","方向(*)","风险类型(*)","风险等级(*)","发现人员(*)","发现日期(*)","跟踪人员(*)","详细说明(*)","影响范围(*)","解决建议(*)","解决人员","解决日期","风险状态");
         //列标题
 
         //下拉框数据(数组)
@@ -131,7 +131,7 @@ public class WorkRiskController extends Controller {
             JSONObject jsonObject = (JSONObject)workRiskService.queryPageList(basePageRequest).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"foundUser","found_user_id","risk_id","solveUser","solve_user_id","trackingUser","tracking_user_id"};
+            String[] s = new String[]{"found_user_id","risk_id","solve_user_id","tracking_user_id"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -139,11 +139,7 @@ public class WorkRiskController extends Controller {
             List<Record> headList = new ArrayList<>();
             addField(headList);
             headList.forEach(head -> {
-                if (!Objects.equals(head.getStr("field_name"), head.getStr("name"))) {
-                    writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("field_name")), head.getStr("name"));
-                } else {
-                    writer.addHeaderAlias(head.getStr("field_name"), head.getStr("name"));
-                }
+                writer.addHeaderAlias(head.getStr("field_name"), head.getStr("name"));
             });
 
             writer.write(list, true);

@@ -92,7 +92,18 @@ public class AdminExamineRecordController extends Controller {
                 auth = AuthUtil.isCrmAuth(CrmEnum.CRM_RECEIVABLES, id);
             } else {
                 id = Db.queryInt("select invoice_id from `72crm_crm_invoice` where examine_record_id = ?", recordId);
-                auth = AuthUtil.isCrmAuth(CrmEnum.CRM_INVOICE, id);
+                if(id != null){
+                    auth = AuthUtil.isCrmAuth(CrmEnum.CRM_INVOICE, id);
+                }else {
+                    id = Db.queryInt("select hours_id from `72crm_task_hours` where examine_record_id = ?", recordId);
+                    if(id != null){
+                        auth = AuthUtil.isCrmAuth(CrmEnum.TASK_HOURS, id);
+                    }else {
+                        id = Db.queryInt("select work_id from `72crm_work` where examine_record_id = ?", recordId);
+                        auth = AuthUtil.isCrmAuth(CrmEnum.WORK, id);
+                    }
+                }
+
             }
         }
         return auth;

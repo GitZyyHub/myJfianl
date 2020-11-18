@@ -99,6 +99,10 @@
           #end
           )
         #end
+        #if(userIds)
+            and user_id in (#fori(userIds))
+        #end
+        #(conditions)
         order by status desc
     #end
     #sql("querySuperior")

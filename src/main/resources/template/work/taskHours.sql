@@ -1,8 +1,12 @@
 #namespace("task.hours")
 
     #sql("queryPageList")
+    select * from (
         SELECT
             hours_id,
+            work_id,
+            (select work_name from 72crm_work where work_id=h.work_id) work_name,
+            (select work_num from 72crm_work where work_id=h.work_id) work_num,
             task_id,
             (select task_name from 72crm_task where task_id=h.task_id) task_name,
             main_user_id,
@@ -21,12 +25,15 @@
             h.create_time,
             h.examine_time,
             (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) check_status,
-            create_time
+            update_time
         FROM
         72crm_task_hours h
         where 1=1
         #if(taskId)
             and task_id = #para(taskId)
+        #end
+        #if(dataAuth)
+            and hours_id in (#fori(dataAuth))
         #end
         #if(workId)
         and work_id = #para(workId)
@@ -34,6 +41,7 @@
         #if(task)
             and subtasks_id in #fori(task)
         #end
+        ) as views where 1=1
         #for(query:queryList)
             #(query.get("sql"))
         #end
@@ -68,7 +76,12 @@
         FROM
         72crm_task_hours h
         where 1=1
-        and create_user_id = #para(userId)
+        #if(workId)
+            and work_id=#para(workId)
+        #end
+        #if(userId)
+            and create_user_id = #para(userId)
+        #end
         ORDER BY update_time desc
     #end
 
@@ -137,7 +150,7 @@
     #end
 
     #sql ("hoursRecordList")
-        select r.*,(select realname from 72crm_admin_user where user_id=r.create_user_id) from 72crm_task_hours_record r where 1=1
+        select r.*,(select realname from 72crm_admin_user where user_id=r.create_user_id) create_user_name from 72crm_task_hours_record r where 1=1
         #if(taskId)
          and r.task_id=#para(taskId)
         #end
@@ -154,6 +167,13 @@
             and r.work_id = #para(workId)
         #end
     #end
+
+  #sql ("checkHoursNum")
+  select count(*)
+  from 72crm_work as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
+  left join 72crm_admin_examine_log as c on b.record_id = c.record_id
+  where c.examine_user = ? and a.check_status in (0,3) and c.examine_status in (0,3) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
+  #end
 
 
 #end

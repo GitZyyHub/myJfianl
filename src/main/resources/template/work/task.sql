@@ -1,7 +1,7 @@
 #namespace("work.task")
 
     #sql ("advancedSearch")
-
+        select * from (
         SELECT
             t1.task_id,
             t1.class_id,
@@ -22,6 +22,7 @@
             t1.batch_id,
             t1.main_user_id,
             t1.pid,
+            t1.owner_user_id,
             (select task_name from 72crm_task where t1.pid=task_id) p_name,
             (select work_name from 72crm_work where t1.work_id=work_id) work_name,
             (select task_name from 72crm_task where t1.before_id=task_id) before_name,
@@ -55,9 +56,12 @@
         #if(_front)
             and t1.task_id!=#para(_front)
         #end
-        #if(_before_id)
-            and t1.before_id=#para(_before_id)
+        #if(_pid)
+            and t1.pid=#para(_pid)
+        #else
+            and t1.pid is null
         #end
+        ) as views where 1=1
         #for(query:queryList)
             #(query.get("sql"))
         #end
@@ -88,6 +92,7 @@
             t1.batch_id,
             t1.main_user_id,
             t1.pid,
+            t1.owner_user_id,
             (select task_name from 72crm_task where t1.pid=task_id) p_name,
             (select work_name from 72crm_work where t1.work_id=work_id) work_name,
             (select task_name from 72crm_task where t1.before_id=task_id) before_name,
@@ -101,7 +106,6 @@
     #end
 
     #sql("waiting")
-
         SELECT
             t1.task_id,
             t1.class_id,
@@ -122,6 +126,7 @@
             t1.batch_id,
             t1.main_user_id,
             t1.pid,
+            t1.owner_user_id,
             (select task_name from 72crm_task where t1.pid=task_id) p_name,
             (select work_name from 72crm_work where t1.work_id=work_id) work_name,
             (select task_name from 72crm_task where t1.before_id=task_id) before_name,
@@ -136,10 +141,37 @@
         #if(dataAuth)
             and task_id in (#fori(dataAuth))
         #end
+        #if(workId)
+            and work_id=#para(workId)
+        #end
         #if(isWaiting)
-            and status!='已完成'
+            and (status!='已完成' or completeness!=100)
         #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
+    #end
+    #sql("waitingCount")
+        SELECT
+           count(1)
+        FROM
+            72crm_task AS t1 where 1=1
+        #for(query:queryList)
+            #(query.get("sql"))
+        #end
+        #if(dataAuth)
+            and task_id in (#fori(dataAuth))
+        #end
+        #if(isWaiting)
+            and (status!='已完成' or completeness!=100)
+        #end
+
+    #end
+
+    #sql ("queryTaskBySearch")
+    select task_id from 72crm_task where #(conditions)
+    #end
+
+    #sql("queryTaskIdByIds")
+    select task_id from 72crm_task where pid in (#fori(ids))
     #end
 
     #sql("querySubtasksByTaskHours")
@@ -190,13 +222,13 @@
         #if(_work_id)
             and t1.work_id=#para(_work_id)
         #end
-        #if(_before_id)
-            and t1.before_id=#para(_before_id)
+        #if(_pid)
+            and t1.pid=#para(_pid)
         #else
-            and t1.before_id=0
+            and t1.pid is null
         #end
-        #for(query:queryList)
-                    #(query.get("sql"))
+        #for(query : queryList)
+            #if(query.get("type")==1) #(query.get("sql")) #end
         #end
     #end
 
@@ -213,8 +245,7 @@
             t1.task_name,
             t1.description,
             t1.`status`,
-            t1.start_time,
-            t1.end_time,
+            DATE_FORMAT( t1.start_time, '%Y-%m-%d %H:%i:%S' ) start_time, DATE_FORMAT( t1.end_time, '%Y-%m-%d %H:%i:%S' ) end_time,
             t1.completeness,
             t1.priority,
             t1.difficulty,
@@ -225,9 +256,7 @@
             main_user_id,
             (select realname from 72crm_admin_user where user_id=t1.main_user_id) main_user_name,
             milestone_id,
-            (select milestone_name from 72crm_milestone where milestone_id=t1.milestone_id) milestone_name,
-            create_user_id,
-            (select realname from 72crm_admin_user where user_id=t1.main_user_id) create_user_name
+            (select milestone_name from 72crm_milestone where milestone_id=t1.milestone_id) milestone_name
         FROM
             72crm_task AS t1
         WHERE t1.task_id = ?
@@ -397,7 +426,7 @@
        and a.priority = #para(priority)
       #end
       #if(date)
-       and date_format(a.stop_time,'%Y-%m-%d') = #para(date)
+       and date_format(a.stop_time,'%Y-%m-%d %H:%i:%S') = #para(date)
       #end
       #if(taskName)
        and a.name like concat('%', #para(taskName),'%')
@@ -450,7 +479,7 @@
        and a.priority = #para(priority)
       #end
       #if(date)
-       and date_format(a.stop_time,'%Y-%m-%d') = #para(date)
+       and date_format(a.stop_time,'%Y-%m-%d %H:%i:%S') = #para(date)
       #end
       #if(taskName)
        and a.name like concat('%', #para(taskName),'%')
@@ -492,7 +521,7 @@
        and a.task_id!=#para(_front)
       #end
       #if(date)
-       and date_format(a.stop_time,'%Y-%m-%d') = #para(date)
+       and date_format(a.stop_time,'%Y-%m-%d %H:%i:%S') = #para(date)
       #end
       #if(taskName)
        and a.name like concat('%', #para(taskName),'%')

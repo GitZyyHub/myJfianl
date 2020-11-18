@@ -44,7 +44,7 @@ public class WorkHistoricalRecordController extends Controller {
         JSONObject json = basePageRequest.getJsonObject();
         json.fluentPut("excel", "yes");
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
-            JSONObject jsonObject = (JSONObject)workHistoricalRecordService.queryRecordList(basePageRequest,false).get("data");
+            JSONObject jsonObject = (JSONObject)workHistoricalRecordService.queryRecordList(basePageRequest,true).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
             String[] s = new String[]{"create_time","id","operation_id","operation_user_id","work_id","task_id"};
@@ -91,7 +91,7 @@ public class WorkHistoricalRecordController extends Controller {
         List<String> names =new ArrayList<>();
         List<String> fieldName = new ArrayList<>();
         WorkRecordEnum parse = WorkRecordEnum.parse(type);
-        List<Integer> integers = Arrays.asList(2, 3, 4, 5, 6);
+        List<Integer> integers = Arrays.asList(2, 3, 4, 5, 6,13);
         List<Integer> task = Arrays.asList(7, 12, 11);
         if (integers.contains(parse.getType())) {
             names.add("模块");

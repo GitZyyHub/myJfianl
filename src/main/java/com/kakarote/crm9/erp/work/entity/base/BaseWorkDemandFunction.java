@@ -36,4 +36,12 @@ public abstract class BaseWorkDemandFunction<M extends BaseWorkDemandFunction<M>
 		return getInt("function_id");
 	}
 
+	public M setProductId(Integer productId) {
+		set("product_id", productId);
+		return (M)this;
+	}
+
+	public Integer getProductId() {
+		return getInt("product_id");
+	}
 }

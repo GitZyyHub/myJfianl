@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
+import com.jfinal.json.Json;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
@@ -53,30 +54,30 @@ public class TaskHoursService extends AbstractBasePageList {
         CrmEnum crmEnum = CrmEnum.TASK_HOURS;
         JSONObject jsonObject1 = basePageRequest.getJsonObject();
         Kv kv = getKv(basePageRequest, crmEnum, isDataAuth);
-        kv.set("taskId",jsonObject1.get("taskId"));
-        kv.set("task",jsonObject1.get("task"));
-        queryDataAuth(WorkUserEnum.TASK_HOURS,kv,CrmEnum.TASK_HOURS,null, WorkRendAuthEnum.HOURS,null);
-        if(kv == null){
+        kv.set("taskId", jsonObject1.get("taskId"));
+        kv.set("task", jsonObject1.get("task"));
+        queryDataAuth(WorkUserEnum.HOURS, kv, CrmEnum.TASK_HOURS, null, WorkRendAuthEnum.HOURS, null);
+        if (kv == null) {
             return R.error("无权限");
         }
         List<Record> records = Db.find(Db.getSqlPara("task.hours.queryPageList", kv));
         String time = Db.queryStr("select lock_time from 72crm_task_hours_lock order by create_time desc limit 0,1");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if(!StrUtil.isEmpty(time)){
+        for (Record record : records) {
+            if (record.getInt("task_id").equals(record.getInt("subtasks_id"))) {
+                record.set("subtasks_id", null);
+                record.set("subtasks_name", null);
+            }
+            //判断工时是否被锁定
             try {
-                Date lockTime = simpleDateFormat.parse(time);
-                for (Record record : records) {
-                    if(record.getInt("task_id")==record.getInt("subtasks_id")){
-                        record.remove("subtasks_id");
-                        record.remove("subtasks_name");
-                    }
+                if (!StrUtil.isEmpty(time)) {
                     String create = record.getStr("create_time");
                     Date createTime = simpleDateFormat.parse(create);
-                    //判断工时是否被锁定
-                    if(createTime.before(lockTime)){
-                        record.set("is_lock",0);
-                    }else {
-                        record.set("is_lock",1);
+                    Date lockTime = simpleDateFormat.parse(time);
+                    if (createTime.before(lockTime)) {
+                        record.set("is_lock", 0);
+                    } else {
+                        record.set("is_lock", 1);
                     }
                 }
             } catch (ParseException e) {
@@ -97,7 +98,7 @@ public class TaskHoursService extends AbstractBasePageList {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Integer userId = jsonObject.getInteger("userId");
         Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("task.hours.queryHoursByUserId", Kv.by("userId", userId)));
-        return R.ok().put("data",page);
+        return R.ok().put("data", page);
     }
 
     /**
@@ -110,7 +111,7 @@ public class TaskHoursService extends AbstractBasePageList {
     public R setTaskHours(JSONObject jsonObject) {
         TaskHours taskHours = jsonObject.getObject("entity", TaskHours.class);
         Task task = Task.dao.findById(taskHours.getTaskId());
-        if(taskHours.getSubtasksId()!=null){
+        if (taskHours.getSubtasksId() != null) {
             Task subtasks = Task.dao.findById(taskHours.getSubtasksId());
             if (subtasks == null) {
                 return R.error("任务不存在");
@@ -122,21 +123,32 @@ public class TaskHoursService extends AbstractBasePageList {
         }
         Date startTime = taskHours.getStartTime();
         Date endTime = taskHours.getEndTime();
-        if (startTime != null && endTime != null && startTime.compareTo(endTime) > 0) {
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+
+        if (startTime != null && endTime != null) {
+            if(!startTime.before(endTime)){
+                return R.error("结束时间应大于开始时间");
+            }else if((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30){
+                return R.error("开始时间到结束时间不能超过30天");
+            }else{
+                Long i = (endTime.getTime() - startTime.getTime()) / (60 * 60 * 1000);
+                taskHours.setWorkingHours(i);
+            }
+        }
+        /*if (startTime != null && endTime != null && !startTime.before(endTime) && fmt.format(startTime).equals(fmt.format(endTime))) {
             return R.error("结束时间应大于开始时间");
-        } else if ((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30) {
+        } else if (startTime != null && endTime != null&&((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30)) {
             return R.error("开始时间到结束时间不能超过30天");
         } else {
-            Long i = (endTime.getTime() - startTime.getTime()) / (60 * 60 * 1000);
-            taskHours.setWorkingHours(i);
-        }
+
+        }*/
         Record examineData = new Record();
         Integer examineCount = Db.queryInt("select count(1) from 72crm_admin_examine where category_type = 4 and status = 1");
         if (taskHours.getHoursId() == null) {
             Integer integer;
-            if(taskHours.getSubtasksId() != null){
+            if (taskHours.getSubtasksId() != null) {
                 integer = Db.queryInt("select count(1) from 72crm_task_hours where task_id=? and subtasks_id=?", taskHours.getTaskId(), taskHours.getSubtasksId());
-            }else {
+            } else {
                 integer = Db.queryInt("select count(1) from 72crm_task_hours where task_id=? and subtasks_id=?", taskHours.getTaskId(), taskHours.getTaskId());
             }
             if (integer != 0)
@@ -183,17 +195,19 @@ public class TaskHoursService extends AbstractBasePageList {
                 if (taskHours.getCheckStatus() == null)
                     taskHours.setCheckStatus(1);
             }
-            if(taskHours.getSubtasksId()==null){
+            if (taskHours.getSubtasksId() == null) {
                 taskHours.setSubtasksId(taskHours.getTaskId()).setSubtasksName(task.getTaskName());
             }
+
+            taskHours.setWorkId(task.getWorkId());
             taskHours.save();
-            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.HOURS, BehaviorEnum.SAVE, taskHours.getHoursId(), null, null,taskHours.getHoursId());
+            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.HOURS, BehaviorEnum.SAVE, taskHours.getHoursId(), null, null, taskHours.getHoursId());
 
         } else {
             TaskHours temp = TaskHours.dao.findById(taskHours.getHoursId());
             if (temp.getCheckStatus() == 1)
                 return R.error("审核已经通过不能再次修改");
-            if(!temp.getCreateTime().before(new Date())){
+            if (!temp.getCreateTime().before(new Date())) {
                 return R.error("工时被被锁定");
             }
             taskHours.setCheckStatus(temp.getCheckStatus());
@@ -202,19 +216,20 @@ public class TaskHoursService extends AbstractBasePageList {
             Record first = queryById(taskHours.getHoursId());
             taskHours.update();
             Record after = queryById(taskHours.getHoursId());
-            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.HOURS, BehaviorEnum.UPDATE, taskHours.getHoursId(), after,first, taskHours.getHoursId());
+            workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.HOURS, BehaviorEnum.UPDATE, taskHours.getHoursId(), after, first, taskHours.getHoursId());
         }
         TaskHours byId = Aop.get(TaskHours.class).dao().findById(taskHours.getHoursId());
         HashSet<Long> set = new HashSet<>();
         set.add(byId.getCheckUserId());
         set.add(byId.getMainUserId());
         set.add(byId.getCreateUserId());
-        WorkService.setWorkRelation(set,taskHours.getHoursId(), WorkUserEnum.HOURS.getType(),taskHours.getWorkId());
+        WorkService.setWorkRelation(set, taskHours.getHoursId(), WorkUserEnum.HOURS.getType(), taskHours.getWorkId());
         return R.ok();
     }
 
     /**
      * 批量删除工时
+     *
      * @param hoursIds
      * @return
      */
@@ -223,16 +238,16 @@ public class TaskHoursService extends AbstractBasePageList {
         List<String> strings = Arrays.asList(hoursIds.split(","));
         for (String string : strings) {
             TaskHours byId = Aop.get(TaskHours.class).dao().findById(string);
-            if(byId.getCheckStatus() !=null){
-                if(byId.getCheckStatus() == 1){
+            if (byId.getCheckStatus() != null) {
+                if (byId.getCheckStatus() == 1) {
                     continue;
                 }
                 Integer examineRecordId = byId.getExamineRecordId();
                 //删除审核记录
                 Record first = Db.findFirst("select log_id,examine_step_id from 72crm_admin_examine_log where record_id=?", examineRecordId);
-                Db.delete("DELETE from 72crm_admin_examine_log WHERE log_id=?",first.getStr("log_id"));
-                Db.delete("DELETE from 72crm_admin_examine_record WHERE record_id=?",examineRecordId);
-                Db.delete("DELETE from 72crm_admin_examine_step WHERE step_id=?",first.getInt("examine_step_id"));
+                Db.delete("DELETE from 72crm_admin_examine_log WHERE log_id=?", first.getStr("log_id"));
+                Db.delete("DELETE from 72crm_admin_examine_record WHERE record_id=?", examineRecordId);
+                Db.delete("DELETE from 72crm_admin_examine_step WHERE step_id=?", first.getInt("examine_step_id"));
             }
             Aop.get(TaskHours.class).deleteById(string);
         }
@@ -240,20 +255,25 @@ public class TaskHoursService extends AbstractBasePageList {
     }
 
     public R queryHoursRecord(BasePageRequest basePageRequest) {
-        return R.ok().put("data",Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),
-                Db.getSqlPara("task.hours.queryHoursRecord",Kv.by("taskId",basePageRequest.getJsonObject().get("taskId")))));
+        return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),
+                Db.getSqlPara("task.hours.queryHoursRecord", Kv.by("taskId", basePageRequest.getJsonObject().get("taskId")))));
     }
 
     /**
-     *
      * 导出记录列表
+     *
      * @return
      */
     public R hoursRecordList(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Kv kv = Kv.by("taskId", jsonObject.get("taskId")).set("workId", jsonObject.get("workId"));
+        if (jsonObject.get("excel") != null) {
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.put("list", Db.find(Db.getSqlPara("task.hours.hoursRecordList", kv)));
+            return R.ok().put("data", jsonObject1);
+        }
         Page<Record> recordList = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("task.hours.hoursRecordList", kv));
-        return R.ok().put("data",recordList);
+        return R.ok().put("data", recordList);
     }
 
 
@@ -265,6 +285,7 @@ public class TaskHoursService extends AbstractBasePageList {
 
     /**
      * 添加修改
+     *
      * @param
      * @param
      */
@@ -273,30 +294,30 @@ public class TaskHoursService extends AbstractBasePageList {
         String name = taskFile.getName();
         taskFile.setFileName(name);
         int i = name.lastIndexOf(".");
-        name = name.substring(0,i);
+        name = name.substring(0, i);
         taskFile.setName(name);
-        if(taskFile.getSubtasksId() == null){
+        if (taskFile.getSubtasksId() == null) {
             taskFile.setSubtasksId(taskFile.getTaskId());
         }
         List<Integer> query = Db.query("select check_status from 72crm_task_hours where subtasks_id=?", taskFile.getSubtasksId());
-        if(!query.contains(1)){
+        if (!query.contains(1)) {
             return R.error("没有通过的工时审核");
         }
-        if(taskFile.getFileId() == null){
+        if (taskFile.getFileId() == null) {
             taskFile.setCreateUserId(BaseUtil.getUserId());
             taskFile.setCreateTime(new Date());
             taskFile.save();
-        }else {
+        } else {
             taskFile.update();
         }
         return R.ok();
     }
 
 
-
-    public Record queryById(Object id){
-        return  Db.findFirst("select * from 72crm_task_hours where hours_id=?",id);
+    public Record queryById(Object id) {
+        return Db.findFirst("select * from 72crm_task_hours where hours_id=?", id);
     }
+
 
 
 }

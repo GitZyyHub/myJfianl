@@ -70,61 +70,78 @@ public class AdminFieldService {
 
     /**
      * 查询字段详情
+     *
      * @param fieldType
      * @param id
      * @return
      */
-    public List<Record> getFields(Integer fieldType,Integer id){
+    public List<Record> getFields(Integer fieldType, Integer id) {
         List<Record> records = Db.find(Db.getSql("admin.field.queryField"), fieldType);
         List<Record> fields = new ArrayList<>();
+        CrmEnum crmEnum = CrmEnum.parse(fieldType);
         records.forEach(record -> {
-            String field_name = ToolUtils.lineToHump(record.getStr("field_name"));
-            record.set("field_name",field_name);
-            FormTypeEnum type = FormTypeEnum.parse(record.getInt("type"));
-            record.set("formType",type.getFormType());
-            String options = record.getStr("options");
-            if(!StringUtils.isNullOrEmpty(options)){
-                String[] split = options.split(",");
-                record.set("setting",split);
+            String fieldName = record.getStr("field_name");
+            if (crmEnum == CrmEnum.WORK || crmEnum == CrmEnum.TASK || crmEnum == CrmEnum.MILESTONE || crmEnum == CrmEnum.SUBTASKS || crmEnum == CrmEnum.PRODUCT) {
+                if(fieldName.equals("work_num") || fieldName.equals("task_num") || fieldName.equals("milestone_num") || fieldName.equals("product_number")){
+                    Integer status = Db.queryInt("select status from 72crm_admin_config where name = 'numberSetting' and value = ?", crmEnum.getType());
+                    if (status == 1) {
+                        if (record.getInt("field_type") == 1) {
+                            record.set("autoGeneNumber", 1);
+                        }
+                    }
+                }
             }
-            record.set("is_unique",0);
+            String field_name = ToolUtils.lineToHump(record.getStr("field_name"));
+            record.set("field_name", field_name);
+            FormTypeEnum type = FormTypeEnum.parse(record.getInt("type"));
+            record.set("formType", type.getFormType());
+            String options = record.getStr("options");
+            if (!StringUtils.isNullOrEmpty(options)) {
+                String[] split = options.split(",");
+                record.set("setting", split);
+            }
+            record.set("is_unique", 0);
             fields.add(record);
         });
         List<Record> list = new ArrayList<>();
-        if(id!=null){
+        if (id != null) {
             Record record = null;
-            CrmEnum crmEnum = CrmEnum.parse(fieldType);
-            if (id != null){
-                if(CrmEnum.WORK.equals(crmEnum)){
+            if (id != null) {
+                if (CrmEnum.WORK.equals(crmEnum)) {
                     record = workService.queryField(crmEnum, id);
-                }else if(CrmEnum.MILESTONE.equals(crmEnum)){
+                } else if (CrmEnum.MILESTONE.equals(crmEnum)) {
                     record = milestoneService.queryById(id);
-                }else if(CrmEnum.TASK.equals(crmEnum)){
+                } else if (CrmEnum.TASK.equals(crmEnum)) {
                     record = taskService.queryById(id);
-                }else if(CrmEnum.SUBTASKS.equals(crmEnum)){
+                } else if (CrmEnum.SUBTASKS.equals(crmEnum)) {
                     record = taskService.queryById(id);
-                }else if(CrmEnum.DEMAND.equals(crmEnum)){
+                } else if (CrmEnum.DEMAND.equals(crmEnum)) {
                     record = workDemandService.queryById(id);
-                }else if(CrmEnum.PRODUCT.equals(crmEnum)){
+                } else if (CrmEnum.PRODUCT.equals(crmEnum)) {
                     record = workProductService.queryById(id);
-                }else if(CrmEnum.PRODUCT_FUNCTIONE.equals(crmEnum)){
+                    workDemandService.setRecord(record, id);
+                } else if (CrmEnum.PRODUCT_FUNCTIONE.equals(crmEnum)) {
                     record = workProductFuntionService.queryById(id);
-                }else if(CrmEnum.TASK_HOURS.equals(crmEnum)){
+                } else if (CrmEnum.TASK_HOURS.equals(crmEnum)) {
                     record = taskHoursServicel.queryById(id);
-                    if(record.getInt("task_id")==record.getInt("subtasks_id")){
+                    if (record.getInt("task_id") == record.getInt("subtasks_id")) {
                         record.remove("subtasks_id");
                     }
-                }else if(CrmEnum.WORKCONFIG.equals(crmEnum)){
+                } else if (CrmEnum.WORKCONFIG.equals(crmEnum)) {
                     record = configManageService.queryById(id);
                 }
             }
 
             for (Record field : fields) {
-                field.set("authLevel",3);
-                field.set("sysInformation",0);
+                if ("workPhase".equals(field.getStr("field_name"))) {
+                    field.set("authLevel", 2);
+                } else {
+                    field.set("authLevel", 3);
+                }
+                field.set("sysInformation", 0);
 
                 try {
-                    if(field.getInt("type") == FormTypeEnum.SINGLE_USER.getType()){
+                    if (field.getInt("type") == FormTypeEnum.SINGLE_USER.getType()) {
                         field.set("value",
                                 Db.find("select user_id,realname from 72crm_admin_user where user_id=?",
                                         record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
@@ -137,43 +154,46 @@ public class AdminFieldService {
                         field.set("value",
                                 Db.find("SELECT dept_id,`name` FROM `72crm_admin_dept` WHERE dept_id=?",
                                         record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
-                    }else if(field.getInt("type") == FormTypeEnum.CHECKBOX.getType()){
+                    } else if (field.getInt("type") == FormTypeEnum.CHECKBOX.getType()) {
                         String field_name = record.getStr(ToolUtils.humpToLine(field.getStr("field_name")));
-                        field.set("value",field_name.split(","));
-                    }else if(field.getInt("type") == FormTypeEnum.CUSTOMER.getType()){
+                        field.set("value", field_name.split(","));
+                    } else if (field.getInt("type") == FormTypeEnum.CUSTOMER.getType()) {
                         field.set("value",
                                 Db.find("SELECT customer_id,`customer_name` FROM `72crm_crm_customer` WHERE customer_id=?",
                                         record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
-                    }else if(field.getInt("type") == FormTypeEnum.TASK.getType()){
+                    } else if (field.getInt("type") == FormTypeEnum.TASK.getType()) {
                         field.set("value",
                                 Db.find("SELECT task_id,task_name FROM 72crm_task WHERE task_id =?",
                                         record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
-                    }else if(field.getInt("type") == FormTypeEnum.SUBTASK.getType()){
+                    } else if (field.getInt("type") == FormTypeEnum.SUBTASK.getType()) {
                         field.set("value",
                                 Db.find("SELECT task_id,task_name FROM 72crm_task WHERE task_id =?",
                                         record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
-                    }else if(field.getInt("type") == FormTypeEnum.MILESTONE.getType()){
+                    } else if (field.getInt("type") == FormTypeEnum.MILESTONE.getType()) {
                         String field_name = ToolUtils.humpToLine(field.getStr("field_name"));
                         field.set("value",
                                 Db.find("SELECT milestone_id,milestone_name FROM 72crm_milestone WHERE milestone_id =?",
                                         record.getStr(field_name)));
-                    }else if(field.getInt("type") == FormTypeEnum.WORK.getType()){
+                    } else if (field.getInt("type") == FormTypeEnum.WORK.getType()) {
                         field.set("value",
                                 Db.find("SELECT work_id,work_name from 72crm_work WHERE work_id=?",
                                         record.getStr(ToolUtils.humpToLine(field.getStr("field_name")))));
                     } else {
                         //String field_name = record.get(ToolUtils.humpToLine(field.getStr("field_name")));
-                        field.set("value",record.get(ToolUtils.humpToLine(field.getStr("field_name") )));
+                        field.set("value", record.get(ToolUtils.humpToLine(field.getStr("field_name"))));
                     }
+
+                    //自动编号开启，对应字段增加标识
+
                 } catch (Exception e) {
-                    field.set("value","查询出错" );
+                    field.set("value", "查询出错");
                 }
-                if(!"createUserId".equals(field.getStr("field_name"))){
+                if (!"createUserId".equals(field.getStr("field_name"))) {
                     list.add(field);
                 }
             }
         }
-        if(list.size()>0){
+        if (list.size() > 0) {
             return list;
         }
         return fields;
@@ -181,6 +201,7 @@ public class AdminFieldService {
 
     /**
      * 详情页面修改对应字段内容
+     *
      * @param jsonObject
      * @return
      */
@@ -192,33 +213,34 @@ public class AdminFieldService {
         JSONArray list = jsonObject.getJSONArray("list");
         CrmEnum parse = CrmEnum.parse(label);
         Record record = new Record();
-        record.set(parse.getTableId(),id);
+        record.set(parse.getTableId(), id);
         for (int i = 0; i < list.size(); i++) {
             JSONObject field = list.getJSONObject(i);
             String fieldName = ToolUtils.humpToLine(field.getString("fieldName"));
             Object value = field.get("value");
-            record.set(fieldName,value);
+            record.set(fieldName, value);
         }
         Record first = Db.findFirst(Db.getSql("work.findWorkById"), id);
-        Db.update(parse.getTableName(),parse.getTableId(),record);
-        Record after = Db.findFirst(Db.getSql("work.findWorkById"),id);
+        Db.update(parse.getTableName(), parse.getTableId(), record);
+        Record after = Db.findFirst(Db.getSql("work.findWorkById"), id);
         Work work = Aop.get(Work.class).findById(id);
-        workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(),  after,first,work.getWorkId());
+        workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(), after, first, work.getWorkId());
         return R.ok();
     }
 
     /**
      * 补充详情页面数据
+     *
      * @param fields
      * @param id
      * @return
      */
-    public List<Record> findFieldDetails(CrmEnum crmEnum, List<Record> fields,Integer id){
+    public List<Record> findFieldDetails(CrmEnum crmEnum, List<Record> fields, Integer id) {
         List<String> sysInformationName = Arrays.asList("创建时间", "创建人", "更新时间");
         List<String> sysInformationFieldName = Arrays.asList("create_time", "create_user_id", "update_time");
         //Record sysInformation = Db.findFirst(Db.getSql("work.queryWorkSysInformationById"), id);
         Record sysInformation = Db.findFirst("SELECT DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%S') create_time," +
-                "(select realname from 72crm_admin_user where user_id = t.create_user_id)create_user_id,DATE_FORMAT(t.update_time,'%Y-%m-%d %H:%i:%S') update_time FROM "+crmEnum.getTableName()+ " t WHERE "+crmEnum.getTableId()+"="+id);
+                "(select realname from 72crm_admin_user where user_id = t.create_user_id)create_user_id,DATE_FORMAT(t.update_time,'%Y-%m-%d %H:%i:%S') update_time FROM " + crmEnum.getTableName() + " t WHERE " + crmEnum.getTableId() + "=" + id);
         for (int i = 0; i < sysInformationFieldName.size(); i++) {
             Record record = new Record();
             record.set("authLevel", 2).set("sysInformation", 1).set("fieldName", sysInformationFieldName.get(i))
@@ -231,28 +253,16 @@ public class AdminFieldService {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     private static Map<Integer, List<String>> fieldColumnNameProperties = new HashMap<>();
 
     static {
-        fieldColumnNameProperties.put(CrmEnum.CRM_LEADS.getType(), Arrays.asList("leads_id","is_transform","followup","leads_name","customer_id","next_time","telephone","mobile","address","remark","create_user_id","owner_user_id","create_time","update_time","batch_id","last_time","last_content"));
-        fieldColumnNameProperties.put(CrmEnum.CRM_CUSTOMER.getType(), Arrays.asList("customer_id","customer_name","followup","is_lock","next_time","deal_status","deal_time","contacts_id","mobile","telephone","website","remark","create_user_id","owner_user_id","ro_user_id","rw_user_id","address","location","detail_address","lng","lat","create_time","update_time","batch_id","status","last_time","pool_time","is_receive","last_content","receive_time"));
-        fieldColumnNameProperties.put(CrmEnum.CRM_CONTACTS.getType(), Arrays.asList("contacts_id","name","next_time","mobile","telephone","email","post","customer_id","address","remark","create_user_id","owner_user_id","create_time","update_time","batch_id","last_time"));
-        fieldColumnNameProperties.put(CrmEnum.CRM_BUSINESS.getType(), Arrays.asList("business_id","type_id","status_id","next_time","customer_id","contacts_id","deal_date","business_name","money","discount_rate","total_price","remark","create_user_id","owner_user_id","create_time","update_time","batch_id","ro_user_id","rw_user_id","is_end","status_remark","status","last_time"));
-        fieldColumnNameProperties.put(CrmEnum.CRM_CONTRACT.getType(), Arrays.asList("contract_id","name","customer_id","business_id","check_status","examine_record_id","order_date","create_user_id","owner_user_id","create_time","update_time","num","start_time","end_time","money","discount_rate","total_price","types","payment_type","batch_id","ro_user_id","rw_user_id","contacts_id","remark","company_user_id","last_time","received_money","unreceived_money"));
-        fieldColumnNameProperties.put(CrmEnum.CRM_RECEIVABLES.getType(), Arrays.asList("receivables_id","number","plan_id","customer_id","contract_id","check_status","examine_record_id","return_time","return_type","money","remark","create_user_id","owner_user_id","create_time","update_time","remarks","batch_id"));
-        fieldColumnNameProperties.put(CrmEnum.CRM_PRODUCT.getType(), Arrays.asList("product_id","name","num","unit","price","status","category_id","description","create_user_id","owner_user_id","create_time","update_time","batch_id"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_LEADS.getType(), Arrays.asList("leads_id", "is_transform", "followup", "leads_name", "customer_id", "next_time", "telephone", "mobile", "address", "remark", "create_user_id", "owner_user_id", "create_time", "update_time", "batch_id", "last_time", "last_content"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_CUSTOMER.getType(), Arrays.asList("customer_id", "customer_name", "followup", "is_lock", "next_time", "deal_status", "deal_time", "contacts_id", "mobile", "telephone", "website", "remark", "create_user_id", "owner_user_id", "ro_user_id", "rw_user_id", "address", "location", "detail_address", "lng", "lat", "create_time", "update_time", "batch_id", "status", "last_time", "pool_time", "is_receive", "last_content", "receive_time"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_CONTACTS.getType(), Arrays.asList("contacts_id", "name", "next_time", "mobile", "telephone", "email", "post", "customer_id", "address", "remark", "create_user_id", "owner_user_id", "create_time", "update_time", "batch_id", "last_time"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_BUSINESS.getType(), Arrays.asList("business_id", "type_id", "status_id", "next_time", "customer_id", "contacts_id", "deal_date", "business_name", "money", "discount_rate", "total_price", "remark", "create_user_id", "owner_user_id", "create_time", "update_time", "batch_id", "ro_user_id", "rw_user_id", "is_end", "status_remark", "status", "last_time"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_CONTRACT.getType(), Arrays.asList("contract_id", "name", "customer_id", "business_id", "check_status", "examine_record_id", "order_date", "create_user_id", "owner_user_id", "create_time", "update_time", "num", "start_time", "end_time", "money", "discount_rate", "total_price", "types", "payment_type", "batch_id", "ro_user_id", "rw_user_id", "contacts_id", "remark", "company_user_id", "last_time", "received_money", "unreceived_money"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_RECEIVABLES.getType(), Arrays.asList("receivables_id", "number", "plan_id", "customer_id", "contract_id", "check_status", "examine_record_id", "return_time", "return_type", "money", "remark", "create_user_id", "owner_user_id", "create_time", "update_time", "remarks", "batch_id"));
+        fieldColumnNameProperties.put(CrmEnum.CRM_PRODUCT.getType(), Arrays.asList("product_id", "name", "num", "unit", "price", "status", "category_id", "description", "create_user_id", "owner_user_id", "create_time", "update_time", "batch_id"));
     }
 
     /**
@@ -266,7 +276,7 @@ public class AdminFieldService {
             Record map = new Record();
             fieldList.add(map.set("field_name", "map_address").set("name", "地区定位").set("form_type", "map_address").set("is_null", 0).set("field_type", 1));
         } else if (crmEnum == CrmEnum.CRM_BUSINESS) {
-            Optional<Record> recordOptional= fieldList.stream().filter(record -> "remark".equals(record.getStr("field_name"))).findFirst();
+            Optional<Record> recordOptional = fieldList.stream().filter(record -> "remark".equals(record.getStr("field_name"))).findFirst();
             recordOptional.ifPresent(fieldList::remove);
             fieldList.add(new Record().set("field_name", "type_id").set("name", "商机状态组").set("value", "").set("form_type", "business_type").set("setting", new String[0]).set("is_null", 1).set("field_type", FormTypeEnum.TEXT.getType()));
             fieldList.add(new Record().set("field_name", "status_id").set("name", "商机阶段").set("value", "").set("form_type", "business_status").set("setting", new String[0]).set("is_null", 1).set("field_type", FormTypeEnum.TEXT.getType()));
@@ -388,7 +398,7 @@ public class AdminFieldService {
         if (crmEnum.equals(CrmEnum.CRM_CUSTOMER) || crmEnum.equals(CrmEnum.CRM_LEADS)) {
             resultList.add(new Record().set("name", "最后跟进记录").set("value", record.getStr("last_content")).set("formType", FormTypeEnum.TEXTAREA.getFormType()).set("field_type", 1));
         }
-        resultList.add(new Record().set("name", "创建人").set("value", Db.find("select user_id,realname from 72crm_admin_user where user_id = ?",record.getStr("create_user_id"))).set("formType", FormTypeEnum.USER.getFormType()).set("field_type", 1));
+        resultList.add(new Record().set("name", "创建人").set("value", Db.find("select user_id,realname from 72crm_admin_user where user_id = ?", record.getStr("create_user_id"))).set("formType", FormTypeEnum.USER.getFormType()).set("field_type", 1));
         resultList.add(new Record().set("name", "创建时间").set("value", record.getDate("create_time")).set("formType", FormTypeEnum.DATETIME.getFormType()).set("field_type", 1));
         resultList.add(new Record().set("name", "更新时间").set("value", record.getDate("update_time")).set("formType", FormTypeEnum.DATETIME.getFormType()).set("field_type", 1));
         if (!crmEnum.equals(CrmEnum.CRM_PRODUCT) && !crmEnum.equals(CrmEnum.CRM_RECEIVABLES) && !crmEnum.equals(CrmEnum.CRM_RETURN_VISIT)) {
@@ -416,15 +426,15 @@ public class AdminFieldService {
                 }
             }
             Integer label = jsonObject.getInteger("label");
-            if (label != 10){
+            if (label != 10) {
                 List<String> fieldNameList = adminFields.stream()
-                        .map(object ->TypeUtils.castToJavaBean(object, AdminField.class))
+                        .map(object -> TypeUtils.castToJavaBean(object, AdminField.class))
                         .filter(adminField -> adminField.getFieldType() == 0)
                         .map(AdminField::getName)
                         .collect(Collectors.toList());
                 Collection<String> intersection = CollUtil.intersection(fieldColumnNameProperties.get(label), fieldNameList);
-                if (CollUtil.isNotEmpty(intersection)){
-                    errorList.add("["+CollUtil.join(intersection,".")+"]自定义表单名称与系统字段重复，请使用其他字段！");
+                if (CollUtil.isNotEmpty(intersection)) {
+                    errorList.add("[" + CollUtil.join(intersection, ".") + "]自定义表单名称与系统字段重复，请使用其他字段！");
                     return false;
                 }
             }
@@ -770,29 +780,30 @@ public class AdminFieldService {
                 fieldUtil.add("lastTime", "最后跟进时间", 4);
             } else if (CrmEnum.CRM_CUSTOMER_POOL.getType() == adminFieldSort.getLabel()) {
                 fieldUtil.add("lastContent", "最后跟进记录", FormTypeEnum.TEXT.getType());
-            } else if(CrmEnum.TASK_HOURS.getType() == adminFieldSort.getLabel()){
+            } else if (CrmEnum.TASK_HOURS.getType() == adminFieldSort.getLabel()) {
                 fieldUtil.add("check_user_name", "审批人", FormTypeEnum.TEXT.getType())
-                         .add("create_user_name", "创建人", FormTypeEnum.TEXT.getType())
-                         .add("create_time", "发起时间", FormTypeEnum.DATE.getType())
-                         .add("examine_time", "审批时间", FormTypeEnum.DATE.getType())
-                         .add("check_status", "审核状态", FormTypeEnum.TEXT.getType());
-            } else if(CrmEnum.SUBTASKS.getType() == adminFieldSort.getLabel()){
+                        .add("create_user_name", "创建人", FormTypeEnum.TEXT.getType())
+                        .add("create_time", "发起时间", FormTypeEnum.DATE.getType())
+                        .add("examine_time", "审批时间", FormTypeEnum.DATE.getType())
+                        .add("check_status", "审核状态", FormTypeEnum.TEXT.getType());
+            } else if (CrmEnum.SUBTASKS.getType() == adminFieldSort.getLabel()) {
                 fieldUtil.add("task_num", "子任务编号", FormTypeEnum.TEXT.getType());
-            }else if(CrmEnum.MILESTONE.getType() == adminFieldSort.getLabel()){
+            } else if (CrmEnum.MILESTONE.getType() == adminFieldSort.getLabel()) {
                 fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4);
             }
 
 
-            if (CrmEnum.TASK.getType() != adminFieldSort.getLabel()&&CrmEnum.CRM_RETURN_VISIT.getType() != adminFieldSort.getLabel()
-                    &&CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()&&CrmEnum.MILESTONE.getType()!=adminFieldSort.getLabel()
-                    &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()&&CrmEnum.WORK.getType() != adminFieldSort.getLabel()) {
+            if (CrmEnum.TASK.getType() != adminFieldSort.getLabel() && CrmEnum.CRM_RETURN_VISIT.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.DEMAND.getType() != adminFieldSort.getLabel() && CrmEnum.MILESTONE.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel() && CrmEnum.WORK.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.WORKCONFIG.getType() != adminFieldSort.getLabel()&& CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()) {
                 fieldUtil.add("ownerUserName", "负责人", 1);
             }
-            if(CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()
-                    &&CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()
-                    &&CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()
-                    &&CrmEnum.MILESTONE.getType() != adminFieldSort.getLabel()
-            ){
+            if (CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.MILESTONE.getType() != adminFieldSort.getLabel()
+            ) {
                 fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4)
                         .add("createUserName", "创建人", 1);
             }
@@ -813,35 +824,35 @@ public class AdminFieldService {
                     fieldSort.setFieldName("contractNum");
                 } else if ("planId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("planNum");
-                } else if("salesId".equals(fieldSort.getFieldName())){
+                } else if ("salesId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("salesName");
-                }else if("managerId".equals(fieldSort.getFieldName())){
+                } else if ("managerId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("managerName");
-                }else if("deptId".equals(fieldSort.getFieldName())){
+                } else if ("deptId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("deptName");
-                }else if("workId".equals(fieldSort.getFieldName())){
+                } else if ("workId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("workName");
-                }else if("taskId".equals(fieldSort.getFieldName())){
+                } else if ("taskId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("taskName");
-                }else if("mainUserId".equals(fieldSort.getFieldName())){
+                } else if ("mainUserId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("mainUserName");
-                }else if("ownerUserId".equals(fieldSort.getFieldName())){
+                } else if ("ownerUserId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("ownerUserName");
-                }else if("milestoneId".equals(fieldSort.getFieldName())){
+                } else if ("milestoneId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("milestoneName");
-                }else if("beforeId".equals(fieldSort.getFieldName())){
+                } else if ("beforeId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("beforeName");
-                }else if("exploitUserId".equals(fieldSort.getFieldName())){
+                } else if ("exploitUserId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("exploitUserName");
-                }else if("createUserId".equals(fieldSort.getFieldName())){
+                } else if ("createUserId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("createUserName");
-                }else if("subtasksId".equals(fieldSort.getFieldName())){
+                } else if ("subtasksId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("subtasksName");
-                }else if("pid".equals(fieldSort.getFieldName())){
+                } else if ("pid".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("pName");
-                }else if("associatedId".equals(fieldSort.getFieldName())){
+                } else if ("associatedId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("associatedName");
-                }else if("exploitUserId".equals(fieldSort.getFieldName())){
+                } else if ("exploitUserId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("exploitUserName");
                 }
 
@@ -884,7 +895,7 @@ public class AdminFieldService {
     public R queryFieldConfig(AdminFieldSort adminFieldSort) {
         Long userId = BaseUtil.getUser().getUserId();
         //查出自定义字段，查看顺序表是否存在该字段，没有则插入，设为隐藏
-        List<Record> fieldList = list(adminFieldSort.getLabel(),0);
+        List<Record> fieldList = list(adminFieldSort.getLabel(), 0);
         for (Record record : fieldList) {
             String name = record.getStr("name");
             Integer number = Db.queryInt("select count(1) from 72crm_admin_field_sort where user_id = ? and label = ? and name = ?", userId, adminFieldSort.getLabel(), name);
@@ -1022,7 +1033,6 @@ public class AdminFieldService {
             }
         });
     }
-
 
 
 }

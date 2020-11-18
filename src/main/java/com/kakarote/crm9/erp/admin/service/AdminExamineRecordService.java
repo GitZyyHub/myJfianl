@@ -225,6 +225,7 @@ public class AdminExamineRecordService {
             }else if(examine.getCategoryType() == 4){
                 //工时
                 Db.update(Db.getSql("task.hours.updateCheckStatusById"), status, id);
+                Aop.get(TaskHours.class).dao().deleteById(id);
             }else if(examine.getCategoryType() == 5){
                 //结项
                 Db.update(Db.getSql("work.updateCheckStatusById"), status, id);
@@ -457,6 +458,9 @@ public class AdminExamineRecordService {
                         }else if(examine.getCategoryType() == 5){
                             //结项
                             Db.update(Db.getSql("work.updateCheckStatusByIdThrough"), 1,new Date(), id);
+                            Work byId = Aop.get(Work.class).findById(id);
+                            String s = Db.queryStr("select remarks from 72crm_admin_examine_record where record_id=? ", byId.getExamineRecordId());
+                            Db.update("update 72crm_work set work_phase=? where work_id=?",s,id);
                         } else {
                             Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 1, id);
                         }
@@ -515,6 +519,9 @@ public class AdminExamineRecordService {
                     }else if(examine.getCategoryType() == 5){
                         //结项
                         Db.update(Db.getSql("work.updateCheckStatusByIdThrough"), 1,new Date(), id);
+                        Work byId = Aop.get(Work.class).findById(id);
+                        String s = Db.queryStr("select remarks from 72crm_admin_examine_record where record_id=? ", byId.getExamineRecordId());
+                        Db.update("update 72crm_work set work_phase=? where work_id=?",s,id);
                     }else {
                         Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), 1, id);
                     }
@@ -567,6 +574,10 @@ public class AdminExamineRecordService {
             record = Db.findFirst(Db.getSql("admin.examineLog.queryContractByRecordId"), recordId);
         } else if (type == 2) {
             record = Db.findFirst(Db.getSql("admin.examineLog.queryReceivablesByRecordId"), recordId);
+        } else if (type == 4) {
+            record = Db.findFirst(Db.getSql("admin.examineLog.queryHoursByRecordId"), recordId);
+        } else if (type == 5) {
+            record = Db.findFirst(Db.getSql("admin.examineLog.queryWorkByRecordId"), recordId);
         } else {
             record = Db.findFirst(Db.getSql("admin.examineLog.queryInvoiceByRecordId"), recordId);
         }

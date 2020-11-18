@@ -63,13 +63,13 @@ public abstract class BaseWorkDemand<M extends BaseWorkDemand<M>> extends Model<
 		return getStr("function2");
 	}
 
-	public M setDescribe(String describe) {
-		set("describe", describe);
+	public M setDemandDescribe(java.lang.String demandDescribe) {
+		set("demand_describe", demandDescribe);
 		return (M)this;
 	}
-	
-	public String getDescribe() {
-		return getStr("describe");
+
+	public java.lang.String getDemandDescribe() {
+		return getStr("demand_describe");
 	}
 
 	public M setDemandType(String demandType) {
@@ -117,23 +117,7 @@ public abstract class BaseWorkDemand<M extends BaseWorkDemand<M>> extends Model<
 		return getStr("demand_number");
 	}
 
-	public M setProductPercentage(String productPercentage) {
-		set("product_percentage", productPercentage);
-		return (M)this;
-	}
-	
-	public String getProductPercentage() {
-		return getStr("product_percentage");
-	}
 
-	public M setProductDescribe(String productDescribe) {
-		set("product_describe", productDescribe);
-		return (M)this;
-	}
-	
-	public String getProductDescribe() {
-		return getStr("product_describe");
-	}
 
 	public M setCreateTime(java.util.Date createTime) {
 		set("create_time", createTime);

@@ -1,11 +1,12 @@
 package com.kakarote.crm9.erp.work.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.erp.crm.common.AbstractBasePageList;
+import com.kakarote.crm9.utils.AbstractBasePageList;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.work.entity.WorkProductFunction;
 import com.kakarote.crm9.utils.BaseUtil;
@@ -71,9 +72,19 @@ public class WorkProductFuntionService  extends AbstractBasePageList {
         return R.ok();
     }
 
+    public R queryFuntionByProductId(String productIds) {
+
+        return R.ok();
+    }
 
     @Override
     public JSONObject appendSqlSearch(String search) {
-        return null;
+        JSONObject sqlObject = new JSONObject();
+        String conditions = " and (function_name like '%{search}%' or function_number like '%{search}%')";
+        sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
+        sqlObject.put("type", 1);
+        return sqlObject;
     }
+
+
 }

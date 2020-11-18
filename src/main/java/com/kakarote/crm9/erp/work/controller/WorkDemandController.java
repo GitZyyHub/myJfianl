@@ -70,11 +70,26 @@ public class WorkDemandController extends Controller {
     }
 
     /**
+     * 查询需求对标的产品
+     */
+    public void queryDemandProduct(@Para("demandId") Integer demandId){
+        renderJson(workDemandService.queryDemandProduct(demandId));
+    }
+
+    /**
+     * 查询需求对标的产品功能
+     */
+    public void queryDemandFunction(@Para("demandId") Integer demandId,@Para("productIds")String productIds){
+        renderJson(workDemandService.queryDemandFunction(demandId,productIds));
+    }
+
+    /**
      * 设置需求-产品-产品功能关联
      */
     @Permissions({"project:demandList:tag"})
-    public void setDemandProduct(@Para("demandId") Integer demandId,@Para("productIds") String productIds,@Para("functionIds") String functionIds){
-        renderJson(workDemandService.setDemandProduct(demandId,productIds,functionIds));
+    public void setDemandProduct(){
+        JSONObject jsonObject = JSONObject.parseObject(getRawData());
+        renderJson(workDemandService.setDemandProduct(jsonObject));
     }
 
     /**
@@ -108,7 +123,11 @@ public class WorkDemandController extends Controller {
                 continue;
             }
             Arrays.asList("");
-            handers.add(field.getStr("name"));
+            String name = field.getStr("name");
+            if(field.getInt("is_null")==1){
+                name += "(*)";
+            }
+            handers.add(name);
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);

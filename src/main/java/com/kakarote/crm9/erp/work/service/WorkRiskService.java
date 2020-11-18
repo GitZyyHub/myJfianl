@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zyy
@@ -54,6 +55,7 @@ public class WorkRiskService {
         List<Record> trackingUser = null;
         List<Record> solveUsers = null;
         List<Record> foundUsers = null;
+        Object excel = jsonObject.get("excel");
         for (Record list : lists) {
 
             List<String> trackingUsers = Arrays.asList(list.getStr("tracking_user_id").split(","));
@@ -62,10 +64,15 @@ public class WorkRiskService {
             trackingUser = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", trackingUsers)));
             solveUsers = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", solveUser)));
             foundUsers = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", foundUser)));
-            list.set("trackingUser", trackingUser);
-            list.set("solveUser", solveUsers);
-            list.set("foundUser", foundUsers);
-
+            if (excel != null) {
+                list.set("trackingUser", trackingUser.stream().map(t->t.getStr("realname")+",").collect(Collectors.toList()));
+                list.set("solveUser", solveUsers.stream().map(t->t.getStr("realname")+",").collect(Collectors.toList()));
+                list.set("foundUser", foundUsers.stream().map(t->t.getStr("realname")+",").collect(Collectors.toList()));
+            }else {
+                list.set("trackingUser", trackingUser);
+                list.set("solveUser", solveUsers);
+                list.set("foundUser", foundUsers);
+            }
             /*StringBuffer stringBuffer = new StringBuffer();
             for (Record record : trackingUser) {
                 stringBuffer.append(record.getStr("realname")+",");
@@ -84,7 +91,7 @@ public class WorkRiskService {
             }
             list.set("found_user",stringBuffer.toString());*/
         }
-        if (jsonObject.get("excel") != null) {
+        if (excel != null) {
             JSONObject resultJsonObject = new JSONObject();
             resultJsonObject.put("list", lists);
             return R.ok().put("data", resultJsonObject);

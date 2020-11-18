@@ -55,6 +55,13 @@ public class WorkProductFuntionController extends Controller {
     }
 
     /**
+     * 根据多个产品ID查询产品功能
+     */
+    public void queryFuntionByProductId(@Para("productIds")String productIds){
+        renderJson(workProductFuntionService.queryFuntionByProductId(productIds));
+    }
+
+    /**
      * 批量删除
      */
     @Permissions({"project:productFunction:delete"})
@@ -139,7 +146,11 @@ public class WorkProductFuntionController extends Controller {
             if("创建人".equals(name)){
                 continue;
             }
-            handers.add(field.getStr("name"));
+            String fieldName = field.getStr("name");
+            if(field.getInt("is_null")==1){
+                fieldName += "(*)";
+            }
+            handers.add(fieldName);
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);

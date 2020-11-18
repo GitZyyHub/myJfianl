@@ -11,7 +11,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
-import com.kakarote.crm9.erp.crm.common.AbstractBasePageList;
+import com.kakarote.crm9.utils.AbstractBasePageList;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.entity.WorkProduct;
@@ -157,7 +157,11 @@ public class WorkProductService extends AbstractBasePageList {
 
     @Override
     public JSONObject appendSqlSearch(String search) {
-        return null;
+        JSONObject sqlObject = new JSONObject();
+        String conditions = " and (product_name like '%{search}%' or product_number like '%{search}%')";
+        sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
+        sqlObject.put("type", 1);
+        return sqlObject;
     }
 
 

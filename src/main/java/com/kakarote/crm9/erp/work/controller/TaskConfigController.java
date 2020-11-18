@@ -82,7 +82,7 @@ public class TaskConfigController extends Controller {
             JSONObject jsonObject = (JSONObject)taskConfigService.queryPageList(basePageRequest).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"config_id","create_time","create_user_id","main_user_id","type","update_time","work_id","task_id"};
+            String[] s = new String[]{"config_id","create_time","create_user_id","main_user_id","type","update_time","associated_id"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -125,14 +125,14 @@ public class TaskConfigController extends Controller {
 
     private void addField(List<Record> headList,boolean tag){
 
-            headList.add(new Record().set("fieldName", "task_config_items").set("name", "配置项"));
+            headList.add(new Record().set("fieldName", "config_items").set("name", "配置项"));
             headList.add(new Record().set("fieldName", "plan_time").set("name", "计划时间"));
             if(tag){
-                headList.add(new Record().set("fieldName", "task_num").set("name", "任务编号"));
-                headList.add(new Record().set("fieldName", "task_name").set("name", "任务名称"));
+                headList.add(new Record().set("fieldName", "associated_num").set("name", "任务编号"));
+                headList.add(new Record().set("fieldName", "associated_name").set("name", "任务名称"));
             }else {
-                headList.add(new Record().set("fieldName", "work_num").set("name", "项目编号"));
-                headList.add(new Record().set("fieldName", "work_name").set("name", "项目名称"));
+                headList.add(new Record().set("fieldName", "associated_num").set("name", "项目编号"));
+                headList.add(new Record().set("fieldName", "associated_name").set("name", "项目名称"));
             }
             headList.add(new Record().set("fieldName", "main_user_name").set("name", "负责人"));
 

@@ -11,6 +11,15 @@
         #end
     #end
 
+    #sql ("queryDataUserId")
+        select user_id from 72crm_work_user_record where 1=1
+        #if(ids)
+        and num_id in (#fori(ids))
+        #end
+        #if(ty)
+        and type=#para(ty)
+        #end
+    #end
     #sql ("queryHistoricalRecordByType")
         SELECT * FROM 72crm_work_historical_record WHERE module=?
     #end
@@ -24,10 +33,13 @@
     #end
 
      #sql ("advancedSearch")
+     select * from(
         SELECT
             (select realname from 72crm_admin_user where user_id=w.create_user_id) create_user_name,
             (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
+            manager_id,
             (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
+            sales_id,
             (select `name` from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
             (select `name` from 72crm_admin_dept where dept_id=w.area) area,
             work_num,
@@ -45,11 +57,12 @@
          #if(workPhase)
             and w.work_phase != #para(workPhase)
          #end
-        #for(query:queryList)
-            #(query.get("sql"))
-        #end
         #if(dataAuth)
             and work_id in (#fori(dataAuth))
+        #end
+        ) as views where 1=1
+        #for(query:queryList)
+            #(query.get("sql"))
         #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
         #if(page&&limit)
@@ -60,8 +73,8 @@
     #sql("queryWoekPageListCount")
         SELECT count(1) from 72crm_work AS w
         where status != 3
-        #for(query:queryList)
-            #(query.get("sql"))
+        #for(query : queryList)
+            #if(query.get("type")==1) #(query.get("sql")) #end
         #end
         #if(workPhase)
             and w.work_phase != #para(workPhase)
@@ -100,7 +113,7 @@
             and work_id in (#fori(dataAuth))
         #end
         #if(isWaiting)
-            and status!='已完成'
+            and work_phase!='结项'
         #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
         #if(page&&limit)
@@ -494,6 +507,13 @@
     #end
 
 
+
+  #sql ("checkWorkNum")
+  select count(*)
+  from 72crm_work as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
+  left join 72crm_admin_examine_log as c on b.record_id = c.record_id
+  where a.work_phase='结项' and c.examine_user = ? and a.check_status in (0,3) and c.examine_status in (0,3) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
+  #end
 
 
 

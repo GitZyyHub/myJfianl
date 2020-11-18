@@ -30,6 +30,9 @@
     #if(workId)
         and work_id =#para(workId)
     #end
+    #if(ty)
+        and `type` =#para(ty)
+    #end
     ORDER BY create_time desc
     #end
 
@@ -55,6 +58,10 @@
 
     #sql("deleteFileByIds")
       DELETE FROM `72crm_task_file`  where file_id in (#fori(ids))
+    #end
+
+    #sql("deleteFileByTaskIds")
+        delete from 72crm_task_file where subtasks_id in (#fori(ids))
     #end
 
 #end

@@ -91,6 +91,14 @@
   select a.create_time,a.owner_user_id,b.realname,check_status
   from 72crm_crm_contract as a left join 72crm_admin_user as b on a.owner_user_id = b.user_id where examine_record_id = ?
   #end
+  #sql ("queryWorkByRecordId")
+  select a.create_time,a.create_user_id owner_user_id,b.realname,check_status
+  from 72crm_work as a left join 72crm_admin_user as b on a.create_user_id = b.user_id where examine_record_id = ?
+  #end
+  #sql ("queryHoursByRecordId")
+  select a.create_time,a.create_user_id owner_user_id,b.realname,check_status
+  from 72crm_task_hours as a left join 72crm_admin_user as b on a.create_user_id = b.user_id where examine_record_id = ?
+  #end
    #sql ("queryReceivablesByRecordId")
   select a.create_time,a.owner_user_id,b.realname,a.check_status
   from 72crm_crm_receivables as a left join 72crm_admin_user as b on a.owner_user_id = b.user_id where examine_record_id = ?
@@ -156,17 +164,40 @@
           c.contract_id as catagory_cite_id,
           c.name as catagory_cite_name
       #else if(categoryType==4)
-      (case when d.subtasks_id=null then d.subtasks_name else d.task_name end) as catagory,
-      d.hours_id as catagory_id,
-      d.create_time,
-      c.task_id as catagory_cite_id,
-      c.task_name as catagory_cite_name
+          (case when d.subtasks_id=null then d.subtasks_name else d.task_name end) as catagory,
+          d.hours_id as catagory_id,
+          d.create_time,
+          c.task_id as catagory_cite_id,
+          c.task_name as catagory_cite_name,
+          d.task_id,
+          (select task_name from 72crm_task where d.task_id=task_id) task_name,
+          (select realname from 72crm_admin_user where user_id=d.main_user_id ) main_user_name,
+          (select realname from 72crm_admin_user where user_id=d.main_user_id ) main_user_name,
+          case when d.task_id!=d.subtasks_id then d.subtasks_id end subtasks_id,
+          case when d.task_id!=d.subtasks_id then (select task_name from 72crm_task where d.subtasks_id=task_id) end subtasks_name,
+          d.start_time,
+          d.end_time,
+          d.working_hours,
+          d.hours_type,
+          d.progress_content
       #else if(categoryType==5)
+          w.work_id,
           w.work_name AS catagory,
           w.work_id AS catagory_id,
           w.work_name AS catagory_cite_name,
           w.work_id AS catagory_cite_id,
-          w.create_time
+          w.create_time,
+          w.work_num,
+          w.work_name,
+          w.dept_id,
+          (select name from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
+          (select name from 72crm_admin_dept where dept_id=w.area) area,
+          (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
+          (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
+          w.work_phase,
+          w.work_type,
+          w.start_time,
+          w.end_time
       #end
     FROM
       72crm_admin_examine_log AS e

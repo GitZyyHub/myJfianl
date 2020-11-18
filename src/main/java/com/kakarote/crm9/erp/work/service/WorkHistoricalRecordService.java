@@ -52,7 +52,7 @@ public class WorkHistoricalRecordService {
             auth = WorkAuthVerify.isPermissions("project:workConfig:readHistorical");
         } else if (type == WorkRecordEnum.TASK.getType()) {
             auth = WorkAuthVerify.isPermissions("project:task:readHistorical");
-        } else if (type == WorkRecordEnum.WORK.getType()) {
+        } else if (type == WorkRecordEnum.WORK.getType() ||type == WorkRecordEnum.WORK_DETAILS.getType() ) {
             auth = WorkAuthVerify.isPermissions("project:projectManage:readHistorical");
         } else if (type == WorkRecordEnum.SUBTASKS.getType()) {
             auth = WorkAuthVerify.isPermissions("project:task:readHistorical");
@@ -60,9 +60,9 @@ public class WorkHistoricalRecordService {
         if (!auth) {
             return R.error("无权限");
         }
-        Page<Record> page = null;
+        Page<Record> page = new Page<>();
         WorkRecordEnum parse = WorkRecordEnum.parse(type);
-        List<Integer> integers = Arrays.asList(2, 3, 4, 5, 6);
+        List<Integer> integers = Arrays.asList(2, 3, 4, 5, 6,13);
         List<Integer> task = Arrays.asList(7, 12, 11);
         Integer tag = 0;
         List<Record> records;
@@ -186,7 +186,7 @@ public class WorkHistoricalRecordService {
             workHistoricalRecord.setWorkId(workId);
             if (workRecordEnum.getType() == 2) {
                 records = Db.find(Db.getSql("admin.field.queryField"), CrmEnum.MILESTONE.getType());
-            }else if (workRecordEnum.getType() == 1) {
+            }else if (workRecordEnum.getType() == 1 || workRecordEnum.getType() == 13) {
                 List<Record> structures = Db.find(Db.getSql("work.queryStructure"), "72crm_work");
                 for (Record structure : structures) {
                     records.add(new Record().set("field_name", structure.getStr("column_name")).set("name", structure.getStr("column_comment")));
@@ -204,7 +204,7 @@ public class WorkHistoricalRecordService {
             } else if (workRecordEnum.getType() == 4 || workRecordEnum.getType() == 5) {
                 records.add(new Record().set("field_name", "config_items").set("name", "配置项"));
                 records.add(new Record().set("field_name", "plan_time").set("name", "计划时间"));
-                records.add(new Record().set("field_name", "main_user_id").set("name", "负责人"));
+                records.add(new Record().set("field_name", "main_user_name").set("name", "负责人"));
                 records.add(new Record().set("field_name", "version").set("name", "版本"));
                 records.add(new Record().set("field_name", "version_time").set("name", "版本时间"));
                 records.add(new Record().set("field_name", "version_describe").set("name", "版本说明"));
@@ -284,13 +284,13 @@ public class WorkHistoricalRecordService {
                     if (workTaskHistorical != null) {
                         if (StrUtil.isEmpty(workTaskHistorical.getField())) {
                             workTaskHistorical.setField(key);
+                            workHistorical.setField(key);
                         }
-                        workHistorical.setField(key);
                     } else {
                         if (StrUtil.isEmpty(workHistoricalRecord.getField())) {
                             workHistoricalRecord.setField(key);
+                            workHistorical.setField(key);
                         }
-                        workHistorical.setField(key);
                     }
                     if (workTaskHistorical != null) {
                         workTaskHistorical.setContentBefore(contentBefore);

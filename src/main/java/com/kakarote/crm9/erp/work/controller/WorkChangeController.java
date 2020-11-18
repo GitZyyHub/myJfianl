@@ -111,7 +111,7 @@ public class WorkChangeController extends Controller {
     }
 
     private void addField(List<Record> fields){
-        List<String> names = Arrays.asList("变更项", "变更类型", "提出时间", "提出人员", "变更原因", "变更方案", "变更影响", "变更负责人", "参与人", "开始时间", "结束时间", "说明", "是否通过");
+        List<String> names = Arrays.asList("变更项", "变更类型", "提出时间", "提出人员", "变更背景及原因", "变更方案", "变更影响", "执行变更负责人", "参与人", "开始时间", "结束时间", "补充说明", "评审是否通过");
         List<String> fieldName = Arrays.asList("change_project", "change_type", "forward_time", "forward_user_name", "forward_why", "forward_plan", "forward_impact", "forward_main_user_name", "owner_user_name", "start_time", "end_time", "instructions", "is_through");
         for (int i = 0; i < names.size(); i++) {
             Record record = new Record();

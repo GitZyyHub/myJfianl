@@ -109,9 +109,18 @@ public class MilestoneService extends AbstractBasePageList {
 
         Date startTime = entity.getStartTime();
         Date endTime = entity.getEndTime();
-        if (startTime != null && endTime != null && startTime.compareTo(endTime) > 0) {
-            return R.error("结束时间应大于开始时间");
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        if (startTime != null && endTime != null) {
+            if(!startTime.before(endTime)){
+                return R.error("结束时间应大于开始时间");
+            }else if((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30){
+                return R.error("开始时间到结束时间不能超过30天");
+            }
         }
+
+        /*if (startTime != null && endTime != null && !startTime.before(endTime) && fmt.format(startTime).equals(fmt.format(endTime))) {
+            return R.error("结束时间应大于开始时间");
+        }*/
         boolean setting;
         if (entity.getMilestoneId() == null) {
             if (StrUtil.isEmpty(entity.getMilestoneNum())) {
@@ -128,13 +137,13 @@ public class MilestoneService extends AbstractBasePageList {
             //变更前数据
             String tableName = CrmEnum.MILESTONE.getTableName();
             String tableId = CrmEnum.MILESTONE.getTableId();
-            Record first = Db.findFirst("SELECT * FROM 72crm_milestone WHERE milestone_id=?", entity.getMilestoneId());
+            Record first = Db.findFirst("SELECT milestone_name,milestone_num,work_id,degree,DATE_FORMAT( start_time, '%Y-%m-%d' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d' ) end_time,(select task_name from 72crm_task where task_id=m.task_id) task_id FROM 72crm_milestone m WHERE milestone_id=?", entity.getMilestoneId());
             if (first == null) {
                 return R.error("里程碑不存在");
             }
             entity.setUpdateTime(new Date());
             entity.update();
-            Record after = Db.findFirst("SELECT * FROM 72crm_milestone WHERE milestone_id=?", entity.getMilestoneId());
+            Record after = Db.findFirst("SELECT milestone_name,milestone_num,work_id,degree,DATE_FORMAT( start_time, '%Y-%m-%d' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d' ) end_time,(select task_name from 72crm_task where task_id=m.task_id) task_id FROM 72crm_milestone m WHERE milestone_id=?", entity.getMilestoneId());
             //添加变更记录
             workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.UPDATE, entity.getMilestoneNum(),after,first,entity.getMilestoneId());
         }

@@ -162,4 +162,13 @@ public abstract class BaseTaskFile<M extends BaseTaskFile<M>> extends Model<M> i
 		return getStr("batch_id");
 	}
 
+	public M setType(java.lang.Integer type) {
+		set("type", type);
+		return (M)this;
+	}
+
+	public java.lang.Integer getType() {
+		return getInt("type");
+	}
+
 }

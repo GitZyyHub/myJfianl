@@ -23,6 +23,7 @@ import com.kakarote.crm9.utils.TagUtil;
 import com.kakarote.crm9.utils.ToolUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,6 @@ public class WorkChangeService {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Kv kv = Kv.by("_batchId", jsonObject.get("batch_id"));
         kv.set("_workId", jsonObject.get("workId"));
-        kv.set("page", basePageRequest.getPage()).set("limit", basePageRequest.getLimit());
         if (jsonObject.get("_search") != null)
             kv.set("search", jsonObject.get("search"));
 
@@ -106,6 +106,17 @@ public class WorkChangeService {
     @Before(Tx.class)
     public R setWorkChange(JSONObject jsonObject) {
         WorkChange entity = jsonObject.getObject("entity", WorkChange.class);
+
+        Date startTime = entity.getStartTime();
+        Date endTime = entity.getEndTime();
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        if (startTime != null && endTime != null) {
+            if(!startTime.before(endTime)){
+                return R.error("结束时间应大于开始时间");
+            }else if((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30){
+                return R.error("开始时间到结束时间不能超过30天");
+            }
+        }
         Set<Long> ownerUserId = null;
         if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(entity.getOwnerUserId())) {
             ownerUserId = TagUtil.toLongSet(entity.getOwnerUserId());
@@ -118,11 +129,11 @@ public class WorkChangeService {
         }
 
         if (entity.getChangeId() == null) {
-            if (StrUtil.isEmpty(entity.getChangeNum())) {
+            /*if (StrUtil.isEmpty(entity.getChangeNum())) {
                 AdminConfig adminConfig = AdminConfig.dao.findFirst("select setting_id,status,value from 72crm_admin_config where name = 'numberSetting' and value = 27");
                 String result = Aop.get(ToolUtils.class).generateNumber(adminConfig, null);
                 entity.setChangeNum(result);
-            }
+            }*/
             entity.setCreateTime(new Date());
             entity.setBatchId(IdUtil.simpleUUID());
             entity.setUpdateTime(new Date());

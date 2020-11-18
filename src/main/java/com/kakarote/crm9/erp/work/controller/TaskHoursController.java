@@ -81,6 +81,13 @@ public class TaskHoursController extends Controller {
     }
 
     /**
+     * 根据工时ID查询工时详情
+     */
+    public void queryHoursById(@Para("taskHoursId")String taskHoursId){
+        renderJson(taskHoursService.queryById(taskHoursId));
+    }
+
+    /**
      * 分页查询工时导出记录
      */
     @Permissions({"project:taskHours:exportRecord"})
@@ -126,16 +133,18 @@ public class TaskHoursController extends Controller {
      * ???导出工时导出记录
      */
     @Permissions({"project:hoursExcelexport:excelexport"})
-    public void hoursRecordExport(@Para("workIds")String workIds){
+    public void hoursRecordExport(@Para("workIds")String workIds,BasePageRequest basePageRequest){
         List<String> strings = null;
         if(!StrUtil.isEmpty(workIds)){
             strings = Arrays.asList(workIds.split(","));
         }
-
+        JSONObject jsonObject1 = basePageRequest.getJsonObject();
+        jsonObject1.fluentPut("excel","yes");
         //添加导出记录
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
-
-            List<Record> records = Db.find(Db.getSqlPara("task.hours.hoursRecordExport", Kv.by("workIds", strings)));
+            JSONObject jsonObject = (JSONObject)taskHoursService.hoursRecordList(basePageRequest).get("data");
+            List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
+            //List<Record> records = Db.find(Db.getSqlPara("task.hours.hoursRecordExport", Kv.by("workIds", strings)));
 
             List<Map<String, Object>> list = new ArrayList<>();
             records.forEach(record -> {

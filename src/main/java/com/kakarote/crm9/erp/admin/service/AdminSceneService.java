@@ -17,6 +17,7 @@ import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminScene;
 import com.kakarote.crm9.erp.admin.entity.AdminSceneDefault;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.crm.service.CrmBusinessService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class AdminSceneService{
+public class AdminSceneService {
     @Inject
     private AdminFieldService adminFieldService;
 
@@ -37,23 +38,23 @@ public class AdminSceneService{
      * @author wyq
      * 查询场景字段
      */
-    public R queryField(Integer label){
+    public R queryField(Integer label) {
         List<Record> fieldList = Db.find("select field_name,name,type,options from 72crm_admin_field where label = ? and field_type = 1 and is_hidden = 0", label != CrmEnum.CRM_CUSTOMER_POOL.getType() ? label : CrmEnum.CRM_CUSTOMER.getType());
         Aop.get(AdminFieldService.class).recordToFormType(fieldList);
         FieldUtil fieldUtil;
         String[] settingArr = new String[]{};
-        if(CrmEnum.CRM_LEADS.getType() == label){
+        if (CrmEnum.CRM_LEADS.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
             fieldUtil.add("last_time", "最后跟进时间", "datetime", settingArr)
                     .add("owner_user_id", "负责人", "user", settingArr)
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.CRM_CUSTOMER.getType() == label){
+        } else if (CrmEnum.CRM_CUSTOMER.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
             List<Record> dealStatusList = new ArrayList<>();
-            dealStatusList.add(new Record().set("name","未成交").set("value",0));
-            dealStatusList.add(new Record().set("name","已成交").set("value",1));
+            dealStatusList.add(new Record().set("name", "未成交").set("value", 0));
+            dealStatusList.add(new Record().set("name", "已成交").set("value", 1));
             fieldUtil.add("deal_status", "成交状态", "dealStatus", dealStatusList)
                     .add("last_time", "最后跟进时间", "datetime", settingArr)
                     .add("owner_user_id", "负责人", "user", settingArr)
@@ -62,7 +63,7 @@ public class AdminSceneService{
                     .add("create_time", "创建时间", "datetime", settingArr)
                     .add("detail_address", "详细地址", "text", settingArr)
                     .add("address", "地区定位", "map_address", settingArr);
-        }else if(CrmEnum.CRM_CONTACTS.getType() == label){
+        } else if (CrmEnum.CRM_CONTACTS.getType() == label) {
             fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("customer_id")) {
                     field.set("field_name", "customer_name");
@@ -75,7 +76,7 @@ public class AdminSceneService{
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr)
                     .add("pool_day", "距进入公海天数", "poolDay", settingArr);
-        }else if(CrmEnum.CRM_PRODUCT.getType() == label){
+        } else if (CrmEnum.CRM_PRODUCT.getType() == label) {
             fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("customer_id")) {
                     field.set("field_name", "customer_name");
@@ -86,7 +87,7 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.CRM_BUSINESS.getType() == label){
+        } else if (CrmEnum.CRM_BUSINESS.getType() == label) {
             fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("customer_id")) {
                     field.set("field_name", "customer_name");
@@ -99,7 +100,7 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.CRM_CONTRACT.getType() == label){
+        } else if (CrmEnum.CRM_CONTRACT.getType() == label) {
             fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("customer_id")) {
                     field.set("field_name", "customer_name");
@@ -110,7 +111,7 @@ public class AdminSceneService{
                 }
             });
             fieldUtil = new FieldUtil(fieldList);
-            List<Map<String,Object>> checkList = new ArrayList<>();
+            List<Map<String, Object>> checkList = new ArrayList<>();
             checkList.add(new JSONObject().fluentPut("name", "待审核").fluentPut("value", 0));
             checkList.add(new JSONObject().fluentPut("name", "通过").fluentPut("value", 1));
             checkList.add(new JSONObject().fluentPut("name", "拒绝").fluentPut("value", 2));
@@ -124,7 +125,7 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.CRM_RECEIVABLES.getType() == label){
+        } else if (CrmEnum.CRM_RECEIVABLES.getType() == label) {
             fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("customer_id")) {
                     field.set("field_name", "customer_name");
@@ -135,7 +136,7 @@ public class AdminSceneService{
                 }
             });
             fieldUtil = new FieldUtil(fieldList);
-            List<Map<String,Object>> checkList = new ArrayList<>();
+            List<Map<String, Object>> checkList = new ArrayList<>();
             checkList.add(new JSONObject().fluentPut("name", "待审核").fluentPut("value", 0));
             checkList.add(new JSONObject().fluentPut("name", "通过").fluentPut("value", 1));
             checkList.add(new JSONObject().fluentPut("name", "拒绝").fluentPut("value", 2));
@@ -160,40 +161,92 @@ public class AdminSceneService{
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.WORK.getType() == label){
+        } else if (CrmEnum.WORK.getType() == label) {
+            fieldList.forEach(field -> {
+                if (field.getStr("field_name").equals("dept_id")) {
+                    field.set("field_name", "dept_name").set("formType", FormTypeEnum.TASK.getFormType());
+                } /*else if (field.getStr("field_name").equals("sales_id")) {
+                    field.set("field_name", "sales_name");
+                } else if (field.getStr("field_name").equals("manager_id")) {
+                    field.set("field_name", "manager_name");
+                }*/
+            });
             fieldUtil = new FieldUtil(fieldList);
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.MILESTONE.getType() == label){
+        } else if (CrmEnum.MILESTONE.getType() == label) {
+            fieldList.forEach(field -> {
+                if (field.getStr("field_name").equals("task_id")) {
+                    field.set("field_name", "task_name").set("formType", FormTypeEnum.TASK.getFormType());
+                } else if (field.getStr("field_name").equals("work_name")) {
+                    field.set("formType", FormTypeEnum.WORK.getFormType());
+                } else if (field.getStr("field_name").equals("work_num")) {
+                    field.set("formType", FormTypeEnum.WORK.getFormType());
+                } /*else if (field.getStr("field_name").equals("main_user_id")) {
+                    field.set("field_name", "main_user_name");
+                }*/
+            });
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_name", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        } else if (CrmEnum.TASK.getType() == label) {
+            for (int i = 0; i < fieldList.size(); i++) {
+                Record field =  fieldList.get(i);
+                if (field.getStr("field_name").equals("before_id")) {
+                    field.set("field_name", "before_name").set("formType", FormTypeEnum.TASK.getFormType());
+                } else if (field.getStr("field_name").equals("work_name")) {
+                    field.set("formType", FormTypeEnum.WORK.getFormType());
+                } else if (field.getStr("field_name").equals("milestone_id")) {
+                    field.set("field_name", "milestone_name").set("formType", FormTypeEnum.MILESTONE.getFormType());
+                }/* else if (field.getStr("field_name").equals("main_user_id")) {
+                    field.set("field_name", "main_user_name");
+                }*/ else if (field.getStr("field_name").equals("owner_user_id")) {
+                    fieldList.remove(i);
+                    continue;
+                }
+            }
+
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_name", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        } else if (CrmEnum.DEMAND.getType() == label) {
+            fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("create_user_name", "创建人", "user", settingArr)
+                    .add("update_time", "更新时间", "datetime", settingArr)
+                    .add("create_time", "创建时间", "datetime", settingArr);
+        } else if (CrmEnum.SUBTASKS.getType() == label) {
+            fieldList.forEach(field -> {
+                if (field.getStr("field_name").equals("pid")) {
+                    field.set("field_name", "p_name").set("formType", FormTypeEnum.TASK.getFormType());
+                } else if (field.getStr("field_name").equals("milestone_id")) {
+                    field.set("field_name", "milestone_name").set("formType", FormTypeEnum.MILESTONE.getFormType());
+                }
+            });
             fieldUtil = new FieldUtil(fieldList);
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.TASK.getType() == label){
+        } else if (CrmEnum.TASK_HOURS.getType() == label) {
+            fieldList.forEach(field -> {
+                if (field.getStr("field_name").equals("subtasks_id")) {
+                    field.set("field_name", "subtasks_name").set("formType", FormTypeEnum.TASK.getFormType());
+                } else if (field.getStr("field_name").equals("task_id")) {
+                    field.set("field_name", "task_name").set("formType", FormTypeEnum.TASK.getFormType());
+                }/* else if (field.getStr("field_name").equals("main_user_id")) {
+                    field.set("field_name", "main_user_name");
+                }*/
+            });
             fieldUtil = new FieldUtil(fieldList);
-            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
-                    .add("update_time", "更新时间", "datetime", settingArr)
-                    .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.DEMAND.getType() == label){
+        } else if (CrmEnum.WORKCONFIG.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
-            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
-                    .add("update_time", "更新时间", "datetime", settingArr)
-                    .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.SUBTASKS.getType() == label){
+        } else if (CrmEnum.PRODUCT.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
-            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
-                    .add("update_time", "更新时间", "datetime", settingArr)
-                    .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(CrmEnum.TASK_HOURS.getType() == label){
+        } else if (CrmEnum.PRODUCT_FUNCTIONE.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
-        }else if(CrmEnum.WORKCONFIG.getType() == label){
-            fieldUtil = new FieldUtil(fieldList);
-        }else if(CrmEnum.PRODUCT.getType() == label){
-            fieldUtil = new FieldUtil(fieldList);
-        }else if(CrmEnum.PRODUCT_FUNCTIONE.getType() == label){
-            fieldUtil = new FieldUtil(fieldList);
-        }else{
+        } else {
             return R.error("场景label不符合要求！");
         }
         fieldList = fieldUtil.getRecordList();
@@ -220,9 +273,9 @@ public class AdminSceneService{
                 field.set("field_name", "pre_owner_user_id");
             }
 
-            String fieldName=field.getStr("field_name");
+            String fieldName = field.getStr("field_name");
             //如果fieldName不包含中文则尝试转换成下划线格式
-            fieldName=ReUtil.contains("[\u4e00-\u9fa5]",fieldName)?fieldName:StrUtil.toUnderlineCase(fieldName);
+            fieldName = ReUtil.contains("[\u4e00-\u9fa5]", fieldName) ? fieldName : StrUtil.toUnderlineCase(fieldName);
             field.set("field_name", fieldName);
         });
         return R.ok().put("data", fieldList);
@@ -233,11 +286,11 @@ public class AdminSceneService{
      * 增加场景
      */
     @Before(Tx.class)
-    public R addScene(AdminScene adminScene){
+    public R addScene(AdminScene adminScene) {
         Long userId = BaseUtil.getUser().getUserId();
         adminScene.setIsHide(0).setSort(99999).setIsSystem(0).setCreateTime(DateUtil.date()).setUserId(userId);
         adminScene.save();
-        if(1 == adminScene.getIsDefault()){
+        if (1 == adminScene.getIsDefault()) {
             AdminSceneDefault adminSceneDefault = new AdminSceneDefault();
             adminSceneDefault.setSceneId(adminScene.getSceneId()).setType(adminScene.getType()).setUserId(userId).save();
         }
@@ -249,10 +302,10 @@ public class AdminSceneService{
      * 更新场景
      */
     @Before(Tx.class)
-    public R updateScene(AdminScene adminScene){
+    public R updateScene(AdminScene adminScene) {
         Long userId = BaseUtil.getUser().getUserId();
         AdminScene oldAdminScene = AdminScene.dao.findById(adminScene.getSceneId());
-        if(1 == adminScene.getIsDefault()){
+        if (1 == adminScene.getIsDefault()) {
             Db.update("update 72crm_admin_scene_default set scene_id = ? where user_id = ? and type = ?", adminScene.getSceneId(), userId, oldAdminScene.getType());
         }
         adminScene.setUserId(userId).setType(oldAdminScene.getType()).setSort(oldAdminScene.getSort()).setIsSystem(oldAdminScene.getIsSystem()).setUpdateTime(DateUtil.date());
@@ -264,7 +317,7 @@ public class AdminSceneService{
      * 设置默认场景
      */
     @Before(Tx.class)
-    public R setDefaultScene(Integer sceneId){
+    public R setDefaultScene(Integer sceneId) {
         Long userId = BaseUtil.getUser().getUserId();
         AdminScene oldAdminScene = AdminScene.dao.findById(sceneId);
         Db.delete("delete from 72crm_admin_scene_default where user_id = ? and type = ?", userId, oldAdminScene.getType());
@@ -277,8 +330,8 @@ public class AdminSceneService{
      * 删除场景
      */
     @Before(Tx.class)
-    public R deleteScene(AdminScene adminScene){
-        if(1 == AdminScene.dao.findById(adminScene.getSceneId()).getIsSystem()){
+    public R deleteScene(AdminScene adminScene) {
+        if (1 == AdminScene.dao.findById(adminScene.getSceneId()).getIsSystem()) {
             return R.error("系统场景不能删除");
         }
         return AdminScene.dao.deleteById(adminScene.getSceneId()) ? R.ok() : R.error();
@@ -289,18 +342,18 @@ public class AdminSceneService{
      * 查询场景
      */
     @Before(Tx.class)
-    public R queryScene(Integer type){
+    public R queryScene(Integer type) {
         Long userId = BaseUtil.getUser().getUserId();
         //查询userId下是否有系统场景，没有则插入
         Integer number = Db.queryInt(Db.getSql("admin.scene.querySystemNumber"), type, userId);
-        if(number.equals(0)){
+        if (number.equals(0)) {
             AdminScene systemScene = new AdminScene();
             systemScene.setUserId(userId).setSort(0).setData("").setIsHide(0).setIsSystem(1).setCreateTime(DateUtil.date()).setType(type);
             JSONObject ownerObject = new JSONObject();
             ownerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "is").fluentPut("value", userId));
             JSONObject subOwnerObject = new JSONObject();
             subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId, BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1)));
-            if(CrmEnum.CRM_LEADS.getType() == type){
+            if (CrmEnum.CRM_LEADS.getType() == type) {
                 systemScene.setName("全部线索").setData(new JSONObject().fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0)).toString()).save();
                 ownerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "is").fluentPut("value", userId)).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
                 systemScene.setSceneId(null).setName("我负责的线索").setData(ownerObject.toString()).save();
@@ -314,7 +367,7 @@ public class AdminSceneService{
                 String leadsIds = CollectionUtil.isEmpty(leadsIdList) ? "0" : CollectionUtil.join(leadsIdList, ",");
                 jsonObject.fluentPut("leads_id", new JSONObject().fluentPut("name", "leads_id").fluentPut("condition", "in").fluentPut("value", leadsIds));
                 systemScene.setSceneId(null).setName("我关注的线索").setData(jsonObject.toString()).setBydata("star").save();
-            }else if(CrmEnum.CRM_CUSTOMER.getType() == type){
+            } else if (CrmEnum.CRM_CUSTOMER.getType() == type) {
                 systemScene.setName("全部客户").save();
                 systemScene.setSceneId(null).setName("我负责的客户").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的客户").setData(subOwnerObject.toString()).save();
@@ -326,7 +379,7 @@ public class AdminSceneService{
                 String customerIds = CollectionUtil.isEmpty(customerIdList) ? "0" : CollectionUtil.join(customerIdList, ",");
                 jsonObject.fluentPut("customer_id", new JSONObject().fluentPut("name", "customer_id").fluentPut("condition", "in").fluentPut("value", customerIds));
                 systemScene.setSceneId(null).setName("我关注的客户").setData(jsonObject.toString()).setBydata("star").save();
-            }else if(CrmEnum.CRM_CONTACTS.getType() == type){
+            } else if (CrmEnum.CRM_CONTACTS.getType() == type) {
                 systemScene.setName("全部联系人").save();
                 systemScene.setSceneId(null).setName("我负责的联系人").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的联系人").setData(subOwnerObject.toString()).save();
@@ -335,13 +388,13 @@ public class AdminSceneService{
                 String contactsIds = CollectionUtil.isEmpty(contactsIdList) ? "0" : CollectionUtil.join(contactsIdList, ",");
                 jsonObject.fluentPut("contacts_id", new JSONObject().fluentPut("name", "contacts_id").fluentPut("condition", "in").fluentPut("value", contactsIds));
                 systemScene.setSceneId(null).setName("我关注的联系人").setData(jsonObject.toString()).setBydata("star").save();
-            }else if(CrmEnum.CRM_PRODUCT.getType() == type){
+            } else if (CrmEnum.CRM_PRODUCT.getType() == type) {
                 systemScene.setName("全部产品").save();
                 systemScene.setSceneId(null).setName("上架的产品").setData(new JSONObject().fluentPut("是否上下架", new JSONObject().fluentPut("name", "是否上下架").fluentPut("condition", "is").fluentPut("value", "上架")).toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("是否上下架", new JSONObject().fluentPut("name", "是否上下架").fluentPut("condition", "is").fluentPut("value", "下架"));
                 systemScene.setSceneId(null).setName("下架的产品").setData(jsonObject.toString()).save();
-            }else if(CrmEnum.CRM_BUSINESS.getType() == type){
+            } else if (CrmEnum.CRM_BUSINESS.getType() == type) {
                 systemScene.setName("全部商机").save();
                 systemScene.setSceneId(null).setName("我负责的商机").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的商机").setData(subOwnerObject.toString()).save();
@@ -353,14 +406,14 @@ public class AdminSceneService{
                 String businessIds = CollectionUtil.isEmpty(businessIdList) ? "0" : CollectionUtil.join(businessIdList, ",");
                 jsonObject.fluentPut("business_id", new JSONObject().fluentPut("name", "business_id").fluentPut("condition", "in").fluentPut("value", businessIds));
                 systemScene.setSceneId(null).setName("我关注的商机").setData(jsonObject.toString()).setBydata("star").save();
-            }else if(CrmEnum.CRM_CONTRACT.getType() == type){
+            } else if (CrmEnum.CRM_CONTRACT.getType() == type) {
                 systemScene.setName("全部合同").save();
                 systemScene.setSceneId(null).setName("我负责的合同").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的合同").setData(subOwnerObject.toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("ro_user_id", new JSONObject().fluentPut("name", "ro_user_id").fluentPut("condition", "takePart").fluentPut("value", userId));
                 systemScene.setSceneId(null).setName("我参与的合同").setData(jsonObject.toString()).save();
-            }else if(CrmEnum.CRM_RECEIVABLES.getType() == type){
+            } else if (CrmEnum.CRM_RECEIVABLES.getType() == type) {
                 systemScene.setName("全部回款").save();
                 systemScene.setSceneId(null).setName("我负责的回款").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的回款").setData(subOwnerObject.toString()).save();
@@ -368,45 +421,60 @@ public class AdminSceneService{
                 systemScene.setName("全部回访").save();
                 systemScene.setSceneId(null).setName("我负责的回访").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的回访").setData(subOwnerObject.toString()).save();
-            } else if(CrmEnum.WORK.getType() ==type){
+            } else if (CrmEnum.WORK.getType() == type) {
                 systemScene.setName("全部项目").save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("manager_id", new JSONObject().fluentPut("name", "manager_id").fluentPut("condition", "is").fluentPut("value", userId));
                 systemScene.setSceneId(null).setName("我负责的项目").setData(jsonObject.toString()).save();
-            } else if(CrmEnum.MILESTONE.getType() ==type){
+            } else if (CrmEnum.MILESTONE.getType() == type) {
                 systemScene.setName("全部里程碑").save();
-            } else if(CrmEnum.TASK.getType() == type){
+            } else if (CrmEnum.TASK.getType() == type) {
                 systemScene.setName("全部任务").save();
+
                 JSONObject jsonObject = new JSONObject();
+                jsonObject.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", getSubUserId(userId, BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1)));
                 systemScene.setSceneId(null).setName("下属负责的任务").setData(jsonObject.toString()).save();
-                jsonObject.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", userId));
-                systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject.toString()).save();
-            } else if(CrmEnum.PRODUCT.getType() == type){
+
+
+                JSONObject jsonObject1 = new JSONObject();
+                jsonObject1.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", userId));
+                systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject1.toString()).save();
+
+                JSONObject j = new JSONObject();
+                j.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "contains").fluentPut("value", ","+userId+","));
+                systemScene.setSceneId(null).setName("我参与的任务").setData(j.toString()).save();
+            } else if (CrmEnum.PRODUCT.getType() == type) {
                 systemScene.setName("全部产品").save();
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.fluentPut("product_status",new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "0"));
+                jsonObject.fluentPut("product_status", new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "0"));
                 systemScene.setSceneId(null).setName("发版的产品").setData(jsonObject.toString()).save();
                 JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.fluentPut("product_status",new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "1"));
+                jsonObject1.fluentPut("product_status", new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "1"));
                 systemScene.setSceneId(null).setName("规划的产品").setData(jsonObject1.toString()).save();
-            } else if(CrmEnum.DEMAND.getType() == type){
+            } else if (CrmEnum.DEMAND.getType() == type) {
                 systemScene.setName("全部需求").save();
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.fluentPut("is_associated",new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "0"));
+                jsonObject.fluentPut("is_associated", new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "1"));
                 systemScene.setSceneId(null).setName("已对标需求").setData(jsonObject.toString()).save();
                 JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.fluentPut("is_associated",new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "1"));
+                jsonObject1.fluentPut("is_associated", new JSONObject().fluentPut("name", "is_associated").fluentPut("condition", "is").fluentPut("value", "0"));
                 systemScene.setSceneId(null).setName("未对标需求").setData(jsonObject1.toString()).save();
-            } else if(CrmEnum.WORKCONFIG.getType() == type){
+            } else if (CrmEnum.WORKCONFIG.getType() == type) {
                 systemScene.setName("全部配置").save();
-            } else if(CrmEnum.SUBTASKS.getType() == type){
+            } else if (CrmEnum.SUBTASKS.getType() == type) {
                 systemScene.setName("全部任务").save();
+
                 JSONObject jsonObject = new JSONObject();
+                jsonObject.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", getSubUserId(userId, BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1)));
                 systemScene.setSceneId(null).setName("下属负责的任务").setData(jsonObject.toString()).save();
-                jsonObject.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", userId));
-                systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject.toString()).save();
+
+
+                JSONObject jsonObject1 = new JSONObject();
+                jsonObject1.fluentPut("main_user_id", new JSONObject().fluentPut("name", "main_user_id").fluentPut("condition", "is").fluentPut("value", userId));
+                systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject1.toString()).save();
+
                 JSONObject j = new JSONObject();
-                j.fluentPut("oneself","oneself");
+                jsonObject1.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "contains").fluentPut("value", ","+userId+","));
                 systemScene.setSceneId(null).setName("我参与的任务").setData(j.toString()).save();
 
             }
@@ -417,12 +485,12 @@ public class AdminSceneService{
     /**
      * 递归查询下属id
      */
-    public String getSubUserId(Long userId, Integer deepness){
+    public String getSubUserId(Long userId, Integer deepness) {
         StringBuilder ids = new StringBuilder();
-        if(deepness > 0){
+        if (deepness > 0) {
             List<Long> list = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
-            if(list != null && list.size() > 0){
-                for(Long l : list){
+            if (list != null && list.size() > 0) {
+                for (Long l : list) {
                     ids.append(",").append(l).append(getSubUserId(l, deepness - 1));
                 }
             }
@@ -434,18 +502,18 @@ public class AdminSceneService{
      * @author wyq
      * 查询场景设置
      */
-    public R querySceneConfig(AdminScene adminScene){
+    public R querySceneConfig(AdminScene adminScene) {
         Long userId = BaseUtil.getUser().getUserId();
         List<Record> valueList = Db.find(Db.getSql("admin.scene.queryScene"), adminScene.getType(), userId);
-        for(Record scene : valueList){
-            if(StrUtil.isNotEmpty(scene.getStr("data"))){
+        for (Record scene : valueList) {
+            if (StrUtil.isNotEmpty(scene.getStr("data"))) {
                 JSONObject jsonObject = JSON.parseObject(scene.getStr("data"));
                 scene.set("data", jsonObject);
             }
         }
         List<Record> hideValueList = Db.find(Db.getSql("admin.scene.queryHideScene"), adminScene.getType(), userId);
-        for(Record hideScene : hideValueList){
-            if(StrUtil.isNotEmpty(hideScene.getStr("data"))){
+        for (Record hideScene : hideValueList) {
+            if (StrUtil.isNotEmpty(hideScene.getStr("data"))) {
                 JSONObject jsonObject = JSON.parseObject(hideScene.getStr("data"));
                 hideScene.set("data", jsonObject);
             }
@@ -458,16 +526,16 @@ public class AdminSceneService{
      * 设置场景
      */
     @Before(Tx.class)
-    public R sceneConfig(AdminScene adminScene){
+    public R sceneConfig(AdminScene adminScene) {
         Long userId = BaseUtil.getUser().getUserId();
         String[] sortArr = adminScene.getNoHideIds().split(",");
-        for(int i = 0; i < sortArr.length; i++){
+        for (int i = 0; i < sortArr.length; i++) {
             Db.update(Db.getSql("admin.scene.sort"), i + 1, adminScene.getType(), userId, sortArr[i]);
         }
-        if(null != adminScene.getHideIds()){
+        if (null != adminScene.getHideIds()) {
             String[] hideIdsArr = adminScene.getHideIds().split(",");
             Record number = Db.findFirst(Db.getSqlPara("admin.scene.queryIsHideSystem", Kv.by("ids", hideIdsArr)));
-            if(number.getInt("number") > 0){
+            if (number.getInt("number") > 0) {
                 return R.error("系统场景不能隐藏");
             }
             Db.update(Db.getSqlPara("admin.scene.isHide", Kv.by("ids", hideIdsArr).set("type", adminScene.getType()).set("userId", userId)));

@@ -68,6 +68,8 @@ public class TaskController extends Controller {
      * 查询待办任务
      */
     public void waiting(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        jsonObject.fluentPut("isWaiting",1);
         renderJson(taskService.waiting(basePageRequest,false));
     }
 
@@ -195,7 +197,11 @@ public class TaskController extends Controller {
 
         int temp = 0;
         for (Record field : fields) {
-            handers.add(field.getStr("name"));
+            String name = field.getStr("name");
+            if(field.getInt("is_null")==1){
+                name += "(*)";
+            }
+            handers.add(name);
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);
@@ -227,14 +233,14 @@ public class TaskController extends Controller {
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.TASK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
             JSONObject jsonObject ;
-            if(json.get("isWaiting")!=null){
+            if(json.get("isWaiting")!=null||json.get("userId")!=null){
                 jsonObject = (JSONObject)taskService.waiting(basePageRequest, false).get("data");
             }else {
                 jsonObject = (JSONObject)taskService.queryPageList(basePageRequest, false).get("data");
             }
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"batch_id","task_id","before_id","main_user_id","milestone_id","owner_user_id","p_name","pid"};
+            String[] s = new String[]{"batch_id","task_id","before_id","main_user_id","milestone_id","owner_user_id","p_name","pid","subtasks_name","subtasks_id","check_status"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
