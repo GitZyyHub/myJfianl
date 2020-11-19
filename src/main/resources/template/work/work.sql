@@ -502,8 +502,8 @@
         associated_name,associated_num,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?
     #end
 
-    #sql("delete")
-
+    #sql("deleteConfigByTaskIds")
+        delete from 72crm_work_config where type =1 and associated_id in (#fori(ids))
     #end
 
     #sql("queryLabel")

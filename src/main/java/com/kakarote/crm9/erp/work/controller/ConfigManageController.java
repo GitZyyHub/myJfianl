@@ -50,6 +50,7 @@ public class ConfigManageController extends Controller {
     @Permissions({"project:workConfig:save","project:workConfig:update"})
     public void setConfig(@Para("") WorkConfig workConfig){
         JSONObject jsonObject = JSONObject.parseObject(getRawData());
+        jsonObject.fluentPut("type",2);
         renderJson(configManageService.setConfig(jsonObject));
     }
 

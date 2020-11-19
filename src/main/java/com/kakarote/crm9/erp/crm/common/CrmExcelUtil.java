@@ -45,6 +45,7 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -372,31 +373,32 @@ public class CrmExcelUtil {
                         WorkConfig workConfig = new WorkConfig();
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
                         for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0,1,3);
+                            List<Integer> integers = Arrays.asList(0, 1, 3, 4);
                             if (integers.contains(i)) {
                                 if (StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
-                            } else if (i == 4) {
-                                List<String> users = null;
+                            }
+                            if (i == 4) {
+                                List<String> users = new ArrayList<>();
                                 try {
                                     users = Arrays.asList(rowList.get(i).toString().trim().split(","));
                                 } catch (NullPointerException e) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
                                 }
-                                List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                if (userIds.size() != users.size()) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
+                                if (users.size() > 0) {
+                                    List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
+                                    if (users.size() == 0) {
+                                        rowList.add(0, "该人员不存在");
+                                        errorList.add(rowList);
+                                        return;
+                                    }
+                                    String s = userIds.toString();
+                                    rowList.set(i, s.substring(1, s.length() - 1));
                                 }
-                                String s = userIds.toString();
-                                rowList.set(i, s.substring(1, s.length() - 1));
-                            }else if(i==1){
+                            }
+                            if (i == 1) {
                                 Record first = Db.findFirst("select work_id,work_num,work_name from 72crm_work where work_num =?", rowList.get(i).toString().trim());
                                 workConfig.setAssociatedId(first.getLong("work_id"));
                                 workConfig.setAssociatedNum(first.getStr("work_num"));
@@ -411,10 +413,17 @@ public class CrmExcelUtil {
                         workConfig.setVersionTime(sdf.parse(rowList.get(8).toString().trim()));
                         workConfig.setCreateTime(new Date());
                         workConfig.setCreateUserId(BaseUtil.getUserId());
-                        if (workConfig.save()) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("entity",workConfig);
+                        R r = Aop.get(ConfigManageService.class).setConfig(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         Log.getLog(getClass()).error("导入数据异常:", e);
                         rowList.add(0, "导入异常");
                         errorList.add(rowList);
@@ -439,7 +448,7 @@ public class CrmExcelUtil {
 
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
                         for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 1);
+                            List<Integer> integers = Arrays.asList(0, 1, 2, 3, 4, 5, 6);
                             if (integers.contains(i)) {
                                 if (StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     rowList.add(0, "必填选项，请添加");
@@ -461,8 +470,16 @@ public class CrmExcelUtil {
                         workProductFunction.setFunctionName(rowList.get(0).toString().trim());
                         workProductFunction.setFunctionNumber(rowList.get(1).toString().trim());
                         workProductFunction.setFunctionDescribe(rowList.get(2).toString().trim());
-                        if (workProductFunction.save()) {
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("entity", workProductFunction);
+                        R r = Aop.get(WorkProductFuntionService.class).setProductFunction(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
                     } catch (Exception e) {
                         Log.getLog(getClass()).error("导入数据异常:", e);
@@ -485,30 +502,30 @@ public class CrmExcelUtil {
                         WorkProduct workProduct = new WorkProduct();
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
                         for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(1, 3, 4, 6);
+                            List<Integer> integers = Arrays.asList(0, 1, 3, 4, 6);
                             if (integers.contains(i)) {
                                 if (StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
-                            } else if (i == 4 || i == 5) {
-                                List<String> users = null;
+                            }
+                            if (i == 4 || i == 5) {
+                                List<String> users = new ArrayList<>();
                                 try {
                                     users = Arrays.asList(rowList.get(i).toString().trim().split(","));
                                 } catch (NullPointerException e) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
                                 }
-                                List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                if (userIds.size() != users.size()) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
+                                if (users.size() > 0) {
+                                    List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
+                                    if (users.size() == 0) {
+                                        rowList.add(0, "该人员不存在");
+                                        errorList.add(rowList);
+                                        return;
+                                    }
+                                    String s = userIds.toString();
+                                    rowList.set(i, s.substring(1, s.length() - 1));
                                 }
-                                String s = userIds.toString();
-                                rowList.set(i, s.substring(1, s.length() - 1));
                             }
                         }
 
@@ -518,14 +535,25 @@ public class CrmExcelUtil {
                         workProduct.setMainUserId(Integer.parseInt(rowList.get(4).toString().trim()));
                         workProduct.setExploitUserId(Integer.parseInt(rowList.get(5).toString().trim()));
                         workProduct.setProductStatus(rowList.get(6).toString().trim());
-                        workProduct.setReleaseTime(sdf.parse(rowList.get(7).toString().trim()));
+                        if (!StrUtil.isEmpty(rowList.get(7).toString())) {
+                            try {
+                                workProduct.setReleaseTime(sdf.parse(rowList.get(7).toString().trim()));
+                            } catch (ParseException e) {
+                                rowList.add(0, "时间格式错误");
+                                errorList.add(rowList);
+                                return;
+                            }
+                        }
                         workProduct.setVersionDescribe(rowList.get(8).toString().trim());
-                        WorkProductService workProductService = new WorkProductService();
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("entity", workProduct);
-                        R r = workProductService.setWorkProduct(jsonObject);
+                        R r = Aop.get(WorkProductService.class).setWorkProduct(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
                     } catch (Exception e) {
                         Log.getLog(getClass()).error("导入数据异常:", e);
@@ -550,30 +578,30 @@ public class CrmExcelUtil {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
 
                         for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 1, 2);
+                            List<Integer> integers = Arrays.asList(0, 1, 2, 3);
                             if (integers.contains(i)) {
                                 if (StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
-                            } else if (i == 3) {
-                                List<String> users = null;
+                            }
+                            if (i == 3) {
+                                List<String> users = new ArrayList<>();
                                 try {
                                     users = Arrays.asList(rowList.get(i).toString().trim().split(","));
                                 } catch (NullPointerException e) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
                                 }
-                                List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                if (userIds.size() != users.size()) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
+                                if (users.size() > 0) {
+                                    List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
+                                    if (users.size() == 0) {
+                                        rowList.add(0, "该人员不存在");
+                                        errorList.add(rowList);
+                                        return;
+                                    }
+                                    String s = userIds.toString();
+                                    rowList.set(i, s.substring(1, s.length() - 1));
                                 }
-                                String s = userIds.toString();
-                                rowList.set(i, s.substring(1, s.length() - 1));
                             }
                         }
 
@@ -581,15 +609,34 @@ public class CrmExcelUtil {
                         workResourcesSetting.setResourcesDescribe(rowList.get(1).toString().trim());
                         workResourcesSetting.setResourcesProvide(rowList.get(2).toString().trim());
                         workResourcesSetting.setMainUserId(Integer.parseInt(rowList.get(3).toString().trim()));
-                        if(!StrUtil.isEmpty(rowList.get(4).toString())){
-                            workResourcesSetting.setPlanTime(sdf.parse(rowList.get(4).toString().trim()));
+                        if (!StrUtil.isEmpty(rowList.get(4).toString())) {
+                            try {
+                                workResourcesSetting.setPlanTime(sdf.parse(rowList.get(4).toString().trim()));
+                            } catch (ParseException e) {
+                                rowList.add(0, "时间格式不正确");
+                                errorList.add(rowList);
+                                return;
+                            }
                         }
-                        if(!StrUtil.isEmpty(rowList.get(5).toString())){
-                            workResourcesSetting.setActualTime(sdf.parse(rowList.get(5).toString().trim()));
+                        if (!StrUtil.isEmpty(rowList.get(5).toString())) {
+                            try {
+                                workResourcesSetting.setActualTime(sdf.parse(rowList.get(5).toString().trim()));
+                            } catch (ParseException e) {
+                                rowList.add(0, "时间格式不正确");
+                                errorList.add(rowList);
+                                return;
+                            }
                         }
                         workResourcesSetting.setResourcesStatus(rowList.get(6).toString().trim());
-                        if (workResourcesSetting.save()) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("entity",workResourcesSetting);
+                        R r = Aop.get(WorkResourcesSettingService.class).setResources(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
                     } catch (Exception e) {
                         Log.getLog(getClass()).error("导入数据异常:", e);
@@ -615,30 +662,30 @@ public class CrmExcelUtil {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
 
                         for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 3, 4, 6, 7, 10, 11, 12);
+                            List<Integer> integers = Arrays.asList(0,1,2 ,3,  6, 7, 10, 11, 12);
                             if (integers.contains(i)) {
                                 if (StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
-                            } else if (i == 8 || i == 9) {
-                                List<String> users = null;
+                            }
+                            if (i == 8 || i == 9) {
+                                List<String> users = new ArrayList<>();
                                 try {
                                     users = Arrays.asList(rowList.get(i).toString().trim().split(","));
                                 } catch (NullPointerException e) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
                                 }
-                                List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                if (userIds.size() != users.size()) {
-                                    rowList.add(0, "该人员不存在");
-                                    errorList.add(rowList);
-                                    return;
+                                if (users.size() > 0) {
+                                    List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
+                                    if (users.size() == 0) {
+                                        rowList.add(0, "该人员不存在");
+                                        errorList.add(rowList);
+                                        return;
+                                    }
+                                    String s = userIds.toString();
+                                    rowList.set(i, s.substring(1, s.length() - 1));
                                 }
-                                String s = userIds.toString();
-                                rowList.set(i, s.substring(1, s.length() - 1));
                             }
                         }
 
@@ -650,18 +697,22 @@ public class CrmExcelUtil {
                         }
                         task.setWorkId(workId);
 
-                        Integer taskId = Db.queryInt("select task_id from 72crm_task where task_num=?", rowList.get(1).toString().trim());
-                        if (taskId == null) {
-                            rowList.add(0, "该任务不存在");
-                            errorList.add(rowList);
-                            return;
+                        if (!StrUtil.isEmpty(rowList.get(1).toString().trim())) {
+                            Integer taskId = Db.queryInt("select task_id from 72crm_task where task_num=?", rowList.get(1).toString().trim());
+                            if (taskId == null) {
+                                rowList.add(0, "该任务不存在");
+                                errorList.add(rowList);
+                                return;
+                            }
+                            task.setBeforeId(taskId);
                         }
-                        task.setBeforeId(taskId);
 
                         if (StrUtil.isEmptyIfStr(rowList.get(2))) {
                             AdminConfig adminConfig = AdminConfig.dao.findFirst("select setting_id,status,value from 72crm_admin_config where name = 'numberSetting' and value = 21");
                             String result = Aop.get(ToolUtils.class).generateNumber(adminConfig, null);
                             task.setTaskNum(result);
+                        } else {
+                            task.setTaskNum(rowList.get(2).toString().trim());
                         }
 
                         Long milestoneId = Db.queryLong("select milestone_id from 72crm_milestone where milestone_num=?", rowList.get(3).toString().trim());
@@ -681,18 +732,36 @@ public class CrmExcelUtil {
                         task.setPriority(rowList.get(10).toString().trim());
                         task.setDifficulty(rowList.get(11).toString().trim());
                         task.setDegree(rowList.get(12).toString().trim());
-
-                        task.setStartTime(sdf.parse(rowList.get(13).toString().trim()));
-                        task.setEndTime(sdf.parse(rowList.get(14).toString().trim()));
+                        if(StrUtil.isEmpty(rowList.get(13).toString())){
+                            try {
+                                task.setStartTime(sdf.parse(rowList.get(13).toString().trim()));
+                            } catch (ParseException e) {
+                                rowList.add(0, "时间格式不正确");
+                                errorList.add(rowList);
+                                return;
+                            }
+                        }
+                        if(StrUtil.isEmpty(rowList.get(14).toString())){
+                            try {
+                                task.setEndTime(sdf.parse(rowList.get(14).toString().trim()));
+                            } catch (ParseException e) {
+                                rowList.add(0, "时间格式不正确");
+                                errorList.add(rowList);
+                                return;
+                            }
+                        }
                         task.setDescription(rowList.get(15).toString().trim());
                         task.setCreateTime(new Date());
                         task.setCreateUserId(BaseUtil.getUserId());
-                        TaskService taskService = new TaskService();
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("entity",task);
-                        R r = taskService.setTask(jsonObject);
-                        if ((int)r.get("code") == 0) {
+                        R r = Aop.get(TaskService.class).setTask(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
 
                     } catch (Exception e) {
@@ -716,12 +785,14 @@ public class CrmExcelUtil {
 
                     try {
                         WorkRisk workRisk = new WorkRisk();
+                        workRisk.setWorkId(Long.parseLong(workId));
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
                         String found = null;
                         String tracking = null;
                         String solve = null;
                         for (int i = 0; i < rowList.size(); i++) {
-                            if (i != 11 || i != 12 || i != 13) {
+                            List<Integer> integers = Arrays.asList(0,1,2,3,4,5,6,7,8,9,10);
+                            if (integers.contains(i)) {
                                 if (StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
@@ -731,34 +802,36 @@ public class CrmExcelUtil {
 
                             if (i == 5 || i == 7 || i == 11) {
                                 if (!StrUtil.isEmptyIfStr(rowList.get(i))) {
-                                    List<String> users = null;
+                                    List<String> users = new ArrayList<>();
                                     try {
                                         users = Arrays.asList(rowList.get(i).toString().trim().split(","));
                                     } catch (NullPointerException e) {
-                                        rowList.add(0, "该人员不存在");
-                                        errorList.add(rowList);
-                                        return;
                                     }
-                                    List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                    if (userIds.size() != users.size()) {
-                                        rowList.add(0, "该人员不存在");
-                                        errorList.add(rowList);
-                                        return;
-                                    }
-                                    StringBuilder stringBuilder = new StringBuilder();
-                                    workRisk.setFoundUserId(userIds.stream().map((user) -> {
-                                        return stringBuilder.append(userIds + ",");
-                                    }).toString());
-                                    switch (i) {
-                                        case 5:
-                                            found = stringBuilder.toString();
-                                            break;
-                                        case 7:
-                                            tracking = stringBuilder.toString();
-                                            break;
-                                        case 11:
-                                            solve = stringBuilder.toString();
-                                            break;
+                                    if (users.size() > 0) {
+                                        List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
+                                        if (users.size() == 0) {
+                                            rowList.add(0, "该人员不存在");
+                                            errorList.add(rowList);
+                                            return;
+                                        }
+                                        String s = userIds.toString();
+                                        rowList.set(i, s.substring(1, s.length() - 1));
+
+                                        StringBuilder stringBuilder = new StringBuilder();
+                                        workRisk.setFoundUserId(userIds.stream().map((user) -> {
+                                            return stringBuilder.append(userIds + ",");
+                                        }).toString());
+                                        switch (i) {
+                                            case 5:
+                                                found = stringBuilder.toString();
+                                                break;
+                                            case 7:
+                                                tracking = stringBuilder.toString();
+                                                break;
+                                            case 11:
+                                                solve = stringBuilder.toString();
+                                                break;
+                                        }
                                     }
                                 }
                             }
@@ -802,12 +875,15 @@ public class CrmExcelUtil {
                         }
                         workRisk.setRiskStatus(rowList.get(13).toString().trim());
                         workRisk.setCreateTime(new Date());
-                        WorkRiskService workRiskService = new WorkRiskService();
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("entity",workRisk);
-                        R r = workRiskService.setRisk(jsonObject);
-                        if ((int)r.get("code") == 0) {
+                        R r = Aop.get(WorkRiskService.class).setRisk(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
                     } catch (Exception e) {
                         Log.getLog(getClass()).error("导入数据异常:", e);
@@ -920,12 +996,15 @@ public class CrmExcelUtil {
                         work.setCreateTime(new Date());
 
                         //boolean save = work.save();
-                        WorkService workService = new WorkService();
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",work);
-                        R r = workService.setWork(jsonObject);
-                        if ((int)r.get("code") == 0) {
+                        jsonObject.put("entity", work);
+                        R r = Aop.get(WorkService.class).setWork(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
 
                     } catch (Exception e) {
@@ -984,7 +1063,7 @@ public class CrmExcelUtil {
                             return;
                         }
                         workDemand.setDemandType(rowList.get(9).toString().trim());
-                        if(workDemand.save()){
+                        if (workDemand.save()) {
                             updateNum++;
                         }
 

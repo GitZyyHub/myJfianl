@@ -64,6 +64,7 @@ public class TaskConfigService {
     @Before(Tx.class)
     public R setConfig(JSONObject jsonObject) {
         WorkConfig workConfig = jsonObject.getObject("entity", WorkConfig.class);
+        workConfig.setType(1);
         boolean temp;
         Task byId = Aop.get(Task.class).findById(workConfig.getAssociatedId());
         if(byId !=null){

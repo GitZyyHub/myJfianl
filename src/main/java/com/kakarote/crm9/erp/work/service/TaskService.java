@@ -192,7 +192,7 @@ public class TaskService extends AbstractBasePageList {
         }
         kv.set("isWaiting", jsonObject.get("isWaiting"));
         kv.set("workId", jsonObject.get("workId"));
-        queryDataAuth(WorkUserEnum.TYPE_1,kv,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,1,kv.getLong("_userId"));
+        queryDataAuth(WorkUserEnum.TYPE_1,kv,CrmEnum.TASK,null, WorkRendAuthEnum.TASK,1,Long.parseLong(kv.getStr("_userId")));
         if(kv == null){
             return R.error("无权访问");
         }
@@ -320,7 +320,7 @@ public class TaskService extends AbstractBasePageList {
         //List<String> strings = Arrays.asList(ids.split(","));
         int delete = Db.template("work.task.deleteTask", Kv.by("ids", ids)).delete();
         Db.template("task.file.deleteFileByTaskIds", Kv.by("ids", ids)).delete();
-        Db.template("task.file.deleteConfigByTaskIds", Kv.by("ids", ids)).delete();
+        Db.template("work.deleteConfigByTaskIds", Kv.by("ids", ids)).delete();
         int deleteTaskByPid = Db.template("work.task.deleteTaskByPid", Kv.by("ids", ids)).delete();
         return delete==strings.size()?R.ok():R.error("删除"+delete+"条数据，未删除+"+(strings.size()-delete));
     }

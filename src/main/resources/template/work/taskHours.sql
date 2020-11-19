@@ -51,6 +51,37 @@
             LIMIT #(page),#(limit)
         #end
     #end
+
+    #sql("queryById")
+     SELECT
+            hours_id,
+            work_id,
+            (select work_name from 72crm_work where work_id=h.work_id) work_name,
+            (select work_num from 72crm_work where work_id=h.work_id) work_num,
+            task_id,
+            (select task_name from 72crm_task where task_id=h.task_id) task_name,
+            main_user_id,
+            (select realname from 72crm_admin_user where user_id=h.main_user_id) main_user_name,
+            subtasks_id,
+            (select task_name from 72crm_task where task_id=h.subtasks_id) subtasks_name,
+            start_time,
+            end_time,
+            working_hours,
+            hours_type,
+            progress_content,
+            check_user_id,
+            (select realname from 72crm_admin_user where user_id=h.check_user_id) check_user_name,
+            create_user_id,
+            (select realname from 72crm_admin_user where user_id=h.create_user_id) create_user_name,
+            h.create_time,
+            h.examine_time,
+            check_status,
+            update_time
+        FROM
+        72crm_task_hours h
+        where hours_id=#para(hoursId)
+    #end
+
     #sql("queryHoursByUserId")
     SELECT
             hours_id,

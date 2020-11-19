@@ -91,7 +91,7 @@ public class WorkRiskController extends Controller {
                 new String[]{"低","中","高"},
                 new String[]{"无","关闭"});
         //下拉列的序号
-        List<String> downRows =  Arrays.asList("0","2","3","4","12");
+        List<String> downRows =  Arrays.asList("0","2","3","4","13");
 
         int temp = 0;
         /*for (Record field : fields) {

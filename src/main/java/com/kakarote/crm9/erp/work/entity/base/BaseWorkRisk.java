@@ -18,7 +18,7 @@ public abstract class BaseWorkRisk<M extends BaseWorkRisk<M>> extends Model<M> i
 		return getInt("risk_id");
 	}
 
-	public M setWorkId(Integer workId) {
+	public M setWorkId(Long workId) {
 		set("work_id", workId);
 		return (M)this;
 	}
