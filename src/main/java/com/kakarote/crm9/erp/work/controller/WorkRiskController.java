@@ -104,7 +104,7 @@ public class WorkRiskController extends Controller {
             }
             temp++;
         }*/
-        try(HSSFWorkbook wb = com.kakarote.crm9.utils.ExcelUtil.createExcelTemplate("项目导入模版",handers, downData, downRows,null,null);) {
+        try(HSSFWorkbook wb = com.kakarote.crm9.utils.ExcelUtil.createExcelTemplate("风险管理导入模版",handers, downData, downRows,null,null);) {
 
             HttpServletResponse response = getResponse();
             response.setContentType("application/vnd.ms-excel;charset=utf-8");

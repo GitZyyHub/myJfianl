@@ -25,11 +25,13 @@ import com.kakarote.crm9.common.interceptor.AuthInterceptor;
 import com.kakarote.crm9.common.interceptor.ErpInterceptor;
 import com.kakarote.crm9.erp._MappingKit;
 import com.kakarote.crm9.erp.admin.common.AdminRouter;
+import com.kakarote.crm9.erp.bi.common.BiRouter;
 import com.kakarote.crm9.erp.call.common.CallRoutes;
 import com.kakarote.crm9.erp.card.common.CardRouter;
 import com.kakarote.crm9.erp.crm.common.CrmRouter;
 import com.kakarote.crm9.erp.email.common.EmailRoutes;
 import com.kakarote.crm9.erp.oa.common.OaRouter;
+import com.kakarote.crm9.erp.statistics.common.StatisticsRouter;
 import com.kakarote.crm9.erp.test.common.TestRouter;
 import com.kakarote.crm9.erp.work.common.WorkRouter;
 
@@ -72,6 +74,9 @@ public class JfinalConfig extends JFinalConfig {
         me.add(new CardRouter());
         me.add(new EmailRoutes());
         me.add(new CallRoutes());
+        me.add(new BiRouter());
+        me.add(new StatisticsRouter());
+
 
     }
 

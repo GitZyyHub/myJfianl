@@ -104,8 +104,9 @@ public class MilestoneController extends Controller {
             JSONObject jsonObject = (JSONObject)milestoneService.queryPageList(basePageRequest, false).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
+            String[] s = new String[]{"milestone_id","main_user_id","task_id","work_id"};
             for (Record record : records) {
-                record.remove("milestone_id");
+                record.remove(s);
                 list.add(record.getColumns());
             }
             List<Record> headList = Aop.get(AdminFieldService.class).queryListHead(new AdminFieldSort().setLabel(CrmEnum.MILESTONE.getType()));

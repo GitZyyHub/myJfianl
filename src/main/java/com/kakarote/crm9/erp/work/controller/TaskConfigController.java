@@ -82,7 +82,7 @@ public class TaskConfigController extends Controller {
             JSONObject jsonObject = (JSONObject)taskConfigService.queryPageList(basePageRequest).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"config_id","create_time","create_user_id","main_user_id","type","update_time","associated_id"};
+            String[] s = new String[]{"config_id","create_time","create_user_id","main_user_id","type","update_time","associated_id","work_id"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());

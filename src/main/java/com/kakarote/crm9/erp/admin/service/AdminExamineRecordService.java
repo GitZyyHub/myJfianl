@@ -225,7 +225,6 @@ public class AdminExamineRecordService {
             }else if(examine.getCategoryType() == 4){
                 //工时
                 Db.update(Db.getSql("task.hours.updateCheckStatusById"), status, id);
-                Aop.get(TaskHours.class).dao().deleteById(id);
             }else if(examine.getCategoryType() == 5){
                 //结项
                 Db.update(Db.getSql("work.updateCheckStatusById"), status, id);
@@ -454,7 +453,7 @@ public class AdminExamineRecordService {
                             updateContractMoney(id);
                         }else if(examine.getCategoryType() == 4){
                             //工时
-                            Db.update(Db.getSql("task.hours.updateCheckStatusByIdThrough"), 1,new Date(),id);
+                            Db.update("update 72crm_task_hours set check_status = ?,examine_time=?,check_user_id=? where hours_id = ?", 1,new Date(),BaseUtil.getUserId(),id);
                         }else if(examine.getCategoryType() == 5){
                             //结项
                             Db.update(Db.getSql("work.updateCheckStatusByIdThrough"), 1,new Date(), id);
@@ -515,7 +514,7 @@ public class AdminExamineRecordService {
                         updateContractMoney(id);
                     }else if(examine.getCategoryType() == 4){
                         //工时
-                        Db.update(Db.getSql("task.hours.updateCheckStatusByIdThrough"), 1,new Date(),id);
+                        Db.update("update 72crm_task_hours set check_status = ?,examine_time=?,check_user_id=? where hours_id = ?", 1,new Date(),BaseUtil.getUserId(),id);
                     }else if(examine.getCategoryType() == 5){
                         //结项
                         Db.update(Db.getSql("work.updateCheckStatusByIdThrough"), 1,new Date(), id);

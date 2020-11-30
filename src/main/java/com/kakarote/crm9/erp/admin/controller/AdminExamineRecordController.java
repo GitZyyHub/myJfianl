@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
+import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.annotation.SysLog;
@@ -17,7 +18,9 @@ import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
+import com.kakarote.crm9.erp.work.common.WorkUserEnum;
 import com.kakarote.crm9.utils.AuthUtil;
+import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import javax.servlet.ServletOutputStream;
@@ -82,7 +85,7 @@ public class AdminExamineRecordController extends Controller {
      * @return
      */
     private boolean getExamineObjIdByRecordId(Integer recordId) {
-        boolean auth;
+        boolean auth = false;
         Integer id = Db.queryInt("select contract_id from `72crm_crm_contract` where examine_record_id = ?", recordId);
         if (id != null) {
             auth = AuthUtil.isCrmAuth(CrmEnum.CRM_CONTRACT, id);
@@ -92,16 +95,22 @@ public class AdminExamineRecordController extends Controller {
                 auth = AuthUtil.isCrmAuth(CrmEnum.CRM_RECEIVABLES, id);
             } else {
                 id = Db.queryInt("select invoice_id from `72crm_crm_invoice` where examine_record_id = ?", recordId);
-                if(id != null){
+                if (id != null) {
                     auth = AuthUtil.isCrmAuth(CrmEnum.CRM_INVOICE, id);
-                }else {
-                    id = Db.queryInt("select hours_id from `72crm_task_hours` where examine_record_id = ?", recordId);
+                } else {
+
+                   /* id = Db.queryInt("select hours_id from `72crm_task_hours` where examine_record_id = ?", recordId);
                     if(id != null){
-                        auth = AuthUtil.isCrmAuth(CrmEnum.TASK_HOURS, id);
+                        List<Long> query = Db.template("work.queryDataUserId", Kv.by("ty", WorkUserEnum.HOURS.getType()).set("numId", id)).query();
+                        if(!query.contains(BaseUtil.getUserId())){
+                            auth = true;
+                        }
                     }else {
-                        id = Db.queryInt("select work_id from `72crm_work` where examine_record_id = ?", recordId);
-                        auth = AuthUtil.isCrmAuth(CrmEnum.WORK, id);
-                    }
+                        List<Long> query = Db.template("work.queryDataUserId", Kv.by("ty", WorkUserEnum.WORK.getType()).set("numId", id)).query();
+                        if(!query.contains(BaseUtil.getUserId())){
+                            auth = true;
+                        }
+                    }*/
                 }
 
             }
@@ -123,22 +132,42 @@ public class AdminExamineRecordController extends Controller {
      */
     public void myExamineExport(BasePageRequest basePageRequest) {
         JSONObject json = basePageRequest.getJsonObject();
+        Integer categoryType = json.getInteger("categoryType");
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
             JSONObject jsonObject = (JSONObject) examineRecordService.myExamineExport(basePageRequest).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            List<String> fieldName = Arrays.asList("examine_type", "create_time", "create_user_name", "examine_status", "examineName", "catagory", "catagory_cite_name");
+            List<String> fieldName = Arrays.asList( "create_time", "create_user_name", "examine_status", "examineName", "catagory", "catagory_cite_name");
             for (Record record : records) {
                 Map<String, Object> columns = record.getColumns();
                 Record temp = new Record();
                 for (Map.Entry<String, Object> entry : columns.entrySet()) {
                     String key = entry.getKey();
-                    if(fieldName.contains(key)){
-                        if("examineName".equals(key)){
-                            temp.set("examine_name",entry.getValue());
-                        }else {
-                            temp.set(key,entry.getValue());
+                    if (fieldName.contains(key)) {
+                        if ("examineName".equals(key)) {
+                            temp.set("examine_name", entry.getValue());
+                        } else if ("examine_status".equals(key)) {
+                            int status = (int) entry.getValue();
+                            switch (status) {
+                                case 0:
+                                    temp.set("examine_status", "未审核");
+                                    break;
+                                case 1:
+                                    temp.set("examine_status", "审核通过");
+                                    break;
+                                case 2:
+                                    temp.set("examine_status", "审核拒绝");
+                                    break;
+                                case 3:
+                                    temp.set("examine_status", "撤回审核");
+                                    break;
+                                default:
+                                    temp.set("examine_status", "未识别");
+                                    break;
+                            }
+                        } else {
+                            temp.set(key, entry.getValue());
                         }
                     }
                 }
@@ -146,7 +175,7 @@ public class AdminExamineRecordController extends Controller {
             }
 
             List<Record> headList = new ArrayList<>();
-            getFields(headList);
+            getFields(headList,categoryType);
             headList.forEach(head -> {
                 if (!Objects.equals(head.getStr("fieldName"), head.getStr("name"))) {
                     writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("fieldName")), head.getStr("name"));
@@ -180,17 +209,22 @@ public class AdminExamineRecordController extends Controller {
         renderNull();
     }
 
-    private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("审批流程", "创建日期", "创建人", "审核状态", "审批人", "审批项目编号", "审批项目名称");
+    private void getFields(List<Record> fields,Integer categoryType) {
+        List<String> names = new ArrayList<>();
+        if(categoryType ==4){
+             names = Arrays.asList("审批流程", "创建日期", "创建人", "审核状态", "审批人", "审批任务编号", "审批任务名称");
+        }else {
+            names = Arrays.asList("审批流程", "创建日期", "创建人", "审核状态", "审批人", "审批项目编号", "审批项目名称");
+        }
         List<String> fieldName = Arrays.asList("examine_type", "create_time", "create_user_name", "examine_status", "examine_name", "catagory", "catagory_cite_name");
         for (int i = 0; i < names.size(); i++) {
             Record record = new Record();
-            record.set("fieldName",fieldName.get(i));
-            record.set("name",names.get(i));
+            record.set("fieldName", fieldName.get(i));
+            record.set("name", names.get(i));
             record.set("type", FormTypeEnum.TEXT.getType());
-            if(i==6){
-                record.set("type",FormTypeEnum.SELECT.getType());
-                record.set("options","已到位,未到位");
+            if (i == 6) {
+                record.set("type", FormTypeEnum.SELECT.getType());
+                record.set("options", "已到位,未到位");
             }
             fields.add(record);
         }

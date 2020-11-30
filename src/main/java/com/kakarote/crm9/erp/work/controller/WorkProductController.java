@@ -146,7 +146,7 @@ public class WorkProductController extends Controller {
             JSONObject jsonObject = (JSONObject)workProductService.queryPageList(basePageRequest, false).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"create_user_id","exploit_user_id","main_user_id","product_number"};
+            String[] s = new String[]{"create_user_id","exploit_user_id","main_user_id","product_number","product_id"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());

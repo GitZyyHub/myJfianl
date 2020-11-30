@@ -162,37 +162,37 @@ public class AdminSceneService {
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (CrmEnum.WORK.getType() == label) {
-            fieldList.forEach(field -> {
+            /*fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("dept_id")) {
-                    field.set("field_name", "dept_name").set("formType", FormTypeEnum.TASK.getFormType());
-                } /*else if (field.getStr("field_name").equals("sales_id")) {
+                    field.set("field_name", "dept_name").set("formType", FormTypeEnum.STRUCTURE.getFormType());
+                } *//*else if (field.getStr("field_name").equals("sales_id")) {
                     field.set("field_name", "sales_name");
                 } else if (field.getStr("field_name").equals("manager_id")) {
                     field.set("field_name", "manager_name");
-                }*/
-            });
+                }*//*
+            });*/
             fieldUtil = new FieldUtil(fieldList);
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (CrmEnum.MILESTONE.getType() == label) {
-            fieldList.forEach(field -> {
+            /*fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("task_id")) {
                     field.set("field_name", "task_name").set("formType", FormTypeEnum.TASK.getFormType());
                 } else if (field.getStr("field_name").equals("work_name")) {
                     field.set("formType", FormTypeEnum.WORK.getFormType());
                 } else if (field.getStr("field_name").equals("work_num")) {
                     field.set("formType", FormTypeEnum.WORK.getFormType());
-                } /*else if (field.getStr("field_name").equals("main_user_id")) {
+                } *//*else if (field.getStr("field_name").equals("main_user_id")) {
                     field.set("field_name", "main_user_name");
-                }*/
-            });
+                }*//*
+            });*/
             fieldUtil = new FieldUtil(fieldList);
-            fieldUtil.add("create_user_name", "创建人", "user", settingArr)
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (CrmEnum.TASK.getType() == label) {
-            for (int i = 0; i < fieldList.size(); i++) {
+            /*for (int i = 0; i < fieldList.size(); i++) {
                 Record field =  fieldList.get(i);
                 if (field.getStr("field_name").equals("before_id")) {
                     field.set("field_name", "before_name").set("formType", FormTypeEnum.TASK.getFormType());
@@ -200,46 +200,47 @@ public class AdminSceneService {
                     field.set("formType", FormTypeEnum.WORK.getFormType());
                 } else if (field.getStr("field_name").equals("milestone_id")) {
                     field.set("field_name", "milestone_name").set("formType", FormTypeEnum.MILESTONE.getFormType());
-                }/* else if (field.getStr("field_name").equals("main_user_id")) {
+                }*//* else if (field.getStr("field_name").equals("main_user_id")) {
                     field.set("field_name", "main_user_name");
-                }*/ else if (field.getStr("field_name").equals("owner_user_id")) {
+                }*//* else if (field.getStr("field_name").equals("owner_user_id")) {
                     fieldList.remove(i);
                     continue;
                 }
-            }
+            }*/
 
             fieldUtil = new FieldUtil(fieldList);
-            fieldUtil.add("create_user_name", "创建人", "user", settingArr)
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (CrmEnum.DEMAND.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
-            fieldUtil.add("create_user_name", "创建人", "user", settingArr)
+            fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (CrmEnum.SUBTASKS.getType() == label) {
-            fieldList.forEach(field -> {
+            /*fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("pid")) {
                     field.set("field_name", "p_name").set("formType", FormTypeEnum.TASK.getFormType());
                 } else if (field.getStr("field_name").equals("milestone_id")) {
                     field.set("field_name", "milestone_name").set("formType", FormTypeEnum.MILESTONE.getFormType());
                 }
-            });
+            });*/
             fieldUtil = new FieldUtil(fieldList);
             fieldUtil.add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (CrmEnum.TASK_HOURS.getType() == label) {
-            fieldList.forEach(field -> {
+            /*fieldList.forEach(field -> {
                 if (field.getStr("field_name").equals("subtasks_id")) {
                     field.set("field_name", "subtasks_name").set("formType", FormTypeEnum.TASK.getFormType());
                 } else if (field.getStr("field_name").equals("task_id")) {
                     field.set("field_name", "task_name").set("formType", FormTypeEnum.TASK.getFormType());
-                }/* else if (field.getStr("field_name").equals("main_user_id")) {
+                }*//* else if (field.getStr("field_name").equals("main_user_id")) {
                     field.set("field_name", "main_user_name");
-                }*/
-            });
+                }*//*
+            });*/
             fieldUtil = new FieldUtil(fieldList);
+            fieldUtil.add("work_id", "项目名称", "work",settingArr);
         } else if (CrmEnum.WORKCONFIG.getType() == label) {
             fieldUtil = new FieldUtil(fieldList);
         } else if (CrmEnum.PRODUCT.getType() == label) {
@@ -446,10 +447,10 @@ public class AdminSceneService {
             } else if (CrmEnum.PRODUCT.getType() == type) {
                 systemScene.setName("全部产品").save();
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.fluentPut("product_status", new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "0"));
+                jsonObject.fluentPut("product_status", new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "发版"));
                 systemScene.setSceneId(null).setName("发版的产品").setData(jsonObject.toString()).save();
                 JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.fluentPut("product_status", new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "1"));
+                jsonObject1.fluentPut("product_status", new JSONObject().fluentPut("name", "product_status").fluentPut("condition", "is").fluentPut("value", "规划"));
                 systemScene.setSceneId(null).setName("规划的产品").setData(jsonObject1.toString()).save();
             } else if (CrmEnum.DEMAND.getType() == type) {
                 systemScene.setName("全部需求").save();
@@ -474,7 +475,7 @@ public class AdminSceneService {
                 systemScene.setSceneId(null).setName("我负责的任务").setData(jsonObject1.toString()).save();
 
                 JSONObject j = new JSONObject();
-                jsonObject1.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "contains").fluentPut("value", ","+userId+","));
+                j.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "contains").fluentPut("value", ","+userId+","));
                 systemScene.setSceneId(null).setName("我参与的任务").setData(j.toString()).save();
 
             }

@@ -240,7 +240,7 @@ public class TaskController extends Controller {
             }
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"batch_id","task_id","before_id","main_user_id","milestone_id","owner_user_id","p_name","pid","subtasks_name","subtasks_id","check_status"};
+            String[] s = new String[]{"create_user_id","work_id","batch_id","task_id","before_id","main_user_id","milestone_id","owner_user_id","p_name","pid","subtasks_name","subtasks_id","check_status"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());

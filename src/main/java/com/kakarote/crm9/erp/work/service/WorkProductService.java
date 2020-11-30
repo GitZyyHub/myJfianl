@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
@@ -20,6 +21,7 @@ import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.ToolUtils;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -79,12 +81,24 @@ public class WorkProductService extends AbstractBasePageList {
         }
         return temp?R.ok():R.error("更新失败");
     }
+    @Inject
+    WorkProductFuntionService workProductFuntionService;
 
     /**
      * 删除产品
      */
+    @Before(Tx.class)
     public R delWorkProduct(String ids) {
-        Db.find("");
+        List<String> strings = Arrays.asList(ids.split(","));
+        for (String string : strings) {
+            Integer integer = Db.queryInt("select count(1) from 72crm_work_demand_product where product_id=?", string);
+            if(integer >0){
+                return R.error("产品已经对标不能删除");
+            }
+            Aop.get(WorkProduct.class).deleteById(string);
+            workProductFuntionService.delProductFuntion(string);
+            Db.delete("delete from 72crm_work_demand_product where product_id =?",string);
+        }
         return R.ok();
     }
 

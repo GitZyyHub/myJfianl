@@ -77,7 +77,7 @@ public class TaskHoursController extends Controller {
      * 根据任务id查询工时状态
      */
     public void queryStatusByTaskId(@Para("taskId")String taskId){
-        renderJson(R.ok().put("data",Db.queryStr("select (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) check_status from 72crm_task_hours where subtasks_id=?",taskId)));
+        renderJson(R.ok().put("data",Db.queryStr("select (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' when 3 then '审核中' end) check_status from 72crm_task_hours where subtasks_id=?",taskId)));
     }
 
     /**
@@ -147,9 +147,12 @@ public class TaskHoursController extends Controller {
             //List<Record> records = Db.find(Db.getSqlPara("task.hours.hoursRecordExport", Kv.by("workIds", strings)));
 
             List<Map<String, Object>> list = new ArrayList<>();
-            records.forEach(record -> {
+            String[] s = new String[]{"create_user_id","id","task_id","work_id"};
+            for (Record record : records) {
+                record.remove(s);
                 list.add(record.getColumns());
-            });
+            }
+
 
             List<Record> headList = new ArrayList<>();
             addField(headList,false);
@@ -215,7 +218,7 @@ public class TaskHoursController extends Controller {
             JSONObject jsonObject = (JSONObject)taskHoursService.queryPageList(basePageRequest, false).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"check_user_id","create_user_id","hours_id","main_user_id","subtasks_id","task_id"};
+            String[] s = new String[]{"check_user_id","create_user_id","hours_id","main_user_id","subtasks_id","task_id","is_lock","update_time","work_id","work_name","work_num"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -289,7 +292,7 @@ public class TaskHoursController extends Controller {
         }else {
             headList.add(new Record().set("field_name", "create_time").set("name", "导出时间"));
             headList.add(new Record().set("field_name", "file_name").set("name", "导出文件名称"));
-            headList.add(new Record().set("field_name", "create_name").set("name", "导出人员"));
+            headList.add(new Record().set("field_name", "create_user_name").set("name", "导出人员"));
         }
     }
 

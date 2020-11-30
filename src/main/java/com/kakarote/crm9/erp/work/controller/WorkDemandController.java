@@ -178,7 +178,7 @@ public class WorkDemandController extends Controller {
             JSONObject jsonObject = (JSONObject)workDemandService.queryPageList(basePageRequest, false).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"work_id","is_associated","demand_id"};
+            String[] s = new String[]{"work_id","is_associated","demand_id","product_percentage","product_describe"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -193,6 +193,66 @@ public class WorkDemandController extends Controller {
                     writer.addHeaderAlias(head.getStr("fieldName"), head.getStr("name"));
                 }
             });
+            for (Map<String, Object> map : list) {
+                List<String> productName = (List<String>)map.get("product_name");
+                StringBuffer stringBuffer = new StringBuffer();
+                for (String s1 : productName) {
+                    if(!StrUtil.isEmpty(s1)){
+                        stringBuffer.append(s1);
+                    }
+                }
+                map.put("product_name",stringBuffer.toString());
+                /*if(!StrUtil.isEmpty(productName)){
+                    if("[]".equals(productName)){
+                        map.put("product_name","");
+                    }else {
+                        productName = productName.substring(1,productName.length()-1);
+                        map.put("product_name",productName);
+                    }
+
+                }*/
+
+
+                List<String> productVersion = (List<String>)map.get("product_version");
+                stringBuffer = new StringBuffer();
+                for (String s1 : productVersion) {
+                    if(!StrUtil.isEmpty(s1)){
+                        stringBuffer.append(s1);
+                    }
+                }
+                map.put("product_version",stringBuffer.toString());
+
+
+                List<String> productNumber =(List<String>) map.get("product_number");
+                stringBuffer = new StringBuffer();
+                for (String s1 : productNumber) {
+                    if(!StrUtil.isEmpty(s1)){
+                        stringBuffer.append(s1);
+                    }
+                }
+                map.put("product_number",stringBuffer.toString());
+
+                List<String> functionName = (List<String>)map.get("function_name");
+                stringBuffer = new StringBuffer();
+                for (String s1 : functionName) {
+                    if(!StrUtil.isEmpty(s1)){
+                        stringBuffer.append(s1);
+                    }
+                }
+                map.put("function_name",stringBuffer.toString());
+
+
+                List<String> functionNumber = (List<String>)map.get("function_number");
+                stringBuffer = new StringBuffer();
+                for (String s1 : functionNumber) {
+                    if(!StrUtil.isEmpty(s1)){
+                        stringBuffer.append(s1);
+                    }
+                }
+                map.put("function_number",stringBuffer.toString());
+
+
+            }
             writer.write(list,true);
             writer.setRowHeight(0, 20);
             writer.setRowHeight(1, 20);

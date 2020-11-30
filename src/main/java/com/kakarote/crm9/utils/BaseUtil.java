@@ -189,6 +189,8 @@ public class BaseUtil {
 
     }
 
+    public static Integer getDept(){return 16671;}
+
     public static Long getSuperUser(){
         return 16360L;
     }

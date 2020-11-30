@@ -137,13 +137,13 @@ public class MilestoneService extends AbstractBasePageList {
             //变更前数据
             String tableName = CrmEnum.MILESTONE.getTableName();
             String tableId = CrmEnum.MILESTONE.getTableId();
-            Record first = Db.findFirst("SELECT milestone_name,milestone_num,work_id,degree,DATE_FORMAT( start_time, '%Y-%m-%d' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d' ) end_time,(select task_name from 72crm_task where task_id=m.task_id) task_id FROM 72crm_milestone m WHERE milestone_id=?", entity.getMilestoneId());
+            Record first = Db.findFirst("SELECT milestone_name,milestone_num,work_id,degree,DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,(select task_name from 72crm_task where task_id=m.task_id) task_id,instructions,(select realname from 72crm_admin_user where user_id=m.main_user_id) main_user_id FROM 72crm_milestone m WHERE milestone_id=?", entity.getMilestoneId());
             if (first == null) {
                 return R.error("里程碑不存在");
             }
             entity.setUpdateTime(new Date());
             entity.update();
-            Record after = Db.findFirst("SELECT milestone_name,milestone_num,work_id,degree,DATE_FORMAT( start_time, '%Y-%m-%d' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d' ) end_time,(select task_name from 72crm_task where task_id=m.task_id) task_id FROM 72crm_milestone m WHERE milestone_id=?", entity.getMilestoneId());
+            Record after = Db.findFirst("SELECT milestone_name,milestone_num,work_id,degree,DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,(select task_name from 72crm_task where task_id=m.task_id) task_id,instructions,(select realname from 72crm_admin_user where user_id=m.main_user_id) main_user_id FROM 72crm_milestone m WHERE milestone_id=?", entity.getMilestoneId());
             //添加变更记录
             workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.UPDATE, entity.getMilestoneNum(),after,first,entity.getMilestoneId());
         }
@@ -179,7 +179,7 @@ public class MilestoneService extends AbstractBasePageList {
     @Override
     public JSONObject appendSqlSearch(String search) {
         JSONObject sqlObject = new JSONObject();
-        String conditions = " and milestone_name like '%{search}%'";
+        String conditions = " and (milestone_name like '%{search}%' or milestone_num like '%{search}%')";
         sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
         sqlObject.put("type", 1);
         return sqlObject;

@@ -86,7 +86,7 @@ public class AdminMessageService {
 
     public Page<AdminMessage> queryList(BasePageRequest<AdminMessage> request) {
         Page<AdminMessage> page= AdminMessage.dao.template("admin.message.queryList", request.getData().put("key", new ArrayList<>()).put("userId", BaseUtil.getUserId())).paginate(request.getPage(), request.getLimit());
-        if(Arrays.asList(14,16,18,20).contains(request.getData().getType())){
+        if(Arrays.asList(14,16,18,20,38,39,40,41,42,43,44,45).contains(request.getData().getType())){
             page.getList().forEach(data->{
                 data.setContent(data.getContent().split(",")[0]);
             });

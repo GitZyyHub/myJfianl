@@ -46,10 +46,7 @@
         #for(query:queryList)
                 #(query.get("sql"))
         #end
-        ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
-        #if(page&&limit)
-          LIMIT #(page),#(limit)
-        #end
+
     #end
 
     #sql ("queryDemandByIdExport")

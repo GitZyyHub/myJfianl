@@ -146,9 +146,7 @@ public class ConfigManageController extends Controller {
         for (Record field : fields) {
 
             String name = field.getStr("name");
-            if(field.getInt("is_null")==1){
-                name += "(*)";
-            }
+
             handers.add(name);
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
@@ -174,8 +172,8 @@ public class ConfigManageController extends Controller {
 
 
     private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("配置项", "关联项目编号", "关联项目名称", "计划时间", "负责人", "创建人", "版本", "版本说明", "版本时间");
-        List<String> fieldName = Arrays.asList("config_items", "associated_num", "associated_name", "plan_time", "main_user_name", "create_user_name", "version", "version_describe", "version_time");
+        List<String> names = Arrays.asList("配置项(*)", "关联项目编号(*)", "关联项目名称(*)", "计划时间(*)", "负责人(*)", "版本", "版本说明", "版本时间");
+        List<String> fieldName = Arrays.asList("config_items", "associated_num", "associated_name", "plan_time", "main_user_name", "version", "version_describe", "version_time");
         for (int i = 0; i < names.size(); i++) {
             Record record = new Record();
             record.set("fieldName",fieldName.get(i));

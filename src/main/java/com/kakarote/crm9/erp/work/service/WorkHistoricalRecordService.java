@@ -56,6 +56,8 @@ public class WorkHistoricalRecordService {
             auth = WorkAuthVerify.isPermissions("project:projectManage:readHistorical");
         } else if (type == WorkRecordEnum.SUBTASKS.getType()) {
             auth = WorkAuthVerify.isPermissions("project:task:readHistorical");
+        } else {
+            auth = WorkAuthVerify.isPermissions("project:historical:index");
         }
         if (!auth) {
             return R.error("无权限");
@@ -97,8 +99,7 @@ public class WorkHistoricalRecordService {
                     record.set("module_two", null);
                 }
             } else if (tag == 2) {
-                if (record.getStr("module_two").equals(record.getStr("module_one"))) {
-                    record.set("module_two", null);
+                if (record.getStr("module_two").equals(record.getStr("module_three"))) {
                     record.set("module_three", null);
                 }
             }

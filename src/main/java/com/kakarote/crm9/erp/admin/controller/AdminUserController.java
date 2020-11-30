@@ -269,6 +269,32 @@ public class AdminUserController extends Controller {
         json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
             List<Record> records = (List<Record>) adminUserService.queryUserList(basePageRequest, roleId, search, isResources, workId).get("data");
+            for (Record record : records) {
+                try {
+                    Integer condition = Integer.parseInt(record.getStr("condition"));
+                    if(condition==0){
+                        record.set("condition","请假");
+                    }else if(condition==1){
+                        record.set("condition","空闲");
+                    }else {
+                        record.set("condition","任务中");
+                    }
+                } catch (Exception e) {
+                    record.set("condition","未选择");
+                }
+                try {
+                    Integer sex = Integer.parseInt(record.getStr("sex"));
+                    if(sex==1){
+                        record.set("sex","男");
+                    }else if(sex==2){
+                        record.set("sex","女");
+                    }else {
+                        record.set("sex","未选择");
+                    }
+                } catch (NumberFormatException e) {
+                    record.set("sex","未选择");
+                }
+            }
             List<Map<String, Object>> list = new ArrayList<>();
             String[] s = new String[]{"username", "user_id", "status", "roleId", "parent_id", "img", "dept_id", "create_time"};
             for (Record record : records) {

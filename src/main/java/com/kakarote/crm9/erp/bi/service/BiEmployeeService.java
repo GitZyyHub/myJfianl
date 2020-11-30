@@ -39,7 +39,7 @@ public class BiEmployeeService {
         Record record = biTimeUtil.analyzeType(biParams);
         Integer cycleNum = 12;
         Integer beginTime = year * 100 + 1;
-        List<Integer> timeList = new ArrayList<>();
+        List<Integer> timeList = new ArrayList<>()  ;
         for (int i=1; i <= cycleNum;i++){
             timeList.add(beginTime);
             beginTime = biTimeUtil.estimateTime(beginTime);

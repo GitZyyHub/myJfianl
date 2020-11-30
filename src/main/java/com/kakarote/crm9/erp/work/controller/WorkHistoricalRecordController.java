@@ -14,6 +14,7 @@ import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.WorkRecordEnum;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.erp.work.service.WorkHistoricalRecordService;
+import com.kakarote.crm9.utils.R;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -39,15 +40,19 @@ public class WorkHistoricalRecordController extends Controller {
     /**
      * 导出!!!
      */
-    @Permissions({"project:milestone:excelexportHistorical"})
+    //@Permissions({"project:milestone:excelexportHistorical"})
     public void historicalRecordExport(BasePageRequest basePageRequest){
         JSONObject json = basePageRequest.getJsonObject();
         json.fluentPut("excel", "yes");
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
-            JSONObject jsonObject = (JSONObject)workHistoricalRecordService.queryRecordList(basePageRequest,true).get("data");
+            R r = workHistoricalRecordService.queryRecordList(basePageRequest, true);
+            if((int)r.get("code") != 0){
+                renderJson(r);
+            }
+            JSONObject jsonObject = (JSONObject)r.get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"create_time","id","operation_id","operation_user_id","work_id","task_id"};
+            String[] s = new String[]{"create_time","id","operation_id","operation_user_id","work_id","task_id","module_two"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -98,9 +103,7 @@ public class WorkHistoricalRecordController extends Controller {
             fieldName.add("module");
         } else if (task.contains(parse.getType())) {
             names.add("模块1");
-            names.add("模块2");
             fieldName.add("module_one");
-            fieldName.add("module_two");
         }else {
             names.add("项目名称");
             names.add("模块1");
@@ -111,7 +114,7 @@ public class WorkHistoricalRecordController extends Controller {
             fieldName.add("module_two");
             fieldName.add("module_three");
         }
-        names.addAll(Arrays.asList("操作人", "历史变更时间", "模块", "行为", "字段名称", "内容变更前", "内容变更后", "序号"));
+        names.addAll(Arrays.asList("操作人", "历史变更时间", "模块", "行为", "字段名称", "内容变更前", "内容变更后", "编号"));
         fieldName.addAll(Arrays.asList("operation_user_name", "change_time", "module", "behavior", "field", "content_before", "content_after", "number"));
 
         for (int i = 0; i < names.size(); i++) {

@@ -101,12 +101,20 @@ public class TaskService extends AbstractBasePageList {
                     "start_time, DATE_FORMAT( t1.end_time, '%Y-%m-%d %H:%i:%S' ) end_time,t1.completeness,t1.priority,t1.difficulty,t1.degree,t1.create_time,t1.update_time," +
                     "t1.before_id,(select realname from 72crm_admin_user where user_id=t1.main_user_id) main_user_id,milestone_id,(select milestone_name from " +
                     "72crm_milestone where milestone_id=t1.milestone_id) milestone_name FROM 72crm_task AS t1 WHERE t1.task_id = ?", task.getTaskId());
+            List<String> owner_user_id = Arrays.asList(first.getStr("owner_user_id").split(","));
+            List<Record> users = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", owner_user_id)));
+            String realname = users.stream().map(user -> user.getStr("realname")).collect(Collectors.toList()).toString();
+            first.set("owner_user_id",realname.substring(1,realname.length()-1));
             task.update();
             Record update = Db.findFirst("SELECT t1.task_id,t1.work_id,(select work_name from 72crm_work where work_id=t1.work_id) " +
                     "work_name,t1.task_num,t1.class_id,t1.owner_user_id,t1.pid,t1.task_name,t1.description,t1.`status`,DATE_FORMAT( t1.start_time, '%Y-%m-%d %H:%i:%S' ) " +
                     "start_time, DATE_FORMAT( t1.end_time, '%Y-%m-%d %H:%i:%S' ) end_time,t1.completeness,t1.priority,t1.difficulty,t1.degree,t1.create_time,t1.update_time," +
                     "t1.before_id,(select realname from 72crm_admin_user where user_id=t1.main_user_id) main_user_id,milestone_id,(select milestone_name from " +
                     "72crm_milestone where milestone_id=t1.milestone_id) milestone_name FROM 72crm_task AS t1 WHERE t1.task_id = ?", task.getTaskId());
+            owner_user_id = Arrays.asList(update.getStr("owner_user_id").split(","));
+            users = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", owner_user_id)));
+            realname = users.stream().map(user -> user.getStr("realname")).collect(Collectors.toList()).toString();
+            update.set("owner_user_id",realname.substring(1,realname.length()-1));
             if(task.getPid()!=null){
                 workHistoricalRecordService.add(task.getWorkId(), WorkRecordEnum.SUBTASKS, BehaviorEnum.UPDATE, task.getTaskNum(),update, first, task.getTaskId());
             }else {
@@ -163,7 +171,7 @@ public class TaskService extends AbstractBasePageList {
     public R querySubtasksByTaskHours(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Integer taskId = jsonObject.getInteger("pid");
-        List<Record> records = Db.find(Db.getSql("work.task.querySubtasksByTaskHours"), taskId);
+        List<Record> records = Db.find(Db.getSqlPara("work.task.querySubtasksByTaskHours",Kv.by("pid",taskId)));
         for (int i = 0; i < records.size(); i++) {
             if(records.get(i).getInt("task_id") == taskId){
                 records.remove(i);
@@ -200,10 +208,10 @@ public class TaskService extends AbstractBasePageList {
         List<Record> records = Db.find(sqlPara);
         records.forEach(record -> {
             if(!StrUtil.isEmpty(record.getStr("pid"))){
-                record.set("task_name",record.getStr("p_name"));
-                record.set("task_id",record.getStr("pid"));
                 record.set("subtasks_name",record.getStr("task_name"));
                 record.set("subtasks_id",record.getStr("task_id"));
+                record.set("task_name",record.getStr("p_name"));
+                record.set("task_id",record.getStr("pid"));
             }
             List<String> owner_user_id = Arrays.asList(record.getStr("owner_user_id").split(","));
             List<Record> users = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", owner_user_id)));
@@ -305,7 +313,7 @@ public class TaskService extends AbstractBasePageList {
             }
             Record first = Db.findFirst("select before_id from 72crm_task where task_id=?", string);
             if(!StrUtil.isEmpty(first.getStr("before_id"))){
-                return R.error("任务："+first.getStr("task_name")+"存在前置任务");
+                return R.error("任务已被关联（前置任务）不可以删除");
             }
         }
         Kv kv = Kv.by("ids", strings);
@@ -409,7 +417,7 @@ public class TaskService extends AbstractBasePageList {
     @Override
     public JSONObject appendSqlSearch(String search) {
         JSONObject sqlObject = new JSONObject();
-        String conditions = " and (task_name like '%{search}%' or task_id like '%{search}%')";
+        String conditions = " and (task_name like '%{search}%' or task_num like '%{search}%' or status like '%{search}%')";
         sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
         sqlObject.put("type", 1);
         return sqlObject;

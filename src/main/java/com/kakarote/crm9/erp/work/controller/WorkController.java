@@ -199,7 +199,7 @@ public class WorkController extends Controller {
             }
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"batch_id","work_id"};
+            String[] s = new String[]{"batch_id","work_id","area","create_user_id","dept_id","manager_id","sales_id","status","description"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());
@@ -299,7 +299,7 @@ public class WorkController extends Controller {
             JSONObject jsonObject = (JSONObject)workService.waiting(basePageRequest, false).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
             List<Map<String, Object>> list = new ArrayList<>();
-            String[] s = new String[]{"batch_id","work_id"};
+            String[] s = new String[]{"batch_id","work_id","description","status"};
             for (Record record : records) {
                 record.remove(s);
                 list.add(record.getColumns());

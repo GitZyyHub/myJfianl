@@ -299,14 +299,21 @@ public class AuthUtil {
                 longs.forEach(id -> conditions.append(" {alias}owner_user_id like CONCAT('%,','").append(id).append("',',%') or ").append("  {alias}relation_user_id like CONCAT('%,','").append(id).append("',',%') or"));
                 conditions.delete(conditions.length()-2,conditions.length());
             } else {
-                conditions.append(" and ({alias}owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
-                if (crmEnum.equals(CrmEnum.CRM_CUSTOMER) || crmEnum.equals(CrmEnum.CRM_BUSINESS) || crmEnum.equals(CrmEnum.CRM_CONTRACT)) {
-                    if (readOnly != null && 0 == readOnly) {
-                        conditions.append(" or {alias}rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
-                    } else {
-                        conditions.append(" or {alias}ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or {alias}rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+                if(crmEnum.equals(CrmEnum.WORK)){
+
+                }else if(crmEnum.equals(CrmEnum.WORK)){
+
+                }else {
+                    conditions.append(" and ({alias}owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
+                    if (crmEnum.equals(CrmEnum.CRM_CUSTOMER) || crmEnum.equals(CrmEnum.CRM_BUSINESS) || crmEnum.equals(CrmEnum.CRM_CONTRACT)) {
+                        if (readOnly != null && 0 == readOnly) {
+                            conditions.append(" or {alias}rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+                        } else {
+                            conditions.append(" or {alias}ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or {alias}rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+                        }
                     }
                 }
+
             }
             conditions.append(")");
         }

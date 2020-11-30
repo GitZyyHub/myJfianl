@@ -83,18 +83,18 @@ public class TaskConfigService {
         } else {
             workConfig.setUpdateTime(new Date());
             List<Map<String, Object>> list = new ArrayList<>();
-            Record first = Db.findFirst("SELECT config_items,DATE_FORMAT( plan_time, '%Y-%m-%d' ) plan_time," +
+            Record first = Db.findFirst("SELECT config_items,DATE_FORMAT( plan_time, '%Y-%m-%d %H:%i:%S' ) plan_time," +
                     "(SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name," +
                     "(SELECT realname FROM 72crm_admin_user WHERE user_id = c.create_user_id) create_user_name," +
-                    " associated_name,associated_num,version,DATE_FORMAT( version_time, '%Y-%m-%d' ) version_time,version_describe FROM 72crm_work_config c WHERE config_id=?", workConfig.getConfigId());
+                    " associated_name,associated_num,version,DATE_FORMAT( version_time, '%Y-%m-%d %H:%i:%S' ) version_time,version_describe FROM 72crm_work_config c WHERE config_id=?", workConfig.getConfigId());
 
             temp = true;
             try {
                 workConfig.update();
-                Record update = Db.findFirst("SELECT config_items,DATE_FORMAT( plan_time, '%Y-%m-%d' ) plan_time," +
+                Record update = Db.findFirst("SELECT config_items,DATE_FORMAT( plan_time, '%Y-%m-%d %H:%i:%S' ) plan_time," +
                         "(SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name," +
                         "(SELECT realname FROM 72crm_admin_user WHERE user_id = c.create_user_id) create_user_name," +
-                        " associated_name,associated_num,version,DATE_FORMAT( version_time, '%Y-%m-%d' ) version_time,version_describe FROM 72crm_work_config c WHERE config_id=?", workConfig.getConfigId());
+                        " associated_name,associated_num,version,DATE_FORMAT( version_time, '%Y-%m-%d %H:%i:%S' ) version_time,version_describe FROM 72crm_work_config c WHERE config_id=?", workConfig.getConfigId());
                 //添加变更记录
                 workHistoricalRecordService.add(workConfig.getWorkId(), WorkRecordEnum.TASK_CONFIG, BehaviorEnum.UPDATE, workConfig.getConfigId(), update,first, workConfig.getConfigId());
             } catch (Exception e) {

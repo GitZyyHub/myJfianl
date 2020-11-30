@@ -127,7 +127,7 @@ public class WorkService extends AbstractBasePageList {
      */
     public R queryById(Integer id) {
         Record work = Db.findFirst(Db.getSql("work.findWorkById"), id);
-        work.set("user_id",BaseUtil.getUserId());
+        work.set("user_id", BaseUtil.getUserId());
         return R.ok().put("data", work);
     }
 
@@ -153,9 +153,9 @@ public class WorkService extends AbstractBasePageList {
         Date endTime = work.getEndTime();
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         if (startTime != null && endTime != null) {
-            if(!startTime.before(endTime)){
+            if (!startTime.before(endTime)) {
                 return R.error("结束时间应大于开始时间");
-            }else if((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30){
+            } else if ((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30) {
                 return R.error("开始时间到结束时间不能超过30天");
             }
         }
@@ -177,21 +177,17 @@ public class WorkService extends AbstractBasePageList {
             workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK_DETAILS, BehaviorEnum.SAVE, work.getWorkNum(), null, null, work.getWorkId());
         } else {
             //修改
-            Record first = Db.findFirst("SELECT work_num,STATUS,work_name,description,work_phase,work_type,(" +
-                    "SELECT NAME FROM 72crm_admin_dept WHERE dept_id= w.dept_id) dept_id,(" +
-                    "SELECT NAME FROM 72crm_admin_dept WHERE dept_id= w.area) area,(" +
-                    "SELECT username FROM 72crm_admin_user WHERE user_id =w.sales_id) sales_id,(" +
-                    "SELECT username FROM 72crm_admin_user WHERE user_id= w.manager_id) manager_id,DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time FROM `72crm_work` w WHERE work_id=?", work.getWorkId());
+            Record first = Db.findFirst(Db.getSql("work.queryWorkById"), work.getWorkId());
             if ("结项".equals(first.getStr("work_phase")) && "结项".equals(work.getWorkPhase())) {
                 return R.error("当前项目阶段为结项，如果需要修改信息请先修改项目阶段！");
             }
+            Work w = Work.dao.findById(work.getWorkId());
+            if (w.getCheckStatus() == 0) {
+                return R.error("当前项目正在审核不允许修改");
+            }
             temp = true;
             work.update();
-            Record after = Db.findFirst("SELECT work_num,STATUS,work_name,description,work_phase,work_type,(" +
-                    "SELECT NAME FROM 72crm_admin_dept WHERE dept_id =w.dept_id) dept_id,(" +
-                    "SELECT NAME FROM 72crm_admin_dept WHERE dept_id =w.area) area,(" +
-                    "SELECT username FROM 72crm_admin_user WHERE user_id =w.sales_id) sales_id,(" +
-                    "SELECT username FROM 72crm_admin_user WHERE user_id= w.manager_id) manager_id, DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time, DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time FROM `72crm_work` w WHERE work_id=?", work.getWorkId());
+            Record after = Db.findFirst(Db.getSql("work.queryWorkById"), work.getWorkId());
             workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK_DETAILS, BehaviorEnum.UPDATE, work.getWorkNum(), after, first, work.getWorkId());
 
             if ("结项".equals(first.getStr("work_phase"))) {
@@ -218,14 +214,20 @@ public class WorkService extends AbstractBasePageList {
     public R updateWorkPhase(Long string, String phase, Long checkUserId) {
         /*List<String> strings = Arrays.asList(ids.split(","));
         for (String string : strings) {*/
+        Work work = Aop.get(Work.class).findById(string);
         Record first = Db.findFirst(Db.getSql("work.findWorkById"), string);
         if ("结项".equals(first.getStr("work_phase"))) {
+            try {
+                if (work.getCheckStatus() == 0) {
+                    return R.error("当前项目正在审核不允许修改");
+                }
+            } catch (NullPointerException e) {
+            }
             R r = addExamine(string, phase, checkUserId);
             return r;
         }
         Db.update(Db.getSqlPara("work.updateWorkPhase", Kv.by("id", string).set("phase", phase)));
         Record after = Db.findFirst(Db.getSql("work.findWorkById"), string);
-        Work work = Aop.get(Work.class).findById(string);
         workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK_DETAILS, BehaviorEnum.UPDATE, work.getWorkNum(), after, first, work.getWorkId());
         //}
         return R.ok();
@@ -238,6 +240,13 @@ public class WorkService extends AbstractBasePageList {
         Record examineData = new Record();
 
         Work work = Work.dao.findById(string);
+        if (work.getExamineRecordId() != null) {
+            Integer examineRecordId = work.getExamineRecordId();
+            Record first = Db.findFirst("select log_id,examine_step_id from 72crm_admin_examine_log where record_id=?", examineRecordId);
+            Db.delete("DELETE from 72crm_admin_examine_log WHERE log_id=?", first.getStr("log_id"));
+            Db.delete("DELETE from 72crm_admin_examine_record WHERE record_id=?", examineRecordId);
+            Db.delete("DELETE from 72crm_admin_examine_step WHERE step_id=?", first.getInt("examine_step_id"));
+        }
         //work.setWorkPhase(phase)
         examineData = examineRecordService.saveExamineRecord(5, checkUserId, work.getSalesId(), null, null);
         if (examineData.getInt("status") == 0) {
@@ -270,19 +279,58 @@ public class WorkService extends AbstractBasePageList {
         String[] split = workIds.split(",");
         boolean temp = false;
         for (String workId : split) {
+            if (Db.queryInt("select count(1) FROM 72crm_milestone WHERE work_id=?", workId) != 0) {
+                return R.error("里程碑下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_work_demand WHERE work_id=?", workId) != 0) {
+                return R.error("需求下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_work_config WHERE work_id=? and type=1", workId) != 0) {
+                return R.error("配置计划下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_work_resources_setting WHERE work_id=?", workId) != 0) {
+                return R.error("资源配置有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_task WHERE work_id=?", workId) != 0) {
+                return R.error("任务下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_task_file WHERE work_id=?", workId) != 0) {
+                return R.error("任务资料下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_work_risk WHERE work_id=?", workId) != 0) {
+                return R.error("风险下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_work_change WHERE work_id=?", workId) != 0) {
+                return R.error("变更下有数据未删除");
+            }
+            if (Db.queryInt("select count(1) FROM 72crm_task_hours WHERE work_id=?", workId) != 0) {
+                return R.error("工时下有数据未删除");
+            }
             temp = false;
             Work byId = Aop.get(Work.class).dao().findById(workId);
-            if(byId == null){
+            if (byId == null) {
                 continue;
             }
             Integer examineRecordId = byId.getExamineRecordId();
-            if(examineRecordId!=null){
-                Db.delete("DELETE FROM 72crm_admin_examine_record WHERE record_id =?", examineRecordId);
-                Db.delete("DELETE FROM 72crm_admin_examine_log WHERE record_id =?", examineRecordId);
+            if (examineRecordId != null) {
+
+                Record first = Db.findFirst("select log_id,examine_step_id from 72crm_admin_examine_log where record_id=?", examineRecordId);
+                Db.delete("DELETE from 72crm_admin_examine_log WHERE log_id=?", first.getStr("log_id"));
+                Db.delete("DELETE from 72crm_admin_examine_record WHERE record_id=?", examineRecordId);
+                Db.delete("DELETE from 72crm_admin_examine_step WHERE step_id=?", first.getInt("examine_step_id"));
             }
-            /*Db.delete("DELETE FROM 72crm_task_hours WHERE task_id in (SELECT task_id from 72crm_task WHERE work_id = ?)", workId);
+            /*Db.delete("DELETE FROM 72crm_milestone WHERE work_id=?",workId);
+            Db.delete("DELETE FROM 72crm_work_demand WHERE work_id=?",workId);
+            Db.delete("DELETE FROM 72crm_work_config WHERE work_id=?",workId);
+            Db.delete("DELETE FROM 72crm_work_resources_setting WHERE work_id=?",workId);
             Db.delete("DELETE FROM 72crm_task WHERE work_id =?", workId);
-            Db.delete("DELETE FROM 72crm_milestone WHERE work_id =?", workId);*/
+            Db.delete("DELETE FROM 72crm_task_file WHERE work_id =?", workId);
+            Db.delete("DELETE FROM 72crm_work_risk WHERE work_id =?", workId);
+            Db.delete("DELETE FROM 72crm_work_change WHERE work_id =?", workId);
+
+            Db.delete("DELETE FROM 72crm_task_hours WHERE task_id in (SELECT task_id from 72crm_task WHERE work_id = ?)", workId);
+*/
+            Db.delete("DELETE FROM 72crm_work_config WHERE associated_id=? and type=2", workId);
             temp = Aop.get(Work.class).dao().deleteById(workId);
             if (!temp) {
                 return R.error("服务器异常删除失败");
@@ -349,7 +397,7 @@ public class WorkService extends AbstractBasePageList {
     @Override
     public JSONObject appendSqlSearch(String search) {
         JSONObject sqlObject = new JSONObject();
-        String conditions = " and (work_name like '%{search}%' or description like '%{search}%')";
+        String conditions = " and (work_num like '%{search}%' or work_name like '%{search}%' or work_phase like '%{search}%')";
         sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
         sqlObject.put("type", 1);
         return sqlObject;
@@ -505,7 +553,7 @@ public class WorkService extends AbstractBasePageList {
         List<Record> fields = adminFieldService.getFields(CrmEnum.WORK.getType(), id);
         for (Record field : fields) {
             String field_name = field.getStr("field_name");
-            if("area".equals(field_name) || "deptId".equals(field_name)){
+            if ("area".equals(field_name) || "deptId".equals(field_name)) {
                 field.set("authLevel", 2);
             }
         }
@@ -515,51 +563,14 @@ public class WorkService extends AbstractBasePageList {
             int temp;
             if ((temp = fieldName.indexOf(entry.getKey())) >= 0) {
                 record.set("authLevel", 3).set("sysInformation", 2).set("fieldName", entry.getKey()).set("name", name.get(temp)).set("value", entry.getValue())
-                        .set("formType", "text").set("isNull", 0).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
+                        .set("formType", "text").set("isNull", 1).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
                         .set("label", CrmEnum.WORK.getType()).set("type", 1).set("sorting", temp).set("options", null).set("fieldType", 1);
+                if ("实施成本".equals(name.get(temp)) || "实际成本".equals(name.get(temp)) || "预算".equals(name.get(temp)) || "有效金额".equals(name.get(temp)) || "合同金额".equals(name.get(temp)) || "预估工作量（人/时）".equals(name.get(temp))) {
+                    record.set("formType", "number");
+                }
             }
             fields.add(record);
         }
-        /*List<String> progressName = Arrays.asList("需求总数", "需求完成数", "需求完成率（%）", "任务总数", "任务完成数",
-                "任务完成度（%）", "总工作量（人/时）", "已消耗工作量（人/时）", "消耗工作量比例（%）");
-        List<String> progressFieldName = Arrays.asList("demand_total", "demand_completion", "demand_rate", "task_total", "task_completion",
-                "task_rate", "total_work", "consumption_work", "rate_work");
-
-        NumberFormat numberFormat = NumberFormat.getInstance();
-        // 设置精确到小数点后2位
-        //numberFormat.setMaximumFractionDigits(1);
-
-
-        Record demand = Db.findFirst("select ifnull(count(1),0) demand_completion,(select ifnull(count(1),0) demand_total from 72crm_work_demand where work_id=?) demand_total " +
-                "from 72crm_work_demand where work_id=? and demand_status='100%'", id, id);
-        String demandTotal = demand.getStr("demand_total");
-        String demandCompletion = demand.getStr("demand_completion");
-        double v1 = Double.parseDouble(demandCompletion) / Double.parseDouble(demandTotal) * 100;
-        String demandRate = Double.isNaN(v1) ? "0" : numberFormat.format(v1);
-
-        String forecastWork = first.getStr("forecast_work");
-        String consumptionWork = Db.queryStr("SELECT ifnull(sum(working_hours),0) from 72crm_task_hours WHERE subtasks_id in (SELECT task_id from 72crm_task WHERE work_id=?)", id);
-        double v2 = Double.parseDouble(forecastWork) / Double.parseDouble(consumptionWork) * 100;
-        String rateWork = Double.isNaN(v2) ? "0" : numberFormat.format(v2);
-
-        Record task = Db.findFirst("SELECT ifnull(count(1),0) task_completion,(SELECT ifnull(COUNT(1),0) FROM 72crm_task WHERE work_id=?) " +
-                " task_total FROM 72crm_task WHERE work_id=? AND completeness='100%'", id, id);
-        String taskCompletion = task.getStr("task_completion");
-        String taskTotal = task.getStr("task_total");
-        double v3 = Double.parseDouble(taskCompletion) / Double.parseDouble(taskTotal) * 100;
-        String taskRate = Double.isNaN(v3) ? "0" : numberFormat.format(v3);
-
-
-        List<String> progressData = Arrays.asList(demandTotal, demandCompletion, demandRate, taskTotal, taskCompletion, taskRate, forecastWork, consumptionWork, rateWork);
-
-        for (int i = 0; i < progressName.size(); i++) {
-            Record record = new Record();
-            record.set("authLevel", 3).set("sysInformation", 3).set("fieldName", progressFieldName.get(i)).set("name", progressName.get(i)).set("value", progressData.get(i))
-                    .set("formType", "text").set("isNull", 0).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
-                    .set("label", CrmEnum.WORK.getType()).set("type", 1).set("sorting", i).set("options", null).set("fieldType", 1);
-            fields.add(record);
-        }*/
-
         return adminFieldService.findFieldDetails(CrmEnum.WORK, fields, id);
     }
 
@@ -573,29 +584,46 @@ public class WorkService extends AbstractBasePageList {
         // 设置精确到小数点后2位
         //numberFormat.setMaximumFractionDigits(1);
 
+        //需求
         Record first = Db.findFirst(Db.getSql("work.queryWorkExtensionById"), id);
         Record demand = Db.findFirst("select ifnull(count(1),0) demand_completion,(select ifnull(count(1),0) demand_total from 72crm_work_demand where work_id=?) demand_total " +
                 "from 72crm_work_demand where work_id=? and demand_status='100'", id, id);
         String demandTotal = demand.getStr("demand_total");
         String demandCompletion = demand.getStr("demand_completion");
-        double v1 = Double.parseDouble(demandCompletion) / Double.parseDouble(demandTotal) * 100;
-        String demandRate = Double.isNaN(v1) ? "0" : numberFormat.format(v1);
-        record.set("demandTotal", demandTotal).set("demandCompletion", demandCompletion).set("demandRate", demandRate);
+        if("0".equals(demandTotal)||"0".equals(demandCompletion)){
+            record.set("demandRate","0");
+        }else {
+            double divide1 = divide(Double.parseDouble(demandCompletion), Double.parseDouble(demandTotal), 2);
+            String demandRate =divide1*100+"";
+            record.set("demandRate",demandRate);
+        }
+        record.set("demandTotal", demandTotal).set("demandCompletion", demandCompletion);
 
 
         String forecastWork = first.getStr("forecast_work");
         String consumptionWork = Db.queryStr("SELECT ifnull(sum(working_hours),0) from 72crm_task_hours WHERE subtasks_id in (SELECT task_id from 72crm_task WHERE work_id=?)", id);
-        double v2 = Double.parseDouble(forecastWork) / Double.parseDouble(consumptionWork) * 100;
-        String rateWork = Double.isNaN(v2) ? "0" : numberFormat.format(v2);
-        record.set("forecastWork", forecastWork).set("consumptionWork", consumptionWork).set("rateWork", rateWork);
+        if(StrUtil.isEmpty(forecastWork)||"0".equals(forecastWork)||"0".equals(consumptionWork)){
+            record.set("rateWork","0");
+        }else {
+            double divide2 = divide(Double.parseDouble(consumptionWork), Double.parseDouble(forecastWork), 2);
+            String rateWork= divide2 * 100 +"";
+            record.set("rateWork",rateWork);
+        }
+        record.set("forecastWork", forecastWork).set("consumptionWork", consumptionWork);
 
+        //任务
         Record task = Db.findFirst("SELECT ifnull(count(1),0) task_completion,(SELECT ifnull(COUNT(1),0) FROM 72crm_task WHERE work_id=?) " +
                 " task_total FROM 72crm_task WHERE work_id=? AND completeness='100'", id, id);
         String taskCompletion = task.getStr("task_completion");
         String taskTotal = task.getStr("task_total");
-        double v3 = Double.parseDouble(taskCompletion) / Double.parseDouble(taskTotal) * 100;
-        String taskRate = Double.isNaN(v3) ? "0" : numberFormat.format(v3);
-        record.set("taskTotal", taskTotal).set("taskCompletion", taskCompletion).set("taskRate", taskRate);
+        if("0".equals(taskCompletion)||"0".equals(taskTotal)){
+            record.set("taskRate","0");
+        }else {
+            double divide2 = divide(Double.parseDouble(taskCompletion), Double.parseDouble(taskTotal), 2);
+            String taskRate= divide2 * 100 +"";
+            record.set("taskRate",taskRate);
+        }
+        record.set("taskTotal", taskTotal).set("taskCompletion", taskCompletion);
 
 
        /* List<String> progressData = Arrays.asList(demandTotal, demandCompletion, demandRate, taskTotal, taskCompletion, taskRate, forecastWork, consumptionWork, rateWork);
@@ -610,6 +638,11 @@ public class WorkService extends AbstractBasePageList {
         return R.ok().put("data", record);
     }
 
+    public static double divide(double a, double b, int scale) {
+        BigDecimal bd1 = new BigDecimal(Double.toString(a));
+        BigDecimal bd2 = new BigDecimal(Double.toString(b));
+        return bd1.divide(bd2, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
 
     /**
      * 拼接

@@ -146,11 +146,7 @@ public class WorkProductFuntionController extends Controller {
             if("创建人".equals(name)){
                 continue;
             }
-            String fieldName = field.getStr("name");
-            if(field.getInt("is_null")==1){
-                fieldName += "(*)";
-            }
-            handers.add(fieldName);
+            handers.add(field.getStr("name"));
             if(Integer.parseInt(field.getStr("type")) == FormTypeEnum.SELECT.getType()){
                 String[] options = field.getStr("options").split(",");
                 downData.add(options);
@@ -174,7 +170,7 @@ public class WorkProductFuntionController extends Controller {
     }
 
     private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("产品功能编号", "产品功能名称", "版本描述");
+        List<String> names = Arrays.asList("产品功能编号(*)", "产品功能名称(*)", "版本描述");
         List<String> fieldName = Arrays.asList("function_number", "function_name", "function_describe");
         for (int i = 0; i < names.size(); i++) {
             Record record = new Record();

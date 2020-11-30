@@ -39,7 +39,7 @@ public class TaskFileService {
      */
     public R queryPageList(BasePageRequest basePageRequest) {
         JSONObject jsonObject = basePageRequest.getJsonObject();
-        Kv by = Kv.by("taskId", jsonObject.get("taskId")).set("workId",jsonObject.get("workId")).set("type",jsonObject.get("ty"));
+        Kv by = Kv.by("taskId", jsonObject.get("taskId")).set("workId",jsonObject.get("workId")).set("type",jsonObject.get("type")).set("search",jsonObject.get("search"));
         by.set("fileAttr",jsonObject.get("fileAttr"));
         SqlPara sqlPara = Db.getSqlPara("task.file.queryPageList", by);
         if (jsonObject.get("excel") != null) {
@@ -76,17 +76,20 @@ public class TaskFileService {
         int i = name.lastIndexOf(".");
         name = name.substring(0, i);
         taskFile.setName(name);
-        if("资料成果".equals(taskFile.getFileAttr())){
-            int temp ;
-            if(taskFile.getSubtasksId()==null){
-                temp = Db.queryInt("select count(1) from 72crm_task_hours where subtasks_id =?",taskFile.getTaskId());
-            }else {
-                temp = Db.queryInt("select count(1) from 72crm_task_hours where subtasks_id =?",taskFile.getSubtasksId());
-            }
-            if(temp == 0){
-                return R.error("该任务没有存在的工时");
+        if(taskFile.getType()==2){
+            if("资料成果".equals(taskFile.getFileAttr())){
+                int temp ;
+                if(taskFile.getSubtasksId()==null){
+                    temp = Db.queryInt("select count(1) from 72crm_task_hours where subtasks_id =?",taskFile.getTaskId());
+                }else {
+                    temp = Db.queryInt("select count(1) from 72crm_task_hours where subtasks_id =?",taskFile.getSubtasksId());
+                }
+                if(temp == 0){
+                    return R.error("该任务没有存在的工时");
+                }
             }
         }
+
         if (taskFile.getSubtasksId() == null) {
             taskFile.setSubtasksId(taskFile.getTaskId());
         }
@@ -147,7 +150,7 @@ public class TaskFileService {
             return R.error("id参数为空");
         }
         Record first = Db.findFirst(Db.getSql("task.file.queryById"), id);
-        if(first.getInt("task_id")==first.getInt("subtasks_id")){
+        if(first.getInt("task_id").equals(first.getInt("subtasks_id"))){
             first.set("subtasks_id",null);
             first.set("subtasks_name",null);
         }

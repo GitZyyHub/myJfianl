@@ -17,6 +17,7 @@ import com.kakarote.crm9.erp.work.common.WorkUserEnum;
 import com.kakarote.crm9.erp.work.entity.WorkRisk;
 import com.kakarote.crm9.utils.R;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -45,10 +46,11 @@ public class WorkRiskService {
         List<Record> lists;
         Page<Record> recordPage = null;
 
-        SqlPara sqlPara = Db.getSqlPara("work.queryRiskByBatchId", by);;
-        if(jsonObject.get("excel") != null){
+        SqlPara sqlPara = Db.getSqlPara("work.queryRiskByBatchId", by);
+        ;
+        if (jsonObject.get("excel") != null) {
             lists = Db.find(sqlPara);
-        }else {
+        } else {
             recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), sqlPara);
             lists = recordPage.getList();
         }
@@ -59,16 +61,22 @@ public class WorkRiskService {
         for (Record list : lists) {
 
             List<String> trackingUsers = Arrays.asList(list.getStr("tracking_user_id").split(","));
-            List<String> solveUser = Arrays.asList(list.getStr("solve_user_id").split(","));
+            List<String> solveUser = null;
+            if(!StrUtil.isEmpty(list.getStr("solve_user_id"))){
+                solveUser = Arrays.asList(list.getStr("solve_user_id").split(","));
+            }
             List<String> foundUser = Arrays.asList(list.getStr("found_user_id").split(","));
             trackingUser = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", trackingUsers)));
             solveUsers = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", solveUser)));
             foundUsers = Db.find(Db.getSqlPara("admin.user.queryUserIdAndRealNameByIds", Kv.by("ids", foundUser)));
             if (excel != null) {
-                list.set("trackingUser", trackingUser.stream().map(t->t.getStr("realname")+",").collect(Collectors.toList()));
-                list.set("solveUser", solveUsers.stream().map(t->t.getStr("realname")+",").collect(Collectors.toList()));
-                list.set("foundUser", foundUsers.stream().map(t->t.getStr("realname")+",").collect(Collectors.toList()));
-            }else {
+                String tracking = trackingUser.stream().map(t -> t.getStr("realname") + ",").collect(Collectors.toList()).toString();
+                String solve = solveUsers.stream().map(t -> t.getStr("realname") + ",").collect(Collectors.toList()).toString();
+                String found = foundUsers.stream().map(t -> t.getStr("realname") + ",").collect(Collectors.toList()).toString();
+                list.set("trackingUser", tracking.substring(1, tracking.length() - 1));
+                list.set("solveUser", solve.substring(1, solve.length() - 1));
+                list.set("foundUser", found.substring(1, found.length() - 1));
+            } else {
                 list.set("trackingUser", trackingUser);
                 list.set("solveUser", solveUsers);
                 list.set("foundUser", foundUsers);
@@ -125,29 +133,49 @@ public class WorkRiskService {
     @Before(Tx.class)
     public R setRisk(JSONObject jsonObject) {
         WorkRisk entity = jsonObject.getObject("entity", WorkRisk.class);
+        Date startTime = entity.getFoundTime();
+        Date endTime = entity.getSolveTime();
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        if (startTime != null && endTime != null) {
+            if (!startTime.before(endTime)) {
+                return R.error("发现时间应早与解决时间");
+            }
+        }
         if (entity.getRiskId() == null) {
             entity.setCreateTime(new Date());
             entity.setUpdateTime(new Date());
             entity.save();
-            workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.SAVE, entity.getRiskId(), null, null,entity.getRiskId());
+            workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.SAVE, entity.getRiskId(), null, null, entity.getRiskId());
 
         } else {
             entity.setUpdateTime(new Date());
             Record first = Db.findFirst("select * from 72crm_work_risk where risk_id =?", entity.getRiskId());
             entity.update();
             Record update = Db.findFirst("select * from 72crm_work_risk where risk_id =?", entity.getRiskId());
-            workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.UPDATE, entity.getRiskId(),  update,first,entity.getRiskId());
+            workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.UPDATE, entity.getRiskId(), update, first, entity.getRiskId());
         }
         List<String> founds = Arrays.asList(entity.getFoundUserId().split(","));
         List<String> trachings = Arrays.asList(entity.getTrackingUserId().split(","));
         HashSet<Long> set = new HashSet<>();
-        if(!StrUtil.isEmpty(entity.getSolveUserId())){
+        if (!StrUtil.isEmpty(entity.getSolveUserId())) {
             List<String> solves = Arrays.asList(entity.getSolveUserId().split(","));
-            solves.forEach(found->set.add(Long.parseLong(found)));
+            solves.forEach(found -> set.add(Long.parseLong(found)));
         }
-        founds.forEach(found->set.add(Long.parseLong(found)));
-        trachings.forEach(found->set.add(Long.parseLong(found)));
-        WorkService.setWorkRelation(set,entity.getRiskId(), WorkUserEnum.HOURS.getType(),entity.getWorkId());
+
+        founds.forEach(found -> {
+            if(!StrUtil.isEmpty(found)){
+            set.add(Long.parseLong(found));}
+        });
+
+        if (trachings.size() > 0) {
+            trachings.forEach(found -> {
+                if(!StrUtil.isEmpty(found)){
+                set.add(Long.parseLong(found));}
+            });
+        }
+        if (set.size() > 0) {
+            WorkService.setWorkRelation(set, entity.getRiskId(), WorkUserEnum.HOURS.getType(), entity.getWorkId());
+        }
         return R.ok();
     }
 

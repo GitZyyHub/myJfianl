@@ -48,8 +48,8 @@ public class WorkChangeService {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Kv kv = Kv.by("_batchId", jsonObject.get("batch_id"));
         kv.set("_workId", jsonObject.get("workId"));
-        if (jsonObject.get("_search") != null)
-            kv.set("search", jsonObject.get("search"));
+        if (jsonObject.get("search") != null)
+            kv.set("_search", jsonObject.get("search"));
 
         if (jsonObject.get("excel") == null) {
             kv.set("page", basePageRequest.getPage()-1);

@@ -39,6 +39,7 @@ public enum FormTypeEnum{
     MILESTONE(30,"milestone"), //里程碑
     WORK(31,"work"),        //项目
     SUBTASK(32,"subTask"),  //子任务
+    MANY_USER(32,"subTask"),  //子任务
     NULL(0,"null")
     ;
 

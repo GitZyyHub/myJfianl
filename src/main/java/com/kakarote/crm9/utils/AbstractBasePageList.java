@@ -226,17 +226,64 @@ public abstract class AbstractBasePageList {
                 sqlObject.put("type", 1);
             }
             else if ("task".equals(formType)) {
-                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
-                sqlObject.put("type", FormTypeEnum.TASK.getType());
+                List<Integer> records = Db.template("work.task.searchTask", Kv.by("val",value)).query();
+                if(records.size()>0){
+                    String s = records.toString();
+                    value =  s.substring(1,s.length()-1);
+                    conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                    // conditions.append(" and ").append(name).append("=").append(value);
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }else {
+                    conditions.append(" and ").append(name).append(" in (").append("0").append(")");
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }
             } else if ("milestone".equals(formType)) {
-                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
-                sqlObject.put("type", FormTypeEnum.MILESTONE.getType());
+                List<Integer> records = Db.template("work.searchMilestone", Kv.by("val",value)).query();
+                if(records.size()>0){
+                    String s = records.toString();
+                    value =  s.substring(1,s.length()-1);
+                    conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                    // conditions.append(" and ").append(name).append("=").append(value);
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }else {
+                    conditions.append(" and ").append(name).append(" in (").append("0").append(")");
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }
+
+
+                /*conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                //conditions.append(" and ").append(name).append("=").append(value);
+                sqlObject.put("type", FormTypeEnum.MILESTONE.getType());*/
             } else if ("work".equals(formType)) {
-                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
-                sqlObject.put("type", FormTypeEnum.WORK.getType());
+                List<Integer> records = Db.template("work.searchWork", Kv.by("val",value)).query();
+                if(records.size()>0){
+                    String s = records.toString();
+                    value =  s.substring(1,s.length()-1);
+                    conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                    // conditions.append(" and ").append(name).append("=").append(value);
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }else {
+                    conditions.append(" and ").append(name).append(" in (").append("0").append(")");
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }
+                /*conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                //conditions.append(" and ").append(name).append("=").append(value);
+                sqlObject.put("type", FormTypeEnum.WORK.getType());*/
             } else if ("subTask".equals(formType)) {
-                conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
-                sqlObject.put("type", FormTypeEnum.SUBTASK.getType());
+                List<Integer> records = Db.template("work.task.searchSubTask", Kv.by("val",value)).query();
+                if(records.size()>0){
+                    String s = records.toString();
+                    value =  s.substring(1,s.length()-1);
+                    conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                    // conditions.append(" and ").append(name).append("=").append(value);
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }else {
+                    conditions.append(" and ").append(name).append(" in (").append("0").append(")");
+                    sqlObject.put("type", FormTypeEnum.TASK.getType());
+                }
+                /*conditions.append(" and ").append(name).append(" in (").append(value).append(")");
+                //conditions.append(" and ").append(name).append("=").append(value);
+                sqlObject.put("type", FormTypeEnum.SUBTASK.getType());*/
             } else if ("structure".equals(formType)) {
                 conditions.append(" and ").append(name).append(" like '%").append(value).append("%'");
                 sqlObject.put("type", FormTypeEnum.STRUCTURE.getType());

@@ -24,7 +24,7 @@
             (select realname from 72crm_admin_user where user_id=h.create_user_id) create_user_name,
             h.create_time,
             h.examine_time,
-            (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) check_status,
+            (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过'when 3 then '审核中' end) check_status,
             update_time
         FROM
         72crm_task_hours h
@@ -64,8 +64,8 @@
             (select realname from 72crm_admin_user where user_id=h.main_user_id) main_user_name,
             subtasks_id,
             (select task_name from 72crm_task where task_id=h.subtasks_id) subtasks_name,
-            start_time,
-            end_time,
+            DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time,
+            DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,
             working_hours,
             hours_type,
             progress_content,
@@ -74,6 +74,7 @@
             create_user_id,
             (select realname from 72crm_admin_user where user_id=h.create_user_id) create_user_name,
             h.create_time,
+            examine_record_id,
             h.examine_time,
             check_status,
             update_time
@@ -102,7 +103,7 @@
             (select realname from 72crm_admin_user where user_id=h.create_user_id) create_user_name,
             h.create_time,
             h.examine_time,
-            (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) check_status,
+            (case check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' when 3 then '审核中' end ) check_status,
             create_time
         FROM
         72crm_task_hours h
@@ -137,7 +138,7 @@
             h.hours_id,
             h.create_time,
             h.examine_time,
-            (case h.check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' end) check_status,
+            (case h.check_status when 0 then '待审核' when 1 then '通过' when 2 then '未通过' when 3 then '审核中' end) check_status,
             (select realname from 72crm_admin_user where user_id=h.main_user_id) main_user_name,
             (select d.name from 72crm_admin_user u join 72crm_admin_dept d on u.dept_id=d.dept_id where u.user_id=h.main_user_id) main_user_dept,
             w.work_name,
@@ -174,7 +175,7 @@
     #end
 
     #sql("updateCheckStatusById")
-        update 72crm_task_hours set check_status = ? where hours_id = ?
+        update 72crm_task_hours set check_status = ?,examine_time=now() where hours_id = ?
     #end
     #sql("updateCheckStatusByIdThrough")
         update 72crm_task_hours set check_status = ?,examine_time=? where hours_id = ?
@@ -201,7 +202,7 @@
 
   #sql ("checkHoursNum")
   select count(*)
-  from 72crm_work as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
+  from 72crm_task_hours as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
   left join 72crm_admin_examine_log as c on b.record_id = c.record_id
   where c.examine_user = ? and a.check_status in (0,3) and c.examine_status in (0,3) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
   #end

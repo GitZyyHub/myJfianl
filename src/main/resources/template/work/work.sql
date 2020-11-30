@@ -4,6 +4,10 @@
         select column_name,column_comment,data_type from information_schema.columns where table_name=?
     #end
 
+    #sql("searchWork")
+        SELECT work_id from 72crm_work WHERE work_name like concat('%',#para(val),'%')
+    #end
+
     #sql ("queryDataAuth")
         select num_id from 72crm_work_user_record where user_id in (#fori(ids)) and type=#para(ty)
         #if(workId)
@@ -15,6 +19,9 @@
         select user_id from 72crm_work_user_record where 1=1
         #if(ids)
         and num_id in (#fori(ids))
+        #end
+        #if(numId)
+        and num_id=#para(numId)
         #end
         #if(ty)
         and type=#para(ty)
@@ -32,16 +39,55 @@
         update 72crm_work set check_status=?,examine_time=? where work_id=?
     #end
 
+    #sql("queryWorkById")
+    SELECT
+        work_num,
+        STATUS,
+        work_name,
+        description,
+        work_phase,
+        work_type,
+        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.dept_id ) dept_id,
+        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.area ) area,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.sales_id ) sales_id,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.manager_id ) manager_id,
+        DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time,
+        DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,
+        examine,
+        solution,
+        risk,
+        unscramble,
+        target,
+        contract_amount,
+        effective_amount,
+        implement_cost,
+        maintenance_cost,
+        budget,
+        practical_cost,
+        customer_name,
+        customer_contact,
+        customer_calls,
+        forecast_work
+    FROM
+        `72crm_work` w
+    WHERE
+        work_id = ?
+    #end
+
+
      #sql ("advancedSearch")
      select * from(
         SELECT
+            create_user_id,
             (select realname from 72crm_admin_user where user_id=w.create_user_id) create_user_name,
             (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
             manager_id,
             (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
             sales_id,
+            dept_id,
             (select `name` from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
-            (select `name` from 72crm_admin_dept where dept_id=w.area) area,
+            area,
+            (select `name` from 72crm_admin_dept where dept_id=w.area) area_name,
             work_num,
             work_id,
             work_name,
@@ -85,12 +131,18 @@
     #end
 
     #sql("waiting")
+    select * from(
         SELECT
                 (select realname from 72crm_admin_user where user_id=w.create_user_id) create_user_name,
+                create_user_id,
+                manager_id,
                 (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
+                sales_id,
                 (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
+                dept_id,
                 (select `name` from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
-                (select `name` from 72crm_admin_dept where dept_id=w.area) area,
+                area,
+                (select `name` from 72crm_admin_dept where dept_id=w.area) area_name,
                 work_num,
                 status,
                 work_id,
@@ -106,14 +158,16 @@
         from 72crm_work AS w
         WHERE 1=1
         and w.work_id in (SELECT work_id from 72crm_work_user_record WHERE user_id=#para(userId) and type=4)
-        #for(query:queryList)
-            #(query.get("sql"))
-        #end
+
         #if(dataAuth)
             and work_id in (#fori(dataAuth))
         #end
         #if(isWaiting)
             and work_phase!='结项'
+        #end
+        ) as views where 1=1
+        #for(query:queryList)
+            #(query.get("sql"))
         #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
         #if(page&&limit)
@@ -125,7 +179,7 @@
         SELECT count(1) from 72crm_work AS w
         where status != 3
         #for(query:queryList)
-            #(query.get("sql"))
+            #if(query.get("type")==1) #(query.get("sql")) #end
         #end
         #if(workPhase)
             and w.work_phase != #para(workPhase)
@@ -239,11 +293,14 @@
             m.degree,
             m.start_time,
             m.end_time,
+            work_id,
             (select work_num from 72crm_work where m.work_id=work_id) work_num,
 			m.update_time,
+			main_user_id,
 			(select realname from 72crm_admin_user where m.main_user_id = user_id) main_user_name,
             m.instructions,
             (select work_name from 72crm_work where m.work_id=work_id) work_name,
+            task_id,
 			(select task_name from 72crm_task where m.task_id=task_id) task_name
         from 72crm_milestone m
 	    where 1=1
@@ -257,6 +314,10 @@
         #if(page&&limit)
           LIMIT #(page),#(limit)
         #end
+    #end
+
+    #sql ("searchMilestone")
+        SELECT milestone_id from 72crm_milestone WHERE milestone_name like concat('%',#para(val),'%')
     #end
 
     #sql ("queryMilestonePageListCount")
@@ -313,13 +374,31 @@
             and r.work_id=#para(workId)
         #end
         #if(search)
-            and found_phase like concat('%', #para(search), '%')
+            and (found_phase like concat('%', #para(search), '%') or risk_level like concat('%', #para(search), '%') or risk_type like concat('%', #para(search), '%'))
         #end
         order by update_time desc
     #end
     #sql ("queryRiskById")
     SELECT
-        r.*,
+        risk_id,
+        work_id,
+        risk_type,
+        risk_level,
+        tracking_user_id,
+        scope,
+        DATE_FORMAT( solve_time, '%Y-%m-%d %H:%i:%S' ) solve_time,
+        risk_status,
+        solve_advice,
+        solve_user_id,
+        detailed,
+        found_user_id,
+        DATE_FORMAT( found_time, '%Y-%m-%d %H:%i:%S' ) found_time,
+        found_phase,
+        found_way,
+        direction,
+        batch_id,
+        create_time,
+        update_time,
         (SELECT realname from 72crm_admin_user WHERE user_id=r.tracking_user_id) tracking_user_name,
         (SELECT realname from 72crm_admin_user WHERE user_id=r.solve_user_id) solve_user_name,
         (SELECT realname from 72crm_admin_user WHERE user_id=r.found_user_id) found_user_name
@@ -362,7 +441,7 @@
         and c.batch_id=#para(_batchId)
         #end
         #if(_search)
-            and c.change_project LIKE concat('%', #para(_search), '%')
+            and (c.change_project LIKE concat('%', #para(_search), '%') or c.change_type LIKE concat('%', #para(_search), '%'))
         #end
         order by update_time desc
         #if(page&&limit)
@@ -408,7 +487,13 @@
     #end
 
     #sql ("queryResourceById")
-        SELECT s.*,
+        SELECT
+            resources_name,
+            resources_describe,
+            resources_provide,
+            DATE_FORMAT( plan_time, '%Y-%m-%d %H:%i:%S' ) plan_time,
+            DATE_FORMAT( actual_time, '%Y-%m-%d %H:%i:%S' ) actual_time,
+            resources_status,
             (SELECT work_name from 72crm_work where work_id=s.work_id) work_name,
             (SELECT realname from 72crm_admin_user where user_id=s.main_user_id) main_user_name
         FROM 72crm_work_resources_setting s WHERE s.resources_id=?
@@ -443,6 +528,9 @@
         #if(type)
         and module_two = #para(type)
         #end
+        #if(workId)
+        and work_id = #para(workId)
+        #end
         #if(operationId)
             and operation_id=#para(operationId)
         #end
@@ -451,6 +539,7 @@
 
 
     #sql ("queryTaskConfigByTaskId")
+    select * from (
         SELECT
             c.*,
             (SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name,
@@ -465,6 +554,10 @@
         #if(associatedId)
             and c.associated_id=#para(associatedId)
         #end
+        #if(search)
+            and ( c.config_items LIKE concat('%', #para(search), '%')  or c.associated_name LIKE concat('%', #para(search), '%'))
+        #end
+        ) views where 1=1
         #for(query:queryList)
             #(query.get("sql"))
         #end
@@ -496,7 +589,7 @@
     #end
 
     #sql ("queryTaskConfigById")
-        SELECT config_items,plan_time,main_user_id,
+        SELECT config_items,DATE_FORMAT( plan_time, '%Y-%m-%d %H:%i:%S' ) plan_time,main_user_id,
         (SELECT realname FROM 72crm_admin_user WHERE user_id = c.main_user_id) main_user_name,
         (SELECT realname FROM 72crm_admin_user WHERE user_id = c.create_user_id) create_user_name,
         associated_name,associated_num,associated_id,version,version_time,version_describe FROM 72crm_work_config c WHERE config_id=?

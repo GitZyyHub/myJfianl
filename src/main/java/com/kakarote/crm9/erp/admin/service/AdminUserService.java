@@ -24,6 +24,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminAttention;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
 import com.kakarote.crm9.erp.work.common.WorkUserEnum;
+import com.kakarote.crm9.erp.work.entity.WorkUser;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.ParamsUtil;
 import com.kakarote.crm9.utils.R;
@@ -48,6 +49,10 @@ public class AdminUserService {
             return R.error("请设置直属上级");
         }
         updateScene(adminUser);
+        Integer integer = Db.queryInt("select count(*) from 72crm_admin_user where job_number = ? and user_id!=?", adminUser.getJobNumber(),adminUser.getUserId());
+        if (integer > 0) {
+            return R.error("工号重复");
+        }
         if (adminUser.getUserId() == null) {
             if (!ReUtil.isMatch("^(?=.*[a-zA-Z])(?=.*\\d).{6,20}$", adminUser.getPassword())) {
                 return R.error("密码必须由 6-20位字母、数字组成");
@@ -56,10 +61,7 @@ public class AdminUserService {
             if (count > 0) {
                 return R.error("手机号重复！");
             }
-            Integer integer = Db.queryInt("select count(*) from 72crm_admin_user where job_number = ?", adminUser.getJobNumber());
-            if (count > 0) {
-                return R.error("工号重复");
-            }
+
             String salt = IdUtil.fastSimpleUUID();
             adminUser.setNum(RandomUtil.randomNumbers(15));
             adminUser.setSalt(salt);
@@ -171,12 +173,12 @@ public class AdminUserService {
         }
         AdminUser adminUser = request.getData();
         Kv kv = Kv.by("name", adminUser.getRealname()).set("deptId", deptIdList).set("status", adminUser.getStatus()).set("roleId", roleId);
-
+        kv.set("search", jsonObject.get("search"));
         List<String> pinyinSearchList = new ArrayList<>();
         if (StrUtil.isNotEmpty(search)) {
             //根据汉语首字母查询
             search = search.trim();
-            kv.set("search", search);
+
             if (ReUtil.isMatch("^[a-zA-Z]*", search)) {
                 for (int i = 0; i < search.length(); i++) {
                     String word = search.substring(i, i + 1).toUpperCase();
@@ -257,9 +259,10 @@ public class AdminUserService {
             }
             Kv by = Kv.by("conditions", conditions.toString());
             List<Object> query = Db.template("work.task.queryTaskBySearch", by).query();
-            query.addAll(Db.template("work.task.queryTaskIdByIds", Kv.by("ids",query)).query());
-            kv.set("userIds",Db.template("work.queryDataUserId", Kv.by("ids",query).set("by", WorkUserEnum.TYPE_1.getType())).query());
+            query.addAll(Db.template("work.task.queryTaskIdByIds", Kv.by("ids", query)).query());
+            kv.set("userIds", Db.template("work.queryDataUserId", Kv.by("ids", query).set("by", WorkUserEnum.TYPE_1.getType())).query());
         }
+        kv.set("sort",jsonObject.get("sort"));
         SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserList", kv);
         if (request.getPageType() == 0) {
             List<Record> recordList = Db.find(sqlPara);
@@ -908,23 +911,25 @@ public class AdminUserService {
     @Before(Tx.class)
     public R setResources(String userIds, Integer isResources, String workId) {
         List<String> strings = Arrays.asList(userIds.split(","));
-        for (String str : strings) {
+        for (String userId : strings) {
             if (isResources == 0) {
-                Integer taskCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE main_user_id=? and create_user_id=? and status!='已完成'", str, str);
                 Integer taskUserCount = Db.queryInt("SELECT COUNT(1) from 72crm_task WHERE task_id in(" +
-                        "SELECT num_id FROM 72crm_work_user_record WHERE user_id=?" +
-                        ") and status!='已完成'", str);
-                if (taskCount != 0 || taskUserCount != 0) {
+                        "SELECT num_id FROM 72crm_work_user_record WHERE user_id=? and type=1 and work_id =?" +
+                        ") and status!='已完成'", userId,workId);
+                if (taskUserCount != 0) {
                     return R.error("存在没有完成的任务不能删除");
                 }
+                Db.delete("delete from 72crm_work_user where work_id=? and user_id=?", workId, userId);
             } else {
-                Integer integer = Db.queryInt("select status from 72crm_admin_user where user_id=?", str);
+                Integer integer = Db.queryInt("select status from 72crm_admin_user where user_id=?", userId);
                 if (integer == 0) {
                     return R.error("该用户被禁用不能添加人力资源");
                 }
-
+                WorkUser workUser = new WorkUser();
+                workUser.setWorkId(Integer.parseInt(workId));
+                workUser.setUserId(Long.parseLong(userId));
+                workUser.save();
             }
-            Db.update("update 72crm_admin_user SET is_resources=?,work_id=? WHERE user_id=?", isResources, workId, str);
         }
         return R.ok();
     }

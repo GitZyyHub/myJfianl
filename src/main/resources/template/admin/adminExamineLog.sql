@@ -164,7 +164,7 @@
           c.contract_id as catagory_cite_id,
           c.name as catagory_cite_name
       #else if(categoryType==4)
-          (case when d.subtasks_id=null then d.subtasks_name else d.task_name end) as catagory,
+          (select task_num from 72crm_task where d.subtasks_id=task_id) as catagory,
           d.hours_id as catagory_id,
           d.create_time,
           c.task_id as catagory_cite_id,
@@ -182,7 +182,7 @@
           d.progress_content
       #else if(categoryType==5)
           w.work_id,
-          w.work_name AS catagory,
+          w.work_num AS catagory,
           w.work_id AS catagory_id,
           w.work_name AS catagory_cite_name,
           w.work_id AS catagory_cite_id,
@@ -191,7 +191,7 @@
           w.work_name,
           w.dept_id,
           (select name from 72crm_admin_dept where dept_id=w.dept_id) dept_name,
-          (select name from 72crm_admin_dept where dept_id=w.area) area,
+          (select name from 72crm_admin_dept where dept_id=w.area) area_name,
           (select realname from 72crm_admin_user where user_id=w.manager_id) manager_name,
           (select realname from 72crm_admin_user where user_id=w.sales_id) sales_name,
           w.work_phase,

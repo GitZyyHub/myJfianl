@@ -4,14 +4,18 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
+import com.jfinal.core.paragetter.Para;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
+import com.kakarote.crm9.erp.work.entity.TaskHoursLock;
 import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.service.TaskHoursLockService;
+import com.kakarote.crm9.utils.R;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +45,17 @@ public class TaskHoursLockController extends Controller {
     public void setHoursLock(){
         JSONObject jsonObject = JSONObject.parseObject(getRawData());
         renderJson(taskHoursLockService.setHoursLock(jsonObject));
+    }
+
+    /**
+     * 工时锁定删除
+     */
+    public void delHoursLock(@Para("ids")String ids){
+        List<String> strings = Arrays.asList(ids.split(","));
+        for (String id : strings) {
+            Aop.get(TaskHoursLock.class).deleteById(id);
+        }
+        renderJson(R.ok());
     }
 
     /**
@@ -93,7 +108,7 @@ public class TaskHoursLockController extends Controller {
     }
 
     private void getFields(List<Record> fields){
-        List<String> names = Arrays.asList("序号", "锁定时间", "操作时间");
+        List<String> names = Arrays.asList("编号", "锁定时间", "操作时间");
         List<String> fieldName = Arrays.asList("id", "lock_time", "create_time");
         for (int i = 0; i < names.size(); i++) {
             Record record = new Record();

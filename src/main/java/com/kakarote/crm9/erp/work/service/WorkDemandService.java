@@ -61,10 +61,10 @@ public class WorkDemandService extends AbstractBasePageList {
         CrmEnum demand = CrmEnum.DEMAND;
         Kv kv = getKv(basePageRequest, demand, isDataAuth);
         kv.set("_workId", jsonObject.getInteger("workId"));
-        queryDataAuth(WorkUserEnum.DEMAND,kv,CrmEnum.DEMAND,null, WorkRendAuthEnum.DEMAND,null);
-        if(kv==null){
+        //queryDataAuth(WorkUserEnum.DEMAND,kv,CrmEnum.DEMAND,null, WorkRendAuthEnum.DEMAND,null);
+        /*if(kv==null){
             return R.error("无权限");
-        }
+        }*/
         List<Record> records = Db.find(Db.getSqlPara("work.demand.queryPageList", kv));
         Integer demand_id ;
         for (Record record : records) {
@@ -92,20 +92,21 @@ public class WorkDemandService extends AbstractBasePageList {
     public void setRecord(Record record, Integer demand_id) {
         //查询关联的产品
         List<Record> products = Db.find(Db.getSql("work.demand.queryAssociatedProduct"), demand_id);
-        record.set("product_name", products.stream().map(product -> product.getStr("product_name")+",").collect(Collectors.toList()));
-        record.set("product_version", products.stream().map(product -> product.getStr("product_version")+",").collect(Collectors.toList()));
-        record.set("product_number", products.stream().map(product -> product.getStr("product_number")+",").collect(Collectors.toList()));
+        
+        record.set("product_name", products.stream().map(product -> StrUtil.isEmpty(product.getStr("product_name"))?null:product.getStr("product_name") + ",").collect(Collectors.toList()));
+        record.set("product_version", products.stream().map(product -> StrUtil.isEmpty(product.getStr("product_version"))?null:product.getStr("product_version")+",").collect(Collectors.toList()));
+        record.set("product_number", products.stream().map(product -> StrUtil.isEmpty(product.getStr("product_number"))?null:product.getStr("product_number")+",").collect(Collectors.toList()));
         try {
-            record.set("product_percentage",products.stream().map(product -> product.getStr("product_percentage")+",").collect(Collectors.toList()));
+            record.set("product_percentage",products.stream().map(product -> StrUtil.isEmpty(product.getStr("product_percentage"))?null:product.getStr("product_percentage")+",").collect(Collectors.toList()));
         } catch (NullPointerException e) {}
         try {
-            record.set("product_describe",products.stream().map(product -> product.getStr("product_describe")+",").collect(Collectors.toList()));
+            record.set("product_describe",products.stream().map(product -> StrUtil.isEmpty(product.getStr("product_describe"))?null:product.getStr("product_describe")+",").collect(Collectors.toList()));
         } catch (NullPointerException e) {}
 
         //查询关联的产品功能
         List<Record> functions = Db.find(Db.getSql("work.demand.queryAssociatedFunction"), demand_id);
-        record.set("function_name", functions.stream().map(function -> function.getStr("function_name")+",").collect(Collectors.toList()));
-        record.set("function_number", functions.stream().map(function -> function.getStr("function_number")+",").collect(Collectors.toList()));
+        record.set("function_name", functions.stream().map(function -> StrUtil.isEmpty(function.getStr("function_name"))?null:function.getStr("function_name")+",").collect(Collectors.toList()));
+        record.set("function_number", functions.stream().map(function ->  StrUtil.isEmpty(function.getStr("function_number"))?null:function.getStr("function_number")+",").collect(Collectors.toList()));
     }
 
 
@@ -125,7 +126,7 @@ public class WorkDemandService extends AbstractBasePageList {
             entity.setUpdateTime(new Date());
             entity.setCreateUserId(BaseUtil.getUserId());
             temp = entity.save();
-            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.SAVE, entity.getDemandNumber(), null, null,entity.getDemandId());
+            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.SAVE,entity.getDemandId(), null, null,entity.getDemandId());
         } else {
             temp = true;
             Record first = Db.findFirst(Db.getSql("work.demand.queryDemandById"), entity.getDemandId());
@@ -136,7 +137,7 @@ public class WorkDemandService extends AbstractBasePageList {
             entity.update();
             Record update = Db.findFirst(Db.getSql("work.demand.queryDemandById"), entity.getDemandId());
             //添加变更记录
-            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.UPDATE, entity.getDemandNumber(), update,first, entity.getDemandId());
+            workHistoricalRecordService.add(entity.getWorkId(),WorkRecordEnum.DEMAND, BehaviorEnum.UPDATE, entity.getDemandId(), update,first, entity.getDemandId());
         }
         WorkDemand byId = Aop.get(WorkDemand.class).dao().findById(entity.getDemandId());
         HashSet<Long> set = new HashSet<>();
@@ -182,8 +183,11 @@ public class WorkDemandService extends AbstractBasePageList {
             ids.addAll(Arrays.asList(productIds.split(",")));
         }
         HashSet<String> strings = new HashSet<>(ids);*/
-        List<Record> records = Db.find(Db.getSqlPara("work.demand.queryDemandFunction", Kv.by("productIds", ids).set("functionIds", functionIds)));
-        records.addAll(Db.find(Db.getSqlPara("work.demand.queryDemandFunction", Kv.by("productIds", ids).set("functionIdsNot", functionIds))));
+        List<Record> records = null;
+        if(!StrUtil.isEmpty(productIds)){
+            records = Db.find(Db.getSqlPara("work.demand.queryDemandFunction", Kv.by("productIds", ids).set("functionIds", functionIds)));
+            records.addAll(Db.find(Db.getSqlPara("work.demand.queryDemandFunction", Kv.by("productIds", ids).set("functionIdsNot", functionIds))));
+        }
         return R.ok().put("data",records);
     }
 
@@ -197,25 +201,28 @@ public class WorkDemandService extends AbstractBasePageList {
         Db.delete("delete from 72crm_work_demand_function where demand_id=?",demandId);
         String functionIds = jsonObject.getString("functionIds");
         List<Map<String,Object>> products = (List<Map<String,Object>>)jsonObject.get("products");
+        boolean temp = false;
         if (StrUtil.isEmpty(demandId + "") || CollectionUtils.isEmpty(products) || StrUtil.isEmpty(functionIds)) {
             return R.error("数据不完整");
-        }
-        boolean temp = false;
-        for (Map<String, Object> product : products) {
-            WorkDemandProduct workDemandProduct = new WorkDemandProduct();
-            workDemandProduct.setDemandId(demandId);
-            workDemandProduct.setProductId( (int)product.get("productId"));
-            workDemandProduct.setProductDescribe((String) product.get("productDescribe"));
-            workDemandProduct.setProductPercentage((String) product.get("productPercentage"));
-            temp = workDemandProduct.save();
-        }
+        }else {
 
-        String[] functionId = functionIds.split(",");
-        for (String s : functionId) {
-            WorkDemandFunction workDemandFunction = new WorkDemandFunction();
-            workDemandFunction.setDemandId(demandId);
-            workDemandFunction.setFunctionId(Integer.parseInt(s));
-            temp = workDemandFunction.save();
+            for (Map<String, Object> product : products) {
+                WorkDemandProduct workDemandProduct = new WorkDemandProduct();
+                workDemandProduct.setDemandId(demandId);
+                workDemandProduct.setProductId( (int)product.get("productId"));
+                workDemandProduct.setProductDescribe((String) product.get("productDescribe"));
+                workDemandProduct.setProductPercentage((String) product.get("productPercentage"));
+                temp = workDemandProduct.save();
+            }
+
+            String[] functionId = functionIds.split(",");
+            for (String s : functionId) {
+                WorkDemandFunction workDemandFunction = new WorkDemandFunction();
+                workDemandFunction.setDemandId(demandId);
+                workDemandFunction.setFunctionId(Integer.parseInt(s));
+                temp = workDemandFunction.save();
+            }
+            Db.update("update 72crm_work_demand set is_associated=1 where demand_id =?",demandId);
         }
 
         return temp ? R.ok() : R.error("关联失败");
@@ -335,7 +342,11 @@ public class WorkDemandService extends AbstractBasePageList {
 
     @Override
     public JSONObject appendSqlSearch(String search) {
-        return null;
+        JSONObject sqlObject = new JSONObject();
+        String conditions = " and (subsystem like '%{search}%' or child_module like '%{search}%')";
+        sqlObject.put("sql", StrUtil.format(conditions, Kv.by("search", search)));
+        sqlObject.put("type", 1);
+        return sqlObject;
     }
 
 

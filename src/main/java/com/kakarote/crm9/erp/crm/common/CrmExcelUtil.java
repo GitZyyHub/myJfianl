@@ -76,31 +76,39 @@ public class CrmExcelUtil {
                 adminMessage.setType(AdminMessageEnum.CRM_CONTACTS_IMPORT.getType());
                 break;
             case CRM_PRODUCT:
-                adminMessage.setType(AdminMessageEnum.CRM_PRODUCT_IMPORT.getType());
+                adminMessage.setType(AdminMessageEnum.CRM_PRODUCT_IMPORT_CANCEL.getType());
                 break;
             case WORK:
-                adminMessage.setType(AdminMessageEnum.CRM_PRODUCT_IMPORT.getType());
+                adminMessage.setType(AdminMessageEnum.CRM_WORK.getType());
+                adminMessage.setLabel(1);
                 break;
             case DEMAND:
                 adminMessage.setType(AdminMessageEnum.CRM_DEMAND_IMPORT.getType());
+                adminMessage.setLabel(1);
                 break;
             case RISK:
                 adminMessage.setType(AdminMessageEnum.WORK_RISK_IMPORT.getType());
+                adminMessage.setLabel(1);
                 break;
             case TASK:
                 adminMessage.setType(AdminMessageEnum.WORK_TASK_IMPORT.getType());
+                adminMessage.setLabel(1);
                 break;
             case RESOURCES:
                 adminMessage.setType(AdminMessageEnum.WORK_RESOURCES.getType());
+                adminMessage.setLabel(1);
                 break;
             case PRODUCT:
-                adminMessage.setType(AdminMessageEnum.WORK_RESOURCES.getType());
+                adminMessage.setType(AdminMessageEnum.WORK_PRODUCT.getType());
+                adminMessage.setLabel(1);
                 break;
             case PRODUCT_FUNCTIONE:
-                adminMessage.setType(AdminMessageEnum.WORK_RESOURCES.getType());
+                adminMessage.setType(AdminMessageEnum.WORK_PRODUCT_FUNCTIONE.getType());
+                adminMessage.setLabel(1);
                 break;
             case WORKCONFIG:
-                adminMessage.setType(AdminMessageEnum.WORK_RESOURCES.getType());
+                adminMessage.setType(AdminMessageEnum.WORK_WORKCONFIG.getType());
+                adminMessage.setLabel(1);
                 break;
             default:
         }
@@ -368,28 +376,51 @@ public class CrmExcelUtil {
         private void workconfigimport() {
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
+
+
                 if (rowIndex > 1) {
+
+                    if (rowList.size() < temp) {
+                        for (int i = rowList.size() - 1; i < temp; i++) {
+                            rowList.add("");
+                        }
+                    }
                     try {
                         WorkConfig workConfig = new WorkConfig();
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
-                        for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 1, 3, 4);
-                            if (integers.contains(i)) {
-                                if (StrUtil.isEmptyIfStr(rowList.get(i))) {
+
+                        List<Integer> integers = Arrays.asList(0, 1,2,3,4);
+                        for (int i = 0; i < integers.size(); i++) {
+                            try {
+                                if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
+                            } catch (Exception e) {
+                                rowList.add(0, "必填选项，请添加");
+                                errorList.add(rowList);
+                                return;
                             }
+
+                        }
+
+                        for (int i = 0; i < rowList.size(); i++) {
                             if (i == 4) {
                                 List<String> users = new ArrayList<>();
                                 try {
-                                    users = Arrays.asList(rowList.get(i).toString().trim().split(","));
+                                    String[] split = rowList.get(i).toString().trim().split(",");
+                                    for (int y = 0; y < split.length; y++) {
+                                        if(!StrUtil.isEmpty(split[y])){
+                                            users.add(split[y]);
+                                        }
+                                    }
                                 } catch (NullPointerException e) {
+                                    continue;
                                 }
                                 if (users.size() > 0) {
                                     List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                    if (users.size() == 0) {
+                                    if (userIds.size() == 0) {
                                         rowList.add(0, "该人员不存在");
                                         errorList.add(rowList);
                                         return;
@@ -400,6 +431,11 @@ public class CrmExcelUtil {
                             }
                             if (i == 1) {
                                 Record first = Db.findFirst("select work_id,work_num,work_name from 72crm_work where work_num =?", rowList.get(i).toString().trim());
+                                if(first == null){
+                                    rowList.add(0, "项目不存在");
+                                    errorList.add(rowList);
+                                    return;
+                                }
                                 workConfig.setAssociatedId(first.getLong("work_id"));
                                 workConfig.setAssociatedNum(first.getStr("work_num"));
                                 workConfig.setAssociatedName(first.getStr("work_name"));
@@ -408,17 +444,17 @@ public class CrmExcelUtil {
                         workConfig.setConfigItems(rowList.get(0).toString().trim());
                         workConfig.setPlanTime(sdf.parse(rowList.get(3).toString().trim()));
                         workConfig.setMainUserId(Integer.parseInt(rowList.get(4).toString().trim()));
-                        workConfig.setVersion(rowList.get(6).toString().trim());
-                        workConfig.setVersionDescribe(rowList.get(7).toString().trim());
-                        workConfig.setVersionTime(sdf.parse(rowList.get(8).toString().trim()));
-                        workConfig.setCreateTime(new Date());
-                        workConfig.setCreateUserId(BaseUtil.getUserId());
+                        workConfig.setVersion(rowList.get(5).toString().trim());
+                        workConfig.setVersionDescribe(rowList.get(6).toString().trim());
+                        if(!StrUtil.isEmpty(rowList.get(7).toString())){
+                            workConfig.setVersionTime(sdf.parse(rowList.get(7).toString().trim()));
+                        }
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",workConfig);
+                        jsonObject.put("entity", workConfig);
                         R r = Aop.get(ConfigManageService.class).setConfig(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
+                        } else {
                             rowList.add(0, r.get("code"));
                             errorList.add(rowList);
                             return;
@@ -429,6 +465,7 @@ public class CrmExcelUtil {
                         errorList.add(rowList);
                     }
                 } else if (rowIndex == 1) {
+                    temp = rowList.size();
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
@@ -442,20 +479,32 @@ public class CrmExcelUtil {
         private void productFunctioneImport() {
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
+
                 if (rowIndex > 1) {
+
+                    if (rowList.size() < temp) {
+                        for (int i = rowList.size() - 1; i < temp; i++) {
+                            rowList.add("");
+                        }
+                    }
                     try {
                         WorkProductFunction workProductFunction = new WorkProductFunction();
 
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
-                        for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 1, 2, 3, 4, 5, 6);
-                            if (integers.contains(i)) {
-                                if (StrUtil.isEmptyIfStr(rowList.get(i))) {
+                        List<Integer> integers = Arrays.asList(0, 1);
+                        for (int i = 0; i < integers.size(); i++) {
+                            try {
+                                if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
+                            } catch (Exception e) {
+                                rowList.add(0, "必填选项，请添加");
+                                errorList.add(rowList);
+                                return;
                             }
+
                         }
                         //查询对应的产品（work这里代表产品ID）
                         WorkProduct byId = Aop.get(WorkProduct.class).dao().findById(workId);
@@ -467,8 +516,8 @@ public class CrmExcelUtil {
                         workProductFunction.setExploitUserId(byId.getExploitUserId());
                         workProductFunction.setProductStatus(byId.getProductStatus());
 
-                        workProductFunction.setFunctionName(rowList.get(0).toString().trim());
-                        workProductFunction.setFunctionNumber(rowList.get(1).toString().trim());
+                        workProductFunction.setFunctionName(rowList.get(1).toString().trim());
+                        workProductFunction.setFunctionNumber(rowList.get(0).toString().trim());
                         workProductFunction.setFunctionDescribe(rowList.get(2).toString().trim());
 
                         JSONObject jsonObject = new JSONObject();
@@ -476,7 +525,7 @@ public class CrmExcelUtil {
                         R r = Aop.get(WorkProductFuntionService.class).setProductFunction(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
+                        } else {
                             rowList.add(0, r.get("code"));
                             errorList.add(rowList);
                             return;
@@ -487,6 +536,7 @@ public class CrmExcelUtil {
                         errorList.add(rowList);
                     }
                 } else if (rowIndex == 1) {
+                    temp = rowList.size();
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
@@ -497,28 +547,49 @@ public class CrmExcelUtil {
         private void projectProductImport() {
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
+
                 if (rowIndex > 1) {
+
+                    if (rowList.size() < temp) {
+                        for (int i = rowList.size() - 1; i < temp; i++) {
+                            rowList.add("");
+                        }
+                    }
                     try {
                         WorkProduct workProduct = new WorkProduct();
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
-                        for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 1, 3, 4, 6);
-                            if (integers.contains(i)) {
-                                if (StrUtil.isEmptyIfStr(rowList.get(i))) {
+
+                        List<Integer> integers = Arrays.asList(1, 3, 4, 6);
+                        for (int i = 0; i < integers.size(); i++) {
+                            try {
+                                if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
+                            } catch (Exception e) {
+                                rowList.add(0, "必填选项，请添加");
+                                errorList.add(rowList);
+                                return;
                             }
+
+                        }
+                        for (int i = 0; i < rowList.size(); i++) {
                             if (i == 4 || i == 5) {
                                 List<String> users = new ArrayList<>();
                                 try {
-                                    users = Arrays.asList(rowList.get(i).toString().trim().split(","));
+                                    String[] split = rowList.get(i).toString().trim().split(",");
+                                    for (int y = 0; y < split.length; y++) {
+                                        if(!StrUtil.isEmpty(split[y])){
+                                            users.add(split[y]);
+                                        }
+                                    }
                                 } catch (NullPointerException e) {
+                                    continue;
                                 }
                                 if (users.size() > 0) {
                                     List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                    if (users.size() == 0) {
+                                    if (userIds.size() == 0) {
                                         rowList.add(0, "该人员不存在");
                                         errorList.add(rowList);
                                         return;
@@ -530,27 +601,34 @@ public class CrmExcelUtil {
                         }
 
                         workProduct.setProductName(rowList.get(1).toString().trim());
+                        workProduct.setProductNumber(rowList.get(0).toString().trim());
                         workProduct.setProductVersion(rowList.get(2).toString().trim());
                         workProduct.setProductType(rowList.get(3).toString().trim());
                         workProduct.setMainUserId(Integer.parseInt(rowList.get(4).toString().trim()));
-                        workProduct.setExploitUserId(Integer.parseInt(rowList.get(5).toString().trim()));
-                        workProduct.setProductStatus(rowList.get(6).toString().trim());
-                        if (!StrUtil.isEmpty(rowList.get(7).toString())) {
-                            try {
-                                workProduct.setReleaseTime(sdf.parse(rowList.get(7).toString().trim()));
-                            } catch (ParseException e) {
-                                rowList.add(0, "时间格式错误");
-                                errorList.add(rowList);
-                                return;
-                            }
+                        if (!StrUtil.isEmpty(rowList.get(5).toString())) {
+                            workProduct.setExploitUserId(Integer.parseInt(rowList.get(5).toString().trim()));
                         }
-                        workProduct.setVersionDescribe(rowList.get(8).toString().trim());
+                        workProduct.setProductStatus(rowList.get(6).toString().trim());
+
+                        try {
+                            if (!StrUtil.isEmpty(rowList.get(7).toString())) {
+                                try {
+                                    workProduct.setReleaseTime(sdf.parse(rowList.get(7).toString().trim()));
+                                } catch (ParseException e) {
+                                    rowList.add(0, "时间格式错误");
+                                    errorList.add(rowList);
+                                    return;
+                                }
+                            }
+                            workProduct.setVersionDescribe(rowList.get(8).toString().trim());
+                        } catch (IndexOutOfBoundsException e) {
+                        }
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("entity", workProduct);
                         R r = Aop.get(WorkProductService.class).setWorkProduct(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
+                        } else {
                             rowList.add(0, r.get("code"));
                             errorList.add(rowList);
                             return;
@@ -561,6 +639,7 @@ public class CrmExcelUtil {
                         errorList.add(rowList);
                     }
                 } else if (rowIndex == 1) {
+                    temp = rowList.size();
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
@@ -571,30 +650,47 @@ public class CrmExcelUtil {
         public void resourcesImport() {
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
+
+
                 if (rowIndex > 1) {
+
+                    if (rowList.size() < temp) {
+                        for (int i = rowList.size() - 1; i < temp; i++) {
+                            rowList.add("");
+                        }
+                    }
                     try {
                         WorkResourcesSetting workResourcesSetting = new WorkResourcesSetting();
                         workResourcesSetting.setWorkId(Long.parseLong(workId));
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
 
-                        for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0, 1, 2, 3);
-                            if (integers.contains(i)) {
-                                if (StrUtil.isEmptyIfStr(rowList.get(i))) {
+                        List<Integer> integers = Arrays.asList(0, 1, 2, 3);
+                        for (int i = 0; i < integers.size(); i++) {
+                            try {
+                                if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
+                            } catch (Exception e) {
+                                rowList.add(0, "必填选项，请添加");
+                                errorList.add(rowList);
+                                return;
                             }
+
+                        }
+
+                        for (int i = 0; i < rowList.size(); i++) {
                             if (i == 3) {
                                 List<String> users = new ArrayList<>();
                                 try {
                                     users = Arrays.asList(rowList.get(i).toString().trim().split(","));
                                 } catch (NullPointerException e) {
+                                    continue;
                                 }
                                 if (users.size() > 0) {
                                     List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                    if (users.size() == 0) {
+                                    if (userIds.size() == 0) {
                                         rowList.add(0, "该人员不存在");
                                         errorList.add(rowList);
                                         return;
@@ -629,11 +725,11 @@ public class CrmExcelUtil {
                         }
                         workResourcesSetting.setResourcesStatus(rowList.get(6).toString().trim());
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",workResourcesSetting);
+                        jsonObject.put("entity", workResourcesSetting);
                         R r = Aop.get(WorkResourcesSettingService.class).setResources(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
+                        } else {
                             rowList.add(0, r.get("code"));
                             errorList.add(rowList);
                             return;
@@ -644,6 +740,7 @@ public class CrmExcelUtil {
                         errorList.add(rowList);
                     }
                 } else if (rowIndex == 1) {
+                    temp = rowList.size();
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
@@ -654,31 +751,52 @@ public class CrmExcelUtil {
         private void taskImport() {
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
+
                 if (rowIndex > 1) {
+
+                    if (rowList.size() < temp) {
+                        for (int i = rowList.size() - 1; i < temp; i++) {
+                            rowList.add("");
+                        }
+                    }
                     try {
 
                         Task task = new Task();
                         task.setWorkId(Long.parseLong(workId));
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
 
-                        for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0,1,2 ,3,  6, 7, 10, 11, 12);
-                            if (integers.contains(i)) {
-                                if (StrUtil.isEmptyIfStr(rowList.get(i))) {
+                        List<Integer> integers = Arrays.asList(0,3,4,5,6,7,8,10,11,12);
+                        for (int i = 0; i < integers.size(); i++) {
+                            try {
+                                if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
+                            } catch (Exception e) {
+                                rowList.add(0, "必填选项，请添加");
+                                errorList.add(rowList);
+                                return;
                             }
+
+                        }
+
+                        for (int i = 0; i < rowList.size(); i++) {
                             if (i == 8 || i == 9) {
                                 List<String> users = new ArrayList<>();
                                 try {
-                                    users = Arrays.asList(rowList.get(i).toString().trim().split(","));
+                                    String[] split = rowList.get(i).toString().trim().split(",");
+                                    for (int y = 0; y < split.length; y++) {
+                                        if(!StrUtil.isEmpty(split[y])){
+                                            users.add(split[y]);
+                                        }
+                                    }
                                 } catch (NullPointerException e) {
+                                    continue;
                                 }
                                 if (users.size() > 0) {
                                     List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                    if (users.size() == 0) {
+                                    if (userIds.size() == 0) {
                                         rowList.add(0, "该人员不存在");
                                         errorList.add(rowList);
                                         return;
@@ -695,10 +813,10 @@ public class CrmExcelUtil {
                             errorList.add(rowList);
                             return;
                         }
-                        task.setWorkId(workId);
+                        task.setWorkId(Long.parseLong(this.workId));
 
                         if (!StrUtil.isEmpty(rowList.get(1).toString().trim())) {
-                            Integer taskId = Db.queryInt("select task_id from 72crm_task where task_num=?", rowList.get(1).toString().trim());
+                            Integer taskId = Db.queryInt("select task_id from 72crm_task where task_num=? and work_id=?", rowList.get(1).toString().trim(),this.workId);
                             if (taskId == null) {
                                 rowList.add(0, "该任务不存在");
                                 errorList.add(rowList);
@@ -715,7 +833,7 @@ public class CrmExcelUtil {
                             task.setTaskNum(rowList.get(2).toString().trim());
                         }
 
-                        Long milestoneId = Db.queryLong("select milestone_id from 72crm_milestone where milestone_num=?", rowList.get(3).toString().trim());
+                        Long milestoneId = Db.queryLong("select milestone_id from 72crm_milestone where milestone_num=? and work_id=?", rowList.get(3).toString().trim(),this.workId);
                         if (milestoneId == null) {
                             rowList.add(0, "该里程碑不存在");
                             errorList.add(rowList);
@@ -732,7 +850,7 @@ public class CrmExcelUtil {
                         task.setPriority(rowList.get(10).toString().trim());
                         task.setDifficulty(rowList.get(11).toString().trim());
                         task.setDegree(rowList.get(12).toString().trim());
-                        if(StrUtil.isEmpty(rowList.get(13).toString())){
+                        if (!StrUtil.isEmpty(rowList.get(13).toString())) {
                             try {
                                 task.setStartTime(sdf.parse(rowList.get(13).toString().trim()));
                             } catch (ParseException e) {
@@ -741,7 +859,7 @@ public class CrmExcelUtil {
                                 return;
                             }
                         }
-                        if(StrUtil.isEmpty(rowList.get(14).toString())){
+                        if (!StrUtil.isEmpty(rowList.get(14).toString())) {
                             try {
                                 task.setEndTime(sdf.parse(rowList.get(14).toString().trim()));
                             } catch (ParseException e) {
@@ -754,11 +872,11 @@ public class CrmExcelUtil {
                         task.setCreateTime(new Date());
                         task.setCreateUserId(BaseUtil.getUserId());
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",task);
+                        jsonObject.put("entity", task);
                         R r = Aop.get(TaskService.class).setTask(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
+                        } else {
                             rowList.add(0, r.get("code"));
                             errorList.add(rowList);
                             return;
@@ -770,46 +888,70 @@ public class CrmExcelUtil {
                         errorList.add(rowList);
                     }
                 } else if (rowIndex == 1) {
+                    temp = rowList.size();
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
                 }
             });
         }
-
+        Integer temp =0 ;
         private void riskImport() {
+
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
                 System.out.println(rowIndex);
+
                 if (rowIndex > 1) {
+
+                    if (rowList.size() < temp) {
+                        for (int i = rowList.size() - 1; i < temp; i++) {
+                            rowList.add("");
+                        }
+                    }
 
                     try {
                         WorkRisk workRisk = new WorkRisk();
                         workRisk.setWorkId(Long.parseLong(workId));
-                        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm");
+                        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
                         String found = null;
                         String tracking = null;
                         String solve = null;
-                        for (int i = 0; i < rowList.size(); i++) {
-                            List<Integer> integers = Arrays.asList(0,1,2,3,4,5,6,7,8,9,10);
-                            if (integers.contains(i)) {
-                                if (StrUtil.isEmptyIfStr(rowList.get(i))) {
+
+                        List<Integer> integers = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+                        for (int i = 0; i < integers.size(); i++) {
+                            try {
+                                if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
                                     rowList.add(0, "必填选项，请添加");
                                     errorList.add(rowList);
                                     return;
                                 }
+                            } catch (Exception e) {
+                                rowList.add(0, "必填选项，请添加");
+                                errorList.add(rowList);
+                                return;
                             }
+
+                        }
+
+                        for (int i = 0; i < rowList.size(); i++) {
 
                             if (i == 5 || i == 7 || i == 11) {
                                 if (!StrUtil.isEmptyIfStr(rowList.get(i))) {
                                     List<String> users = new ArrayList<>();
                                     try {
-                                        users = Arrays.asList(rowList.get(i).toString().trim().split(","));
+                                        String[] split = rowList.get(i).toString().trim().split(",");
+                                        for (int y = 0; y < split.length; y++) {
+                                            if(!StrUtil.isEmpty(split[y])){
+                                                users.add(split[y]);
+                                            }
+                                        }
                                     } catch (NullPointerException e) {
+                                        continue;
                                     }
                                     if (users.size() > 0) {
                                         List<Integer> userIds = Db.template("admin.user.queryCountByNames", Kv.by("names", users)).query();
-                                        if (users.size() == 0) {
+                                        if (userIds.size() == 0) {
                                             rowList.add(0, "该人员不存在");
                                             errorList.add(rowList);
                                             return;
@@ -817,21 +959,6 @@ public class CrmExcelUtil {
                                         String s = userIds.toString();
                                         rowList.set(i, s.substring(1, s.length() - 1));
 
-                                        StringBuilder stringBuilder = new StringBuilder();
-                                        workRisk.setFoundUserId(userIds.stream().map((user) -> {
-                                            return stringBuilder.append(userIds + ",");
-                                        }).toString());
-                                        switch (i) {
-                                            case 5:
-                                                found = stringBuilder.toString();
-                                                break;
-                                            case 7:
-                                                tracking = stringBuilder.toString();
-                                                break;
-                                            case 11:
-                                                solve = stringBuilder.toString();
-                                                break;
-                                        }
                                     }
                                 }
                             }
@@ -843,30 +970,30 @@ public class CrmExcelUtil {
                         workRisk.setRiskType(rowList.get(3).toString().trim());
                         workRisk.setRiskLevel(rowList.get(4).toString().trim());
 
-                        workRisk.setFoundUserId(found);
+                        workRisk.setFoundUserId(rowList.get(5).toString().trim());
 
                         try {
                             Object date = rowList.get(6);
                             Date startTime = sdf.parse((String) date);
-                            workRisk.setSolveTime(startTime);
+                            workRisk.setFoundTime(startTime);
                         } catch (Exception e) {
                             rowList.add(0, "日期格式错误");
                             errorList.add(rowList);
                             return;
                         }
-                        workRisk.setTrackingUserId(tracking);
+                        workRisk.setTrackingUserId(rowList.get(7).toString().trim());
 
                         workRisk.setDetailed(rowList.get(8).toString().trim());
                         workRisk.setScope(rowList.get(9).toString().trim());
                         workRisk.setSolveAdvice(rowList.get(10).toString().trim());
 
-                        workRisk.setSolveUserId(solve);
+                        workRisk.setSolveUserId(rowList.get(11).toString().trim());
                         try {
-                            Object time = rowList.get(12);
-                            if (time != null) {
+                            String time = rowList.get(12).toString();
+                            if (!StrUtil.isEmpty(time)) {
                                 Object date = rowList.get(12);
                                 Date startTime = sdf.parse((String) date);
-                                workRisk.setFoundTime(startTime);
+                                workRisk.setSolveTime(startTime);
                             }
                         } catch (Exception e) {
                             rowList.add(0, "日期格式错误");
@@ -876,12 +1003,12 @@ public class CrmExcelUtil {
                         workRisk.setRiskStatus(rowList.get(13).toString().trim());
                         workRisk.setCreateTime(new Date());
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("entity",workRisk);
+                        jsonObject.put("entity", workRisk);
                         R r = Aop.get(WorkRiskService.class).setRisk(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
-                            rowList.add(0, r.get("code"));
+                        } else {
+                            rowList.add(0, r.get("msg"));
                             errorList.add(rowList);
                             return;
                         }
@@ -891,6 +1018,7 @@ public class CrmExcelUtil {
                         errorList.add(rowList);
                     }
                 } else if (rowIndex == 1) {
+                    temp = rowList.size();
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
@@ -1001,7 +1129,7 @@ public class CrmExcelUtil {
                         R r = Aop.get(WorkService.class).setWork(jsonObject);
                         if ((int) r.get("code") == 0) {
                             updateNum++;
-                        }else {
+                        } else {
                             rowList.add(0, r.get("code"));
                             errorList.add(rowList);
                             return;
@@ -1023,6 +1151,73 @@ public class CrmExcelUtil {
         private void demandImport() {
             ExcelUtil.readBySax(filePath, 0, (int sheetIndex, int rowIndex, List<Object> rowList) -> {
                 num++;
+                if (rowList.size() < kv.entrySet().size()) {
+                    for (int i = rowList.size() - 1; i < kv.entrySet().size(); i++) {
+                        rowList.add("");
+                    }
+                }
+                System.out.println(rowIndex);
+                if (rowIndex > 1) {
+                    WorkRisk workRisk = new WorkRisk();
+                    workRisk.setWorkId(Long.parseLong(workId));
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
+                    String found = null;
+                    String tracking = null;
+                    String solve = null;
+
+                        try {
+                            List<Integer> integers = Arrays.asList(0, 1, 2, 4, 9);
+                            for (int i = 0; i < integers.size(); i++) {
+                                try {
+                                    if (StrUtil.isEmptyIfStr(rowList.get(integers.get(i)))) {
+                                        rowList.add(0, "必填选项，请添加");
+                                        errorList.add(rowList);
+                                        return;
+                                    }
+                                } catch (Exception e) {
+                                    rowList.add(0, "必填选项，请添加");
+                                    errorList.add(rowList);
+                                    return;
+                                }
+
+                            }
+
+                            WorkDemand workDemand = new WorkDemand();
+                            workDemand.setWorkId(Integer.parseInt(workId));
+                            workDemand.setSubsystem(rowList.get(0).toString().trim());
+                            workDemand.setChildModule(rowList.get(1).toString().trim());
+                            workDemand.setFunction1(rowList.get(2).toString().trim());
+                            workDemand.setFunction2(rowList.get(3).toString().trim());
+                            workDemand.setDemandDescribe(rowList.get(4).toString().trim());
+                            workDemand.setDemandStatus(rowList.get(5).toString().trim());
+                            workDemand.setDemandVersion(rowList.get(6).toString().trim());
+                            workDemand.setPlan(rowList.get(7).toString().trim());
+                            workDemand.setDemandNumber(rowList.get(8).toString().trim());
+                            workDemand.setDemandType(rowList.get(9).toString().trim());
+
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("entity", workDemand);
+                            R r = Aop.get(WorkDemandService.class).setDemand(jsonObject);
+                            if ((int) r.get("code") == 0) {
+                                updateNum++;
+                            } else {
+                                rowList.add(0, r.get("code"));
+                                errorList.add(rowList);
+                                return;
+                            }
+                        } catch (Exception e) {
+                            Log.getLog(getClass()).error("导入数据异常:", e);
+                            rowList.add(0, "导入异常");
+                            errorList.add(rowList);
+                        }
+
+
+                } else if (rowIndex == 1) {
+                    queryExcelHead(rowList);
+                } else {
+                    errorList.add(0, rowList);
+                }
+                /*num++;
                 if (rowIndex > 1) {
                     try {
                         WorkDemand workDemand = new WorkDemand();
@@ -1062,9 +1257,17 @@ public class CrmExcelUtil {
                             errorList.add(rowList);
                             return;
                         }
+
                         workDemand.setDemandType(rowList.get(9).toString().trim());
-                        if (workDemand.save()) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("entity", workDemand);
+                        R r = Aop.get(WorkDemandService.class).setDemand(jsonObject);
+                        if ((int) r.get("code") == 0) {
                             updateNum++;
+                        }else {
+                            rowList.add(0, r.get("code"));
+                            errorList.add(rowList);
+                            return;
                         }
 
                     } catch (NumberFormatException e) {
@@ -1076,7 +1279,7 @@ public class CrmExcelUtil {
                     queryExcelHead(rowList);
                 } else {
                     errorList.add(0, rowList);
-                }
+                }*/
             });
         }
 

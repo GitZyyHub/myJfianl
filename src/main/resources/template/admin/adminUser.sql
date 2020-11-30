@@ -48,9 +48,12 @@
     #sql("queryUserList")
 
     select
-        a.job_number,a.rank,a.condition,
+        a.job_number,a.rank,
+        a.`condition`,
         (select name from 72crm_admin_dept where dept_id = a.area) area,
-        a.realname,a.username,a.user_id,a.sex,a.mobile,a.email,e.name as deptName,a.status,a.create_time,a.dept_id,
+        a.realname,a.username,a.user_id,
+        a.sex,
+        a.mobile,a.email,e.name as deptName,a.status,a.create_time,a.dept_id,
         a.post,a.parent_id,a.img,
         (select b.realname from 72crm_admin_user b where b.user_id = a.parent_id) as parentName,
         a.post,a.parent_id,a.img,
@@ -83,13 +86,10 @@
           and g.role_id = #para(roleId)
         #end
         #if(isResources)
-            and is_resources=#para(isResources)
-        #end
-        #if(workId)
-            and work_id=#para(workId)
+            and user_id in (select user_id from 72crm_work_user where work_id=#para(workId))
         #end
         #if(search)
-          and (a.realname like concat('%', #para(search), '%')
+          and (a.realname like concat('%', #para(search), '%') or job_number like concat('%', #para(search), '%')
           #if(pinyinSearch)
             or (
             #for(str : pinyinSearch)
@@ -104,6 +104,14 @@
         #end
         #(conditions)
         order by status desc
+        #if(sort)
+            #if(sort=1)
+            ,realname desc
+            #else
+            ,realname
+            #end
+        #end
+
     #end
     #sql("querySuperior")
       select id,realname from 72crm_admin_user where 1 = 1

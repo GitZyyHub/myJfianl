@@ -56,8 +56,11 @@
             product_status,
             create_time,
             update_time,
+            main_user_id,
             (SELECT realname FROM 72crm_admin_user where user_id=f.main_user_id) main_user_name,
+            exploit_user_id,
             (SELECT realname FROM 72crm_admin_user where user_id=f.exploit_user_id) exploit_user_name,
+            create_user_id,
             (SELECT realname FROM 72crm_admin_user where user_id=f.create_user_id) create_user_name
         FROM 72crm_work_product_function f
         where 1=1

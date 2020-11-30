@@ -50,7 +50,7 @@ public enum AdminMessageEnum {
 
 
 
-    CRM_PRODUCT_IMPORT(38,6,"导入项目通知"),
+    CRM_WORK(38,6,"导入项目通知"),
     CRM_DEMAND_IMPORT(39,6,"导入需求通知"),
     WORK_RISK_IMPORT(40,6,"导入风险通知"),
     WORK_TASK_IMPORT(41,6,"导入任务通知"),

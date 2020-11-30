@@ -208,9 +208,9 @@ public class AdminRoleService {
         }
         List<String> moduleName = Db.query("select name from 72crm_admin_config where name in ('taskExamine','crm','project','log','book','bi','email','card') and status = 0");
         String startCalendarModule = Db.queryStr("select name from 72crm_admin_config where name = 'calendar' and status = 1");
-        if (!jsonObject.containsKey("project")) {
+        /*if (!jsonObject.containsKey("project")) {
             jsonObject.put("project", new Object());
-        }
+        }*/
         if (!jsonObject.containsKey("oa")) {
             jsonObject.put("oa", new Object());
         }

@@ -119,7 +119,6 @@ public class AdminFieldService {
                     record = workDemandService.queryById(id);
                 } else if (CrmEnum.PRODUCT.equals(crmEnum)) {
                     record = workProductService.queryById(id);
-                    workDemandService.setRecord(record, id);
                 } else if (CrmEnum.PRODUCT_FUNCTIONE.equals(crmEnum)) {
                     record = workProductFuntionService.queryById(id);
                 } else if (CrmEnum.TASK_HOURS.equals(crmEnum)) {
@@ -207,7 +206,12 @@ public class AdminFieldService {
      */
     @Before(Tx.class)
     public R updateInformation(JSONObject jsonObject) {
+
         Integer id = jsonObject.getInteger("id");
+        Record firsts = Db.findFirst(Db.getSql("work.queryWorkById"),id);
+        if ("结项".equals(firsts.getStr("work_phase"))) {
+            return R.error("当前项目阶段为结项，如果需要修改信息请先修改项目阶段！");
+        }
         String batchId = jsonObject.getString("batchId");
         Integer label = jsonObject.getInteger("label");
         JSONArray list = jsonObject.getJSONArray("list");
@@ -220,11 +224,11 @@ public class AdminFieldService {
             Object value = field.get("value");
             record.set(fieldName, value);
         }
-        Record first = Db.findFirst(Db.getSql("work.findWorkById"), id);
+        Record first = Db.findFirst(Db.getSql("work.queryWorkById"), id);
         Db.update(parse.getTableName(), parse.getTableId(), record);
-        Record after = Db.findFirst(Db.getSql("work.findWorkById"), id);
+        Record after = Db.findFirst(Db.getSql("work.queryWorkById"), id);
         Work work = Aop.get(Work.class).findById(id);
-        workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK, BehaviorEnum.UPDATE, work.getWorkNum(), after, first, work.getWorkId());
+        workHistoricalRecordService.add(work.getWorkId(), WorkRecordEnum.WORK_DETAILS, BehaviorEnum.UPDATE, work.getWorkNum(), after, first, work.getWorkId());
         return R.ok();
     }
 
@@ -796,7 +800,9 @@ public class AdminFieldService {
             if (CrmEnum.TASK.getType() != adminFieldSort.getLabel() && CrmEnum.CRM_RETURN_VISIT.getType() != adminFieldSort.getLabel()
                     && CrmEnum.DEMAND.getType() != adminFieldSort.getLabel() && CrmEnum.MILESTONE.getType() != adminFieldSort.getLabel()
                     && CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel() && CrmEnum.WORK.getType() != adminFieldSort.getLabel()
-                    && CrmEnum.WORKCONFIG.getType() != adminFieldSort.getLabel()&& CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()) {
+                    && CrmEnum.WORKCONFIG.getType() != adminFieldSort.getLabel()&& CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()
+                    && CrmEnum.PRODUCT.getType() != adminFieldSort.getLabel()&& CrmEnum.PRODUCT_FUNCTIONE.getType() != adminFieldSort.getLabel()
+            ) {
                 fieldUtil.add("ownerUserName", "负责人", 1);
             }
             if (CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()
@@ -854,6 +860,8 @@ public class AdminFieldService {
                     fieldSort.setFieldName("associatedName");
                 } else if ("exploitUserId".equals(fieldSort.getFieldName())) {
                     fieldSort.setFieldName("exploitUserName");
+                } else if ("area".equals(fieldSort.getFieldName())) {
+                    fieldSort.setFieldName("areaName");
                 }
 
             });

@@ -1,5 +1,13 @@
 #namespace("work.task")
 
+    #sql("searchTask")
+        SELECT task_id from 72crm_task WHERE task_name like concat('%',#para(val),'%')
+    #end
+
+    #sql("searchSubTask")
+        SELECT task_id from 72crm_task WHERE task_name like concat('%',#para(val),'%') and  pid is not null
+    #end
+
     #sql ("advancedSearch")
         select * from (
         SELECT
@@ -24,10 +32,12 @@
             t1.pid,
             t1.owner_user_id,
             (select task_name from 72crm_task where t1.pid=task_id) p_name,
+            work_id,
             (select work_name from 72crm_work where t1.work_id=work_id) work_name,
             (select task_name from 72crm_task where t1.before_id=task_id) before_name,
             (select milestone_name from 72crm_milestone where t1.milestone_id=milestone_id) milestone_name,
             (select realname from 72crm_admin_user where t1.main_user_id=user_id) main_user_name,
+            create_user_id,
             (select realname from 72crm_admin_user where t1.create_user_id=user_id) create_user_name,
             (select check_status from 72crm_task_hours where subtasks_id =t1.task_id) check_status
         FROM
@@ -128,10 +138,12 @@
             t1.pid,
             t1.owner_user_id,
             (select task_name from 72crm_task where t1.pid=task_id) p_name,
+            work_id,
             (select work_name from 72crm_work where t1.work_id=work_id) work_name,
             (select task_name from 72crm_task where t1.before_id=task_id) before_name,
             (select milestone_name from 72crm_milestone where t1.milestone_id=milestone_id) milestone_name,
             (select realname from 72crm_admin_user where t1.main_user_id=user_id) main_user_name,
+            create_user_id,
             (select realname from 72crm_admin_user where t1.create_user_id=user_id) create_user_name
         FROM
             72crm_task AS t1 where 1=1
@@ -159,6 +171,9 @@
         #end
         #if(dataAuth)
             and task_id in (#fori(dataAuth))
+        #end
+        #if(workId)
+            and work_id=#para(workId)
         #end
         #if(isWaiting)
             and (status!='已完成' or completeness!=100)
@@ -204,7 +219,8 @@
             (select check_status from 72crm_task_hours where subtasks_id = t1.task_id) check_status
         FROM
         72crm_task AS t1
-        where task_id in (select subtasks_id from 72crm_task_hours where task_id = ? group by subtasks_id)
+        where task_id in (select subtasks_id from 72crm_task_hours where task_id = #para(pid) group by subtasks_id) and
+        t1.pid=#para(pid)
     #end
 
     #sql ("queryTaskPageListCount")
