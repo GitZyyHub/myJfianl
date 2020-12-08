@@ -54,6 +54,7 @@ public class TaskFileService {
                 try {
                     if (record.getStr("subtasks_id").equals(record.getStr("task_id"))) {
                         record.set("subtasks_name", null);
+                        record.set("subtasks_id", null);
                     }
                 } catch (NullPointerException e) {
                     continue;

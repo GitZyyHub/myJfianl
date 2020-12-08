@@ -172,13 +172,14 @@
           d.task_id,
           (select task_name from 72crm_task where d.task_id=task_id) task_name,
           (select realname from 72crm_admin_user where user_id=d.main_user_id ) main_user_name,
-          (select realname from 72crm_admin_user where user_id=d.main_user_id ) main_user_name,
+          (select realname from 72crm_admin_user where user_id=d.check_user_id ) check_user_name,
           case when d.task_id!=d.subtasks_id then d.subtasks_id end subtasks_id,
           case when d.task_id!=d.subtasks_id then (select task_name from 72crm_task where d.subtasks_id=task_id) end subtasks_name,
           d.start_time,
           d.end_time,
           d.working_hours,
           d.hours_type,
+          d.examine_time,
           d.progress_content
       #else if(categoryType==5)
           w.work_id,
@@ -197,7 +198,8 @@
           w.work_phase,
           w.work_type,
           w.start_time,
-          w.end_time
+          w.end_time,
+          w.update_time
       #end
     FROM
       72crm_admin_examine_log AS e

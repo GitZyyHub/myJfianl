@@ -36,13 +36,13 @@ public abstract class BaseWorkDemandProduct<M extends BaseWorkDemandProduct<M>> 
 		return getInt("product_id");
 	}
 
-	public M setProductPercentage(String productPercentage) {
+	public M setProductPercentage(Long productPercentage) {
 		set("product_percentage", productPercentage);
 		return (M)this;
 	}
 	
-	public String getProductPercentage() {
-		return getStr("product_percentage");
+	public Long getProductPercentage() {
+		return getLong("product_percentage");
 	}
 
 	public M setProductDescribe(String productDescribe) {

@@ -15,6 +15,7 @@ import com.kakarote.crm9.common.constant.BehaviorEnum;
 import com.kakarote.crm9.common.constant.WorkRecordEnum;
 import com.kakarote.crm9.erp.work.common.WorkUserEnum;
 import com.kakarote.crm9.erp.work.entity.WorkRisk;
+import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.text.SimpleDateFormat;
@@ -143,6 +144,7 @@ public class WorkRiskService {
         }
         if (entity.getRiskId() == null) {
             entity.setCreateTime(new Date());
+            entity.setCreateUserId(BaseUtil.getUserId());
             entity.setUpdateTime(new Date());
             entity.save();
             workHistoricalRecordService.add(entity.getWorkId(), WorkRecordEnum.RISK, BehaviorEnum.SAVE, entity.getRiskId(), null, null, entity.getRiskId());

@@ -130,9 +130,6 @@ public class TaskHoursService extends AbstractBasePageList {
                 return R.error("结束时间应大于开始时间");
             }else if((startTime.getTime() - endTime.getTime()) / (24 * 60 * 60 * 1000) > 30){
                 return R.error("开始时间到结束时间不能超过30天");
-            }else{
-                Long i = (endTime.getTime() - startTime.getTime()) / (60 * 60 * 1000);
-                taskHours.setWorkingHours(i);
             }
         }
 

@@ -14,38 +14,98 @@ import com.kakarote.crm9.erp.statistics.entity.WorkParams;
 import com.kakarote.crm9.utils.BaseUtil;
 import net.sf.cglib.asm.$Handle;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.sql.Struct;
+import java.util.*;
 
 /**
  * @author zyy
  */
-public interface StatisticsTypeUtils {
+public class StatisticsTypeUtils {
 
-    public default Record getStatisticsType(WorkParams workParams) {
-        Integer deptId = workParams.getDeptId();
-        List<Integer> deptIds = new ArrayList<>();
-        if (deptId != null) {
-            //获得下级部门
-            deptIds = Aop.get(AdminUserService.class).queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);
-            deptIds.add(deptId);
+    public Record getDpteStatisticsField(WorkParams workParams) {
+        Record record = analyzeTime(workParams);
+        String deptId = workParams.getDeptId();
+        String area = workParams.getArea();
+        List deptIds = new ArrayList<>();
+        if(!StrUtil.isEmpty(deptId) || !StrUtil.isEmpty(area)){
+            //如果筛选
+            List<String> strings ;
+            if(!StrUtil.isEmpty(deptId)){
+                strings = Arrays.asList(deptId.split(","));
+            }else {
+                strings = Arrays.asList(area.split(","));
+            }
+            for (String string : strings) {
+                HashMap<String, Object> map = new HashMap<>();
+                int id = Integer.parseInt(string);
+                List<Integer> integers = Aop.get(AdminUserService.class).queryChileDeptIds(id, BaseConstant.AUTH_DATA_RECURSION_NUM);
+                integers.add(id);
+                map.put("below",integers);
+                map.put("dept",Integer.parseInt(string));
+                deptIds.add(map);
+            }
+            record.set("deptIds",deptIds);
         }else {
+            //默认搜索
             deptIds = Aop.get(AdminUserService.class).queryChileDeptIds(BaseUtil.getDept(), BaseConstant.AUTH_DATA_RECURSION_NUM);
-            deptIds.add(BaseUtil.getDept());
+            List<Record> records = Db.template("statistics.queryDept", Kv.by("deptIds", deptIds)).find();
+            record.set("deptIds", records);
         }
-        List<Integer> adds = new ArrayList<>();
+        record.set("isDept", workParams.getTypeId());
+        return record;
+    }
 
-        List<Integer> records = Db.template("statistics.queryDept", Kv.by("deptIds", deptIds)).query();
-        Record record = new Record();
-        record.set("deptIds", records);
-        record.set("isDept", workParams.getIsDept());
+    public Record getTimeStatisticsField(WorkParams workParams) {
+        Record record = analyzeTime(workParams);
+        Integer cycleNum = record.getInt("cycleNum");
+        Integer beginTime = record.getInt("beginTime");
+        List<Object> timeList = new ArrayList<>();
+        //获得横坐标和查询条件
+        for (int i=1; i <= cycleNum;i++){
+            Map<String, Integer> map = new HashMap<>();
+            map.put("startTime",beginTime);
+            beginTime = estimateTime(beginTime);
+            map.put("endTime",beginTime);
+            timeList.add(map);
+        }
+        record.set("timeList",timeList);
+        return record;
+    }
+    public Record getWorkphaseStatisticsField(WorkParams workParams) {
+        Record record = analyzeTime(workParams);
+        List<String> records = new ArrayList<>();
+        String search = workParams.getSearch();
+        if(!StrUtil.isEmpty(search)){
+            records.add(search);
+        }else {
+            if(workParams.getTypeId() == StatisticsFieldEnum.WORKPHASE.getType()){
+                records = Arrays.asList("项目立项", "需求阶段", "设计阶段", "开发测试", "项目初验", "试运行", "项目终验", "结项");
+            }else if(workParams.getTypeId() == StatisticsFieldEnum.WORKTYPE.getType()){
+                records = Arrays.asList("已结项","未结项");
+            }
+        }
+        record.set("search",records);
+        record.set("type",workParams.getTypeId());
+        return record;
+    }
+
+    public Record getRiskLevelStatisticsField(WorkParams workParams) {
+        Record record = analyzeTime(workParams);
+        List<String> records = new ArrayList<>();
+        String search = workParams.getSearch();
+        if(!StrUtil.isEmpty(search)){
+            records.add(search);
+        }else {
+            records = Arrays.asList("高", "中", "低");
+        }
+        record.set("search",records);
+        record.set("type",workParams.getTypeId());
         return record;
     }
 
 
-    public default Record analyzeTime(WorkParams workParams) {
+
+    public Record analyzeTime(WorkParams workParams) {
         Date beginDate = DateUtil.date();
         Date endDate = DateUtil.date();
         Integer cycleNum = 12;
@@ -138,7 +198,47 @@ public interface StatisticsTypeUtils {
         return new Record().set("sqlDateFormat", sqlDateFormat).set("dateFormat", dateFormat).set("beginDate", beginDate).set("endDate", endDate).set("cycleNum", cycleNum).set("beginTime", beginTime).set("finalTime", finalTime);
     }
 
-    public default Record appendSqlCondition(WorkParams workParams, Record record) {
+    private Integer estimateTime(Integer beginTime){
+        if (beginTime < 1000000 && beginTime%100 == 12){
+            beginTime = beginTime + 89;
+        }else if (beginTime > 1000000){
+            int month = DateUtil.month(DateUtil.parse(beginTime.toString(),"yyyyMMdd"))+1;
+            if (month == 1||month == 3||month == 5||month == 7||month == 8||month == 10){
+                if (beginTime%100 == 31){
+                    beginTime = beginTime + 70;
+                }else {
+                    beginTime++;
+                }
+            }else if (month == 4||month == 6||month == 9||month == 11){
+                if (beginTime%100 == 30){
+                    beginTime = beginTime + 71;
+                }else {
+                    beginTime++;
+                }
+            }else if (month == 2){
+                int year = DateUtil.year(DateUtil.parse(beginTime.toString(),"yyyyMMdd"));
+                if (DateUtil.isLeapYear(year) && beginTime%100 == 29){
+                    beginTime = beginTime + 72;
+                }else if (!DateUtil.isLeapYear(year) && beginTime%100 == 28){
+                    beginTime = beginTime + 73;
+                }else {
+                    beginTime++;
+                }
+            }else if (month == 12){
+                if (beginTime%100 == 31){
+                    beginTime = beginTime + 8870;
+                }else{
+                    beginTime++;
+                }
+            }
+        }else {
+            beginTime++;
+        }
+        return beginTime;
+    }
+
+
+    public Record appendSqlCondition(WorkParams workParams, Record record) {
         JSONObject jsonObject = workParams.getJsonObject();
         Map<String, Object> innerMap = jsonObject.getInnerMap();
         for (Map.Entry<String, Object> entry : innerMap.entrySet()) {
@@ -146,4 +246,7 @@ public interface StatisticsTypeUtils {
         }
         return record;
     }
+
+
+
 }

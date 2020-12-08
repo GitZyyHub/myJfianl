@@ -9,12 +9,14 @@ import org.omg.CORBA.TIMEOUT;
  */
 public enum StatisticsFieldEnum {
 
-    DEPT(1,"区域"),
-    TIME(2,"时间"),
-    WORKPHASE(3,"项目阶段"),
-    WORKTYPE(4,"项目类型"),
+    AREA(1,"区域"),
+    DEPT(2,"部门"),
+    TIME(3,"时间"),
+    WORKPHASE(4,"项目阶段"),
+    WORKTYPE(5,"项目类型"),
+    RISKLEVEL(6,"风险等级"),
 
-    CRM_NULL(0,null);
+    CRM_NULL(0,"全部");
     ;
 
 
@@ -42,5 +44,13 @@ public enum StatisticsFieldEnum {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

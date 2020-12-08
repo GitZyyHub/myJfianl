@@ -1,5 +1,40 @@
 #namespace("work")
 
+    #sql("queryWorkByDept")
+        select
+        work_id,
+        work_num,
+        STATUS,
+        work_name,
+        description,
+        work_phase,
+        work_type,
+        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.dept_id ) dept_id,
+        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.area ) area,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.sales_id ) sales_id,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.manager_id ) manager_id,
+        DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time,
+        DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,
+        examine,
+        solution,
+        risk,
+        unscramble,
+        target,
+        contract_amount,
+        effective_amount,
+        implement_cost,
+        maintenance_cost,
+        budget,
+        practical_cost,
+        customer_name,
+        customer_contact,
+        customer_calls,
+        forecast_work
+        from 72crm_work w where area in (#fori(deptIds)) or dept_id in (#fori(deptIds))
+        and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+        and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+    #end
+
     #sql("queryStructure")
         select column_name,column_comment,data_type from information_schema.columns where table_name=?
     #end

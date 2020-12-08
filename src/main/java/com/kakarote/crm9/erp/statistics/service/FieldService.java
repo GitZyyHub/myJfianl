@@ -11,15 +11,15 @@ public class FieldService {
 
     public R getField(Integer type) {
 
-        if(StatisticsFieldEnum.DEPT.getType() == type){
+        if (StatisticsFieldEnum.DEPT.getType() == type) {
 
-        }else if(StatisticsFieldEnum.TIME.getType() == type){
+        } else if (StatisticsFieldEnum.TIME.getType() == type) {
 
-        }else if(StatisticsFieldEnum.WORKPHASE.getType() == type){
+        } else if (StatisticsFieldEnum.WORKPHASE.getType() == type) {
 
-        }else if(StatisticsFieldEnum.WORKTYPE.getType() == type){
+        } else if (StatisticsFieldEnum.WORKTYPE.getType() == type) {
 
-        }else {
+        } else {
 
         }
         return R.ok();

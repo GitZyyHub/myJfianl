@@ -7,7 +7,7 @@ public enum CrmEnum {
     WORK("work", 19, "项目", "72crm_work", "work_id", null, "work_num"),
     MILESTONE("milestone", 20, "里程碑", "72crm_milestone", "milestone_id", null, "milestone_num"),
     TASK("task",21,"任务","72crm_task","task_id",null,"task_num"),
-    SUBTASKS("task",29,"子任务","72crm_task","task_id",null,null),
+    SUBTASKS("task",29,"子任务","72crm_task","task_id",null,"task_num"),
     RISK("risk",22,"风险","72crm_work_risk","risk_id",null,null),
     PRODUCT("work_product",23,"产品","72crm_work_product","product_id",null,"product_number"),
     DEMAND("work_demand",24,"需求","72crm_work_risk","demand_id",null,null),

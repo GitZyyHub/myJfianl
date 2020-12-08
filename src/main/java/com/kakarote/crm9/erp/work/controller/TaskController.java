@@ -284,7 +284,7 @@ public class TaskController extends Controller {
     /**
      * 设置任务(添加/编辑)!!!
      */
-    @Permissions({"project:subtasks:save","project:subtasks:update"})
+    @Permissions({"project:subtasks:save","project:subtasks:update","project:task:createSubtasks"})
     public void setSubtasks(){
         JSONObject jsonObject = JSONObject.parseObject(getRawData());
         renderJson(taskService.setTask(jsonObject));
@@ -306,8 +306,56 @@ public class TaskController extends Controller {
     }
 
     @Permissions({"project:subtasks:excelexport"})
-    public void subtasksExport(@Para("taskIds") String taskIds){
-        List<String> strings = null;
+    public void subtasksExport(BasePageRequest<Work> basePageRequest){
+        JSONObject json = basePageRequest.getJsonObject();
+        json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.TASK.getType());
+        try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
+            JSONObject jsonObject ;
+            if(json.get("isWaiting")!=null||json.get("userId")!=null){
+                jsonObject = (JSONObject)taskService.waiting(basePageRequest, false).get("data");
+            }else {
+                jsonObject = (JSONObject)taskService.queryPageList(basePageRequest, false).get("data");
+            }
+            List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);
+            List<Map<String, Object>> list = new ArrayList<>();
+            String[] s = new String[]{"create_user_id","work_id","batch_id","task_id","before_id","main_user_id","milestone_id","owner_user_id","p_name","pid","subtasks_name","subtasks_id","check_status"};
+            for (Record record : records) {
+                record.remove(s);
+                list.add(record.getColumns());
+            }
+            List<Record> headList = Aop.get(AdminFieldService.class).queryListHead(new AdminFieldSort().setLabel(CrmEnum.TASK.getType()));
+
+            headList.forEach(head -> {
+                if (!Objects.equals(head.getStr("fieldName"), head.getStr("name"))) {
+                    writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("fieldName")), head.getStr("name"));
+                } else {
+                    writer.addHeaderAlias(head.getStr("fieldName"), head.getStr("name"));
+                }
+            });
+            writer.write(list, true);
+            writer.setRowHeight(0, 20);
+            writer.setRowHeight(1, 20);
+
+            for (int i = 0; i < headList.size(); i++) {
+                writer.setColumnWidth(i, 25);
+            }
+
+            HttpServletResponse response = getResponse();
+
+            response.setCharacterEncoding("UTF-8");
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=task.xls");
+
+            ServletOutputStream out = response.getOutputStream();
+            writer.flush(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        renderNull();
+        /*List<String> strings = null;
         if(!StrUtil.isEmpty(taskIds)){
             strings = Arrays.asList(taskIds.split(","));
         }
@@ -351,6 +399,6 @@ public class TaskController extends Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        renderNull();
+        renderNull();*/
     }
 }

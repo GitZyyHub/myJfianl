@@ -105,7 +105,7 @@
         #(conditions)
         order by status desc
         #if(sort)
-            #if(sort=1)
+            #if(sort==1)
             ,realname desc
             #else
             ,realname
@@ -221,7 +221,8 @@
     #end
     #sql("queryUserInfo")
       SELECT
-        a.realname,a.img,c.`name` as dept_name,a.post,a.mobile,a.email,a.sex
+        a.realname,a.img,c.`name` as dept_name,a.post,a.mobile,a.email,a.sex,a.job_number,a.condition,a.status,a.rank,
+        (select `name` from 72crm_admin_dept where dept_id=a.area) area
       FROM
         72crm_admin_user as a
       LEFT JOIN 72crm_admin_dept as c on a.dept_id=c.dept_id

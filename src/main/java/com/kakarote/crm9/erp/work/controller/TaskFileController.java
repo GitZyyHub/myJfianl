@@ -122,7 +122,7 @@ public class TaskFileController extends Controller {
      */
     public void export(BasePageRequest basePageRequest){
         JSONObject json = basePageRequest.getJsonObject();
-        json.fluentPut("excel", "yes").fluentPut("type", CrmEnum.WORK.getType());
+        json.fluentPut("excel", "yes");
         try (ExcelWriter writer = ExcelUtil.getWriter(true)) {
             JSONObject jsonObject = (JSONObject)taskFileService.queryPageList(basePageRequest).get("data");
             List<Record> records = jsonObject.getJSONArray("list").toJavaList(Record.class);

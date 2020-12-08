@@ -36,4 +36,13 @@ public abstract class BaseTaskHoursLock<M extends BaseTaskHoursLock<M>> extends 
 		return get("create_time");
 	}
 
+	public M setLockIn(java.util.Date lockIn) {
+		set("lock_in", lockIn);
+		return (M)this;
+	}
+
+	public java.util.Date getLockIn() {
+		return get("lock_in");
+	}
+
 }

@@ -157,7 +157,7 @@
             and work_id=#para(workId)
         #end
         #if(isWaiting)
-            and (status!='已完成' or completeness!=100)
+            and status!='已完成'
         #end
         ORDER BY CONVERT(`#(orderByKey)` using gbk) #(orderByType)
     #end
@@ -294,7 +294,7 @@
     #end
 
     #sql("findOwnerUser")
-        select user_id,realname from 72crm_admin_user where user_id in (select user_id from 72crm_work_user_record where num_id=? and type=1)
+        select user_id,realname from 72crm_admin_user where user_id in (select user_id from 72crm_work_user_record where num_id=? and type=1 and role_id=1)
     #end
 
     #sql ("queryTaskByIdExport")
@@ -368,7 +368,7 @@
 
 
     #sql("queryTaskHoursLockPageList")
-        select * from 72crm_task_hours_lock
+        select id,lock_time,create_time,DATE_FORMAT( lock_in, '%Y-%m' ) lock_in from 72crm_task_hours_lock
     #end
 
 

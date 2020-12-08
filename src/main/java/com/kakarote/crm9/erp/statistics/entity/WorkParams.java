@@ -6,13 +6,15 @@ import com.alibaba.fastjson.JSONObject;
  * @author wyq
  */
 public class WorkParams {
-    private Integer deptId;
-    private Integer area;
+    private String deptId;
+    private String area;
     private String type;
+    private String search;
     private String startTime;
     private String endTime;
-    private Integer isDept;//0 区域 1 员工
+    private Integer isDept;//0 区域 1 部门
     private Integer typeId;
+    private Integer rate;
     private JSONObject jsonObject;
 
     public JSONObject getJsonObject() {
@@ -23,11 +25,11 @@ public class WorkParams {
         this.jsonObject = jsonObject;
     }
 
-    public Integer getArea() {
+    public String getArea() {
         return area;
     }
 
-    public void setArea(Integer area) {
+    public void setArea(String area) {
         this.area = area;
     }
 
@@ -39,11 +41,19 @@ public class WorkParams {
         this.isDept = isDept;
     }
 
-    public Integer getDeptId() {
+    public String getDeptId() {
         return deptId;
     }
 
-    public void setDeptId(Integer deptId) {
+    public Integer getRate() {
+        return rate;
+    }
+
+    public void setRate(Integer rate) {
+        this.rate = rate;
+    }
+
+    public void setDeptId(String deptId) {
         this.deptId = deptId;
     }
 
@@ -53,6 +63,14 @@ public class WorkParams {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getSearch() {
+        return search;
+    }
+
+    public void setSearch(String search) {
+        this.search = search;
     }
 
     public String getStartTime() {

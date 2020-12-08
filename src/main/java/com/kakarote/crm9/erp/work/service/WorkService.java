@@ -24,6 +24,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.common.constant.BehaviorEnum;
 import com.kakarote.crm9.common.constant.WorkRecordEnum;
 import com.kakarote.crm9.common.enums.FieldTypeEnum;
@@ -32,8 +33,11 @@ import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
+import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomerData;
+import com.kakarote.crm9.erp.statistics.common.StatisticsTypeUtils;
+import com.kakarote.crm9.erp.statistics.entity.WorkParams;
 import com.kakarote.crm9.erp.work.common.WorkAuthVerify;
 import com.kakarote.crm9.erp.work.common.WorkPermissions;
 import com.kakarote.crm9.erp.work.common.WorkRendAuthEnum;
@@ -71,6 +75,8 @@ public class WorkService extends AbstractBasePageList {
     @Inject
     WorkAuthVerify workAuthVerify;
 
+    @Inject
+    StatisticsTypeUtils statisticsTypeUtils;
 
     /**
      * 查询项目
@@ -182,8 +188,11 @@ public class WorkService extends AbstractBasePageList {
                 return R.error("当前项目阶段为结项，如果需要修改信息请先修改项目阶段！");
             }
             Work w = Work.dao.findById(work.getWorkId());
-            if (w.getCheckStatus() == 0) {
-                return R.error("当前项目正在审核不允许修改");
+            try {
+                if (w.getCheckStatus() == 0) {
+                    return R.error("当前项目正在审核不允许修改");
+                }
+            } catch (NullPointerException e) {
             }
             temp = true;
             work.update();
@@ -551,10 +560,14 @@ public class WorkService extends AbstractBasePageList {
         List<String> name = Arrays.asList("项目名称", "立项评审", "项目类型", "方案对标", "风险", "合同解读", "目标", "合同金额", "有效金额", "实施成本", "运维成本", "预算", "实际成本", "客户名称", "客户联系人", "客户联系电话", "预估工作量（人/时）");
         List<String> fieldName = Arrays.asList("work_name", "examine", "work_type", "solution", "risk", "unscramble", "target", "contract_amount", "effective_amount", "implement_cost", "maintenance_cost", "budget", "practical_cost", "customer_name", "customer_contact", "customer_calls", "forecast_work");
         List<Record> fields = adminFieldService.getFields(CrmEnum.WORK.getType(), id);
+        Record temporary = new Record();
         for (Record field : fields) {
             String field_name = field.getStr("field_name");
-            if ("area".equals(field_name) || "deptId".equals(field_name)) {
+            if ("area".equals(field_name) || "deptId".equals(field_name)|| "workName".equals(field_name)|| "workType".equals(field_name)) {
                 field.set("authLevel", 2);
+            }
+            if("workType".equals(field_name)){
+                temporary = field;
             }
         }
         Record first = Db.findFirst(Db.getSql("work.queryWorkExtensionById"), id);
@@ -562,11 +575,18 @@ public class WorkService extends AbstractBasePageList {
             Record record = new Record();
             int temp;
             if ((temp = fieldName.indexOf(entry.getKey())) >= 0) {
+
                 record.set("authLevel", 3).set("sysInformation", 2).set("fieldName", entry.getKey()).set("name", name.get(temp)).set("value", entry.getValue())
-                        .set("formType", "text").set("isNull", 1).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
+                        .set("formType", "text").set("isNull", 0).set("isUnique", 0).set("remark", null).set("inputTips", null).set("defaultValue", null)
                         .set("label", CrmEnum.WORK.getType()).set("type", 1).set("sorting", temp).set("options", null).set("fieldType", 1);
-                if ("实施成本".equals(name.get(temp)) || "实际成本".equals(name.get(temp)) || "预算".equals(name.get(temp)) || "有效金额".equals(name.get(temp)) || "合同金额".equals(name.get(temp)) || "预估工作量（人/时）".equals(name.get(temp))) {
+                if ("实施成本".equals(name.get(temp)) || "实际成本".equals(name.get(temp)) || "预算".equals(name.get(temp)) || "有效金额".equals(name.get(temp)) || "合同金额".equals(name.get(temp)) || "预估工作量（人/时）".equals(name.get(temp))|| "运维成本".equals(name.get(temp))) {
                     record.set("formType", "number");
+                }
+                if("项目名称".equals(name.get(temp)) || "项目类型".equals(name.get(temp))){
+                    record.set("isNull", 1);
+                }
+                if("项目类型".equals(name.get(temp))){
+                    record.set("formType","select").set("options",temporary.get("options")).set("setting",temporary.get("setting")).set("value",temporary.get("value"));
                 }
             }
             fields.add(record);
@@ -705,5 +725,19 @@ public class WorkService extends AbstractBasePageList {
             }
         }
         return setLabel(workId, stringBuffer.toString());
+    }
+
+    public R queryWorkByArea(BasePageRequest basePageRequest) {
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        WorkParams workParams = new WorkParams();
+        workParams.setStartTime(jsonObject.getString("startTime"));
+        workParams.setEndTime(jsonObject.getString("endTime"));
+        Record record = statisticsTypeUtils.analyzeTime(workParams);
+        Integer deptId = jsonObject.getInteger("deptId");
+        List<Integer> integers = Aop.get(AdminUserService.class).queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);
+        integers.add(deptId);
+        record.set("deptIds", integers);
+        Page<Record> deptIds = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.queryWorkByDept", record));
+        return R.ok().put("data",deptIds);
     }
 }

@@ -224,7 +224,7 @@ public class AdminExamineRecordService {
                 Db.update(Db.getSql("crm.invoice.updateCheckStatusById"), status, id);
             }else if(examine.getCategoryType() == 4){
                 //工时
-                Db.update(Db.getSql("task.hours.updateCheckStatusById"), status, id);
+                Db.update(Db.getSql("task.hours.updateCheckStatusById"), BaseUtil.getUserId(),status, id);
             }else if(examine.getCategoryType() == 5){
                 //结项
                 Db.update(Db.getSql("work.updateCheckStatusById"), status, id);
@@ -277,7 +277,7 @@ public class AdminExamineRecordService {
                     return R.error("该工时已审核通过，不能撤回！");
                 }
                 //工时
-                Db.update(Db.getSql("task.hours.updateCheckStatusById"), 4, id);
+                Db.update(Db.getSql("task.hours.updateCheckStatusById"), BaseUtil.getUserId(),4, id);
             }else if(examine.getCategoryType() == 5){
                 Work work = Work.dao.findById(id);
                 if(work.getCheckStatus() == 1){
@@ -334,7 +334,7 @@ public class AdminExamineRecordService {
                             Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
                         }else if(examine.getCategoryType() == 4){
                             //工时
-                            Db.update(Db.getSql("task.hours.updateCheckStatusById"), 3, id);
+                            Db.update(Db.getSql("task.hours.updateCheckStatusById"), BaseUtil.getUserId(),3, id);
                         }else if(examine.getCategoryType() == 5){
                             //结项
                             Db.update(Db.getSql("work.updateCheckStatusById"), 3, id);
@@ -434,7 +434,7 @@ public class AdminExamineRecordService {
                             Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
                         }else if(examine.getCategoryType() == 4){
                             //工时
-                            Db.update(Db.getSql("task.hours.updateCheckStatusById"), 3, id);
+                            Db.update(Db.getSql("task.hours.updateCheckStatusById"),BaseUtil.getUserId(), 3, id);
                         }else if(examine.getCategoryType() == 5){
                             //结项
                             Db.update(Db.getSql("work.updateCheckStatusById"), 3, id);
@@ -495,7 +495,7 @@ public class AdminExamineRecordService {
                         Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
                     }else if(examine.getCategoryType() == 4){
                         //工时
-                        Db.update(Db.getSql("task.hours.updateCheckStatusById"), 3, id);
+                        Db.update(Db.getSql("task.hours.updateCheckStatusById"),BaseUtil.getUserId(), 3, id);
                     }else if(examine.getCategoryType() == 5){
                         //结项
                         Db.update(Db.getSql("work.updateCheckStatusById"), 3, id);

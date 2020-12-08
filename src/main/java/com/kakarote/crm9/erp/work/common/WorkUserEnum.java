@@ -17,7 +17,7 @@ public enum  WorkUserEnum {
     TASKCONFIG(10,"配置计划"),
     HOURS(11,"工时"),
     RISK(12,"风险"),
-
+    TASK_O(13,"任务"),
     ;
 
     private Integer type;

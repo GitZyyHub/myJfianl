@@ -211,7 +211,7 @@ public class WorkDemandService extends AbstractBasePageList {
                 workDemandProduct.setDemandId(demandId);
                 workDemandProduct.setProductId( (int)product.get("productId"));
                 workDemandProduct.setProductDescribe((String) product.get("productDescribe"));
-                workDemandProduct.setProductPercentage((String) product.get("productPercentage"));
+                workDemandProduct.setProductPercentage( Long.parseLong(product.get("productPercentage").toString()));
                 temp = workDemandProduct.save();
             }
 
@@ -220,6 +220,7 @@ public class WorkDemandService extends AbstractBasePageList {
                 WorkDemandFunction workDemandFunction = new WorkDemandFunction();
                 workDemandFunction.setDemandId(demandId);
                 workDemandFunction.setFunctionId(Integer.parseInt(s));
+                workDemandFunction.setProductId(Db.queryInt("select product_id from 72crm_work_product_function where function_id=?",s));
                 temp = workDemandFunction.save();
             }
             Db.update("update 72crm_work_demand set is_associated=1 where demand_id =?",demandId);

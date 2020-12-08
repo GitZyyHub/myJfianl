@@ -315,13 +315,13 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		return getStr("contract_amount");
 	}
 
-	public M setEffectiveAmount(String effectiveAmount) {
+	public M setEffectiveAmount(Integer effectiveAmount) {
 		set("effective_amount", effectiveAmount);
 		return (M)this;
 	}
 	
-	public String getEffectiveAmount() {
-		return getStr("effective_amount");
+	public Integer getEffectiveAmount() {
+		return getInt("effective_amount");
 	}
 
 	public M setImplementCost(java.math.BigDecimal implementCost) {
@@ -342,13 +342,13 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		return get("maintenance_cost");
 	}
 
-	public M setBudget(String budget) {
+	public M setBudget(Integer budget) {
 		set("budget", budget);
 		return (M)this;
 	}
 	
-	public String getBudget() {
-		return getStr("budget");
+	public Integer getBudget() {
+		return getInt("budget");
 	}
 
 	public M setPracticalCost(java.math.BigDecimal practicalCost) {

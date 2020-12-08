@@ -184,6 +184,13 @@ public class WorkController extends Controller {
     }
 
     /**
+     * 根据对应区域查询区域下所有项目
+     */
+    public void queryWorkByArea(BasePageRequest basePageRequest){
+        renderJson(workService.queryWorkByArea(basePageRequest));
+    }
+
+    /**
      * 导出项目
      */
     @Permissions({"project:projectManage:excelexport"})

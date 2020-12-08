@@ -69,10 +69,6 @@ public class TaskService extends AbstractBasePageList {
             task.setWorkId(byId.getWorkId());
         }
         Set<Long> longs = new HashSet<>();
-        if (!StringUtils.isNullOrEmpty(task.getOwnerUserId())) {
-            longs = TagUtil.toLongSet(task.getOwnerUserId());
-            task.setOwnerUserId(TagUtil.fromLongSet(longs));
-        }
         longs.add(task.getMainUserId());
         Date date = new Date();
         boolean temp;
@@ -124,6 +120,12 @@ public class TaskService extends AbstractBasePageList {
         }
         //设置任务关联人员
         WorkService.setWorkRelation(longs, task.getTaskId(),WorkUserEnum.TYPE_1.getType(),task.getWorkId());
+        longs = new HashSet<>();
+        if (!StringUtils.isNullOrEmpty(task.getOwnerUserId())) {
+            longs = TagUtil.toLongSet(task.getOwnerUserId());
+            task.setOwnerUserId(TagUtil.fromLongSet(longs));
+        }
+        setTaskRelation(longs, task.getTaskId(),WorkUserEnum.TYPE_1.getType(),task.getWorkId());
 
         return temp ? R.ok() : R.error("设置任务错误");
     }
@@ -183,10 +185,6 @@ public class TaskService extends AbstractBasePageList {
     }
 
     /**
-     *
-     */
-
-    /**
      * 查询待办任务
      */
     public R waiting(BasePageRequest basePageRequest, boolean isDataAuth){
@@ -219,11 +217,6 @@ public class TaskService extends AbstractBasePageList {
             String realname = users.stream().map(user -> user.getStr("realname")).collect(Collectors.toList()).toString();
             record.set("owner_user_id",userId.substring(1,userId.length()-1));
             record.set("owner_user_name",realname.substring(1,realname.length()-1));
-            /*List<Record> users = Db.find(Db.getSql("work.queryWorkUserByNumId"), record.getStr("task_id"),1);
-            String userId = users.stream().map(user -> user.getStr("user_id")).collect(Collectors.toList()).toString();
-            String realname = users.stream().map(user -> user.getStr("realname")).collect(Collectors.toList()).toString();
-            record.set("owner_user_id",userId.substring(1,userId.length()-1));
-            record.set("owner_user_name",realname.substring(1,realname.length()-1));*/
         });
         JSONObject resultJsonObject = new JSONObject();
         Integer integer = Db.template("work.task.waitingCount", kv).queryInt();
@@ -293,7 +286,7 @@ public class TaskService extends AbstractBasePageList {
         Integer subtasksId = Db.template("work.task.countTaskBySubtasksId", kv).queryInt();
         if(subtasksId != 0){
             return R.error("有任务存在任务工时不能删除");
-    }
+        }
         Integer integer = Db.template("work.task.countTaskByBeforeId", kv).queryInt();
         if(integer != 0){
             return R.error("有任务存在子任务是否继续");
@@ -347,17 +340,18 @@ public class TaskService extends AbstractBasePageList {
      * 操作任务关联人员表
      *
      * @param longs
-     * @param task
+     * @param
      */
-    private void setTaskRelation(Collection<Long> longs, Task task) {
-        longs.remove(null);
-        Long taskId = task.getTaskId();
-        Db.deleteById("72crm_work_user_record", "num_id", taskId);
+    private void setTaskRelation(Collection<Long> longs, Object id, Integer type, Long workId) {
+        longs.removeAll(Collections.singleton(""));
+        longs.removeAll(Collections.singleton(null));
+        Db.delete("delete from 72crm_work_user_record where num_id=? and type=? and role_id=1", id, type);
         Date date = new Date();
         longs.forEach(user -> {
             WorkUserRecord workUser = new WorkUserRecord();
-
-            workUser.setNumId(task.getTaskId()).setUserId(user).setType(WorkUserEnum.TYPE_1.getType());
+            workUser.setWorkId(workId);
+            workUser.setNumId(id).setUserId(user).setType(type);
+            workUser.setRoleId(1);
             workUser.save();
         });
     }
@@ -377,14 +371,14 @@ public class TaskService extends AbstractBasePageList {
      * @return
      */
     public R addOwnerUser(String taskId, String users) {
-        List<Long> userIds = Db.query("select user_id from 72crm_work_user_record where num_id=? and type=1", taskId);
+        List<Long> userIds = Db.query("select user_id from 72crm_work_user_record where num_id=? and type=1 and role_id=1", taskId);
         List<String> strings = Arrays.asList(users.split(","));
         HashSet<Long> set = new HashSet<>();
         set.addAll(userIds);
         strings.forEach(str->{
             set.add(Long.parseLong(str));
         });
-        set.removeAll(userIds);
+
         List<WorkUserRecord> list = new ArrayList<>();
         set.forEach(str->{
             WorkUserRecord workUserRecord = new WorkUserRecord();
@@ -394,6 +388,13 @@ public class TaskService extends AbstractBasePageList {
             list.add(workUserRecord);
         });
         Db.batchSave(list,list.size());
+        Task byId = Aop.get(Task.class).findById(taskId);
+        StringBuffer stringBuffer = new StringBuffer();
+        for (WorkUserRecord workUserRecord : list) {
+            stringBuffer.append(workUserRecord.getUserId()+",");
+        }
+        byId.setOwnerUserId(stringBuffer.toString());
+        byId.update();
         return R.ok();
     }
 
@@ -407,10 +408,20 @@ public class TaskService extends AbstractBasePageList {
         boolean temp = Db.tx(()->{
             int delete =0;
             for (String string : strings) {
-                delete+= Db.delete("delete from 72crm_work_user_record where num_id=? and user_id=? and type=1", taskId, string);
+                delete+= Db.delete("delete from 72crm_work_user_record where num_id=? and user_id=? and type=1 and role_id=1", taskId, string);
             }
             return delete == strings.size()? true:false;
         });
+        if(temp){
+            Task byId = Aop.get(Task.class).findById(taskId);
+            List<Long> userIds = Db.query("select user_id from 72crm_work_user_record where num_id=? and type=1 and role_id=1", taskId);
+            StringBuffer stringBuffer = new StringBuffer();
+            for (Long workUserRecord : userIds) {
+                stringBuffer.append(workUserRecord+",");
+            }
+            byId.setOwnerUserId(stringBuffer.toString());
+            byId.update();
+        }
         return temp?R.ok():R.error("删除失败");
     }
 

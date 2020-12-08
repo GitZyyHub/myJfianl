@@ -63,7 +63,7 @@
             main_user_id,
             (select realname from 72crm_admin_user where user_id=h.main_user_id) main_user_name,
             subtasks_id,
-            (select task_name from 72crm_task where task_id=h.subtasks_id) subtasks_name,
+            case when task_id!=subtasks_id then (select task_name from 72crm_task where task_id=h.subtasks_id) end subtasks_name,
             DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time,
             DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,
             working_hours,
@@ -175,7 +175,7 @@
     #end
 
     #sql("updateCheckStatusById")
-        update 72crm_task_hours set check_status = ?,examine_time=now() where hours_id = ?
+        update 72crm_task_hours set check_user_id=?,check_status = ?,examine_time=now() where hours_id = ?
     #end
     #sql("updateCheckStatusByIdThrough")
         update 72crm_task_hours set check_status = ?,examine_time=? where hours_id = ?
