@@ -737,6 +737,7 @@ public class WorkService extends AbstractBasePageList {
         List<Integer> integers = Aop.get(AdminUserService.class).queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);
         integers.add(deptId);
         record.set("deptIds", integers);
+        record.set("search", jsonObject.getString("search"));
         Page<Record> deptIds = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.queryWorkByDept", record));
         return R.ok().put("data",deptIds);
     }

@@ -324,13 +324,13 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		return getStr("contract_amount");
 	}
 
-	public M setEffectiveAmount(java.lang.String effectiveAmount) {
+	public M setEffectiveAmount(java.math.BigDecimal effectiveAmount) {
 		set("effective_amount", effectiveAmount);
 		return (M)this;
 	}
 	
-	public java.lang.String getEffectiveAmount() {
-		return getStr("effective_amount");
+	public java.math.BigDecimal getEffectiveAmount() {
+		return get("effective_amount");
 	}
 
 	public M setImplementCost(java.math.BigDecimal implementCost) {
@@ -351,13 +351,13 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		return get("maintenance_cost");
 	}
 
-	public M setBudget(java.lang.String budget) {
+	public M setBudget(java.math.BigDecimal budget) {
 		set("budget", budget);
 		return (M)this;
 	}
 	
-	public java.lang.String getBudget() {
-		return getStr("budget");
+	public java.math.BigDecimal getBudget() {
+		return get("budget");
 	}
 
 	public M setPracticalCost(java.math.BigDecimal practicalCost) {
@@ -396,13 +396,13 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 		return getStr("customer_calls");
 	}
 
-	public M setForecastWork(java.lang.Integer forecastWork) {
+	public M setForecastWork(java.lang.String forecastWork) {
 		set("forecast_work", forecastWork);
 		return (M)this;
 	}
 	
-	public java.lang.Integer getForecastWork() {
-		return getInt("forecast_work");
+	public java.lang.String getForecastWork() {
+		return getStr("forecast_work");
 	}
 
 	public M setLabelId(java.lang.String labelId) {

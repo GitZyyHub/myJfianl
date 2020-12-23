@@ -9,10 +9,10 @@
         description,
         work_phase,
         work_type,
-        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.dept_id ) dept_id,
+        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.dept_id ) dept_name,
         (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.area ) area,
-        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.sales_id ) sales_id,
-        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.manager_id ) manager_id,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.sales_id ) sales_name,
+        (SELECT realname FROM 72crm_admin_user WHERE user_id = w.manager_id ) manager_name,
         DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time,
         DATE_FORMAT( end_time, '%Y-%m-%d %H:%i:%S' ) end_time,
         examine,
@@ -30,9 +30,13 @@
         customer_contact,
         customer_calls,
         forecast_work
-        from 72crm_work w where area in (#fori(deptIds)) or dept_id in (#fori(deptIds))
+        from 72crm_work w where (area in (#fori(deptIds)) or dept_id in (#fori(deptIds)))
+        and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
         and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
         and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+        #if(search)
+            and work_name like '%#(search)%'
+        #end
     #end
 
     #sql("queryStructure")
@@ -333,6 +337,8 @@
 			m.update_time,
 			main_user_id,
 			(select realname from 72crm_admin_user where m.main_user_id = user_id) main_user_name,
+			create_user_id,
+			(select realname from 72crm_admin_user where m.create_user_id = user_id) create_user_name,
             m.instructions,
             (select work_name from 72crm_work where m.work_id=work_id) work_name,
             task_id,

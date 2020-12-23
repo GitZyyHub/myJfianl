@@ -24,6 +24,9 @@
         select user_id from 72crm_admin_user where dept_id in (#fori(deptIds))
     #end
 
+    #sql("queryUserIdByDeptIds")
+        select user_id from 72crm_admin_user where dept_id in (#fori(deptIds)) or area in (#fori(deptIds))
+    #end
 
 
 
@@ -103,12 +106,12 @@
             and user_id in (#fori(userIds))
         #end
         #(conditions)
-        order by status desc
-        #if(sort)
-            #if(sort==1)
-            ,realname desc
-            #else
-            ,realname
+        #if(sorts)
+        order by
+             #if(sorts==1)
+            realname desc
+            #else if(sorts==0)
+            realname
             #end
         #end
 

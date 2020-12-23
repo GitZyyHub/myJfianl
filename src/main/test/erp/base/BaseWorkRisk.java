@@ -180,4 +180,13 @@ public abstract class BaseWorkRisk<M extends BaseWorkRisk<M>> extends Model<M> i
 		return get("update_time");
 	}
 
+	public M setCreateUserId(java.lang.Integer createUserId) {
+		set("create_user_id", createUserId);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getCreateUserId() {
+		return getInt("create_user_id");
+	}
+
 }

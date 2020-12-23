@@ -6,10 +6,10 @@
         delete from `72crm_oa_event_update_record` where event_id in (#fori(eventIds))
     #end
     #sql("eventTask")
-        select task_id, name, unix_timestamp(start_time) * 1000 as startTime, unix_timestamp(stop_time) * 1000 as endTime,2 as eventType
+        select task_id, task_name, unix_timestamp(start_time) * 1000 as startTime, unix_timestamp(end_time) * 1000 as endTime,2 as eventType
         from `72crm_task`
-        where unix_timestamp(start_time) * 1000 >= (#para(startTime) - (unix_timestamp(stop_time) * 1000 - unix_timestamp(start_time) * 1000))
-          and unix_timestamp(stop_time) * 1000 <= #para(endTime) + (unix_timestamp(stop_time) * 1000 - unix_timestamp(start_time) * 1000)
+        where unix_timestamp(start_time) * 1000 >= (#para(startTime) - (unix_timestamp(end_time) * 1000 - unix_timestamp(start_time) * 1000))
+          and unix_timestamp(stop_time) * 1000 <= #para(endTime) + (unix_timestamp(end_time) * 1000 - unix_timestamp(start_time) * 1000)
           and   pid = 0 and ishidden = 0
                         and (
                       main_user_id = #para(userId)

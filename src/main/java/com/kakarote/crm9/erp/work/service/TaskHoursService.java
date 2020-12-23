@@ -132,10 +132,6 @@ public class TaskHoursService extends AbstractBasePageList {
                 return R.error("开始时间到结束时间不能超过30天");
             }
         }
-
-
-
-
         if (taskHours.getHoursId() == null) {
             Integer integer;
             if (taskHours.getSubtasksId() != null) {
@@ -149,7 +145,6 @@ public class TaskHoursService extends AbstractBasePageList {
 
             taskHours.setCreateUserId(BaseUtil.getUserId());
             taskHours.setCreateTime(new Date());
-
 
             if (taskHours.getSubtasksId() == null) {
                 taskHours.setSubtasksId(taskHours.getTaskId()).setSubtasksName(task.getTaskName());

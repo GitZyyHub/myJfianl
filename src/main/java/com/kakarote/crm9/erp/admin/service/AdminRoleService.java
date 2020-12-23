@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AdminRoleService {
 
@@ -166,7 +167,7 @@ public class AdminRoleService {
                 }
             }
             //1为crm顶部菜单id,根据用户权限添加公海权限
-            /*if (adminMenu.getMenuId().equals(1)) {
+            if (adminMenu.getMenuId().equals(1)) {
                 JSONObject authObject = new JSONObject();
                 Integer read = Db.template("crm.customerPool.queryPoolReadAuth", Kv.by("userId", userId).set("deptId", BaseUtil.getUser().getDeptId())).queryInt();
                 if (BaseUtil.isAdmin() || read > 0) {
@@ -177,7 +178,7 @@ public class AdminRoleService {
                     authObject.fluentPut("distribute", true).fluentPut("excelexport", true).fluentPut("delete", true);
                 }
                 object.fluentPut("pool", authObject);
-            }*/
+            }
             //3为后台顶部菜单id
             if (adminMenu.getMenuId() == 2) {
                 AdminConfig adminConfig = AdminConfig.getConfig("call");
@@ -195,7 +196,7 @@ public class AdminRoleService {
                     object.put("examineFlow", new JSONObject().fluentPut("update", true));
                     object.put("crm", new JSONObject().fluentPut("field", true).fluentPut("pool", true).fluentPut("setting", true).fluentPut("achievement", true));
                     object.put("work", new JSONObject().fluentPut("update", true));
-                    object.put("card",new JSONObject().fluentPut("update",true));
+                    object.put("card", new JSONObject().fluentPut("update", true));
                 }
                 AdminConfig cardConfig = AdminConfig.getConfig("applet");
                 if (cardConfig == null || cardConfig.getStatus() != 1) {
@@ -239,6 +240,16 @@ public class AdminRoleService {
             }
         }
         jsonObject.remove("work");
+        Map<String, Object> project = jsonObject.getJSONObject("project");
+        if (project.get("manpowerStatistics") != null
+                || project.get("productStatistical") != null
+                || project.get("riskStatistics") != null
+                || project.get("workStatistics ") != null
+        ) {
+            project.put("statistics", true);
+        }
+
+
         /*try {
             JSONObject project = jsonObject.getJSONObject("project");
             if(project!=null){
@@ -251,7 +262,7 @@ public class AdminRoleService {
             e.printStackTrace();
         }*/
 
-        CaffeineCache.ME.put("role:permissions:",userId.toString(),jsonObject);
+        CaffeineCache.ME.put("role:permissions:", userId.toString(), jsonObject);
         return jsonObject;
     }
 
@@ -415,13 +426,13 @@ public class AdminRoleService {
         JSONArray rules = jsonObject.getJSONArray("rules");
         AdminRole adminRole;
         if (roleId == null) {
-            adminRole=new AdminRole();
+            adminRole = new AdminRole();
             adminRole.setRoleName(roleName);
             adminRole.setRemark(remark);
             adminRole.setRoleType(6);
             bol = adminRole.save();
         } else {
-            adminRole= AdminRole.dao.findById(roleId);
+            adminRole = AdminRole.dao.findById(roleId);
             adminRole.setRoleName(roleName);
             adminRole.setRemark(remark);
             adminRole.setRoleId(roleId);

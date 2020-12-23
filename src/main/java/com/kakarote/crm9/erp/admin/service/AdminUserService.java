@@ -165,8 +165,10 @@ public class AdminUserService {
     }
 
     public R queryUserList(BasePageRequest<AdminUser> request, String roleId, String search, String isResources, String workId) {
+
         List<Integer> deptIdList = new ArrayList<>();
         JSONObject jsonObject = request.getJsonObject();
+        System.out.println("=========================================="+jsonObject.toString());
         if (request.getData().getDeptId() != null) {
             deptIdList.add(request.getData().getDeptId());
             deptIdList.addAll(queryChileDeptIds(request.getData().getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
@@ -202,7 +204,17 @@ public class AdminUserService {
 
         StringBuilder conditions = new StringBuilder("1=1");
         JSONObject data = jsonObject.getJSONObject("data");
-        if (data != null) {
+        Object taskName = null;
+        Object taskNum = null;
+        try {
+            taskName = data.get("taskName");
+        } catch (NullPointerException e) {
+        }
+        try {
+            taskNum = data.get("taskNum");
+        } catch (NullPointerException e) {
+        }
+        if (taskName!=null||taskNum!=null) {
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 JSONObject json = JSON.parseObject(entry.getValue().toString());
                 String condition = json.getString("condition");
@@ -260,14 +272,16 @@ public class AdminUserService {
             Kv by = Kv.by("conditions", conditions.toString());
             List<Object> query = Db.template("work.task.queryTaskBySearch", by).query();
             query.addAll(Db.template("work.task.queryTaskIdByIds", Kv.by("ids", query)).query());
-            kv.set("userIds", Db.template("work.queryDataUserId", Kv.by("ids", query).set("by", WorkUserEnum.TYPE_1.getType())).query());
+            kv.set("userIds",Db.template("work.queryDataUserId", Kv.by("ids", query).set("by", WorkUserEnum.TYPE_1.getType())).query());
         }
-        kv.set("sort",jsonObject.get("sort"));
+        kv.set("sorts",jsonObject.get("sort"));
         SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserList", kv);
         if (request.getPageType() == 0) {
             List<Record> recordList = Db.find(sqlPara);
             return R.ok().put("data", recordList);
         } else {
+            System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------"+jsonObject.get("sort"));
+
             Page<Record> paginate = Db.paginate(request.getPage(), request.getLimit(), sqlPara);
             return R.ok().put("data", paginate);
         }

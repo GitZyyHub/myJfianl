@@ -135,4 +135,13 @@ public abstract class BaseMilestone<M extends BaseMilestone<M>> extends Model<M>
 		return getStr("work_name");
 	}
 
+	public M setCreateUserId(Long createUserId) {
+		set("create_user_id", createUserId);
+		return (M)this;
+	}
+
+	public Long getCreateUserId() {
+		return getLong("create_user_id");
+	}
+
 }

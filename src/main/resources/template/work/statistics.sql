@@ -13,6 +13,7 @@
         #(for.index == 0 ? "" : "union all")
             select '#(x.name)' as name , counts,'#(x.dept_id)' as deptId from (
             select ifnull(count(1),0) counts from 72crm_work a where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
              #if(deptIds)
                 and (dept_id = #(x.dept_id) or area = #(x.dept_id))
              #end
@@ -26,13 +27,11 @@
         #for(x : deptIds)
         #(for.index == 0 ? "" : "union all")
             select (select name from 72crm_admin_dept where dept_id='#(x.dept)') name, sum(counts) counts from (
-            #for(i : x.below)
-            #(for.index == 0 ? "" : "union all")
-                    select ifnull(count(1),0) counts from 72crm_work a where 1=1
-                    and (dept_id in (#fori(i)) or area in (#fori(i)))
+                    select work_id,ifnull(count(1),0) counts from 72crm_work a where 1=1
+                    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+                    and (dept_id in (#(x.below)) or area in (#(x.below)))
                 and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
                 and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
-            #end
             )w
         #end
 
@@ -54,6 +53,7 @@
                     work_phase = '#(x)'
                 #end
             #end
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
             and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
              and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
             ) w
@@ -63,9 +63,14 @@
     #sql("workTimeStatistics")
         #for(x:timeList)
             #(for.index == 0 ? "":"union all")
-            select '#(x.startTime)' as name ,ifnull(count(1),0) counts from 72crm_work where
-            (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime))
-                    and (#(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            select '#(x.startTime)' as name ,ifnull(count(1),0) counts from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+            #if(sqlDateFormat == '%Y%m%d')
+             and (#(x.startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+            #else
+                and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime)
+                or #(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            #end
         #end
     #end
 
@@ -76,6 +81,7 @@
         #(for.index == 0 ? "" : "union all")
             select '#(x.name)' as name ,ifnull(sum(budget),0) budget,ifnull(sum(effective_amount),0) effective_amount,ifnull(sum(practical_cost),0) practical_cost from (
             select ifnull(sum(budget),0) budget,ifnull(sum(effective_amount),0) effective_amount,ifnull(sum(practical_cost),0) practical_cost from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
              #if(deptIds)
                 and (dept_id = #(x.dept_id) or area = #(x.dept_id))
              #end
@@ -89,13 +95,13 @@
         #for(x : deptIds)
         #(for.index == 0 ? "" : "union all")
             select (select name from 72crm_admin_dept where dept_id='#(x.dept)') name,ifnull(sum(budget),0) budget,ifnull(sum(effective_amount),0) effective_amount,ifnull(sum(practical_cost),0) practical_cost from (
-            #for(i : x.below)
-            #(for.index == 0 ? "" : "union all")
+
                     select ifnull(sum(budget),0) budget,ifnull(sum(effective_amount),0) effective_amount,ifnull(sum(practical_cost),0) practical_cost from 72crm_work a where 1=1
-                    and (dept_id in (#fori(i)) or area in (#fori(i)))
+                    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+                    and (dept_id in (#(x.below)) or area in (#(x.below)))
                 and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
                 and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
-            #end
+
             )w
         #end
     #end
@@ -117,6 +123,7 @@
                     work_phase = '#(x)'
                 #end
             #end
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
             and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
              and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
             ) w
@@ -126,9 +133,14 @@
     #sql("profitTime")
         #for(x:timeList)
             #(for.index == 0 ? "":"union all")
-            select '#(x.startTime)' as name ,ifnull(sum(budget),0) budget,ifnull(sum(effective_amount),0) effective_amount,ifnull(sum(practical_cost),0) practical_cost from 72crm_work where
-            (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime))
-                    and (#(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            select '#(x.startTime)' as name ,ifnull(sum(budget),0) budget,ifnull(sum(effective_amount),0) effective_amount,ifnull(sum(practical_cost),0) practical_cost from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+            #if(sqlDateFormat == '%Y%m%d')
+             and (#(x.startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+            #else
+                and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime)
+                or #(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            #end
         #end
     #end
 
@@ -138,6 +150,7 @@
         #for(x : deptIds)
         #(for.index == 0 ? "" : "union all")
             select '#(x.name)' as name ,ifnull(count(1),0) counts from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
                 #if(isAll==2)
                     and implement_cost<=(effective_amount * #para(rate))
                 #end
@@ -151,18 +164,18 @@
         #for(x : deptIds)
          #(for.index == 0 ? "" : "union all")
         select (select name from 72crm_admin_dept where dept_id='#(x.dept)') name,sum(counts) counts from (
-            #for(i : x.below)
-            #(for.index == 0 ? "" : "union all")
+
                 select ifnull(count(1),0) counts from 72crm_work where 1=1
+                and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
                     #if(isAll==2)
                         #if(rate)
                             and implement_cost<=(effective_amount * #para(rate))
                         #end
                     #end
-                    and (dept_id in (#fori(i)) or and area in (#fori(i)))
+                    and (dept_id in (#(x.below)) or area in (#(x.below)))
                     and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
                     and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
-            #end
+
             ) w
         #end
     #end
@@ -171,6 +184,7 @@
         #for(x : search)
         #(for.index == 0 ? "" : "union all")
             select '#(x)' as name ,count(1) counts from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
             #if(isAll==2)
                 #if(rate)
                     and implement_cost<=(effective_amount * #para(rate))
@@ -192,13 +206,18 @@
         #for(x:timeList)
             #(for.index == 0 ? "":"union all")
             select '#(x.startTime)' as name ,count(1) counts from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
             #if(isAll==2)
                 #if(rate)
                     and implement_cost<=(effective_amount * #para(rate))
                 #end
             #end
-            and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime))
-            and (#(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            #if(sqlDateFormat == '%Y%m%d')
+             and (#(x.startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+            #else
+                and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime)
+                or #(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            #end
         #end
     #end
 
@@ -206,6 +225,7 @@
 
     #sql("queryWorkIdByDeptId")
             select work_id,DATE_FORMAT(start_time, '%Y%m%d' ) start_time,DATE_FORMAT(end_time, '%Y%m%d' ) end_time from 72crm_work a where 1=1
+                and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
                 and (dept_id in (#fori(below)) or area in (#fori(below)))
                 and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
                 and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
@@ -215,9 +235,9 @@
         select sum(counts) counts from(
         #for(x:works)
         #(for.index == 0 ? "" : "union all")
-            select count(1) counts from 72crm_work_resources_setting where 1=1 and actual_time is not null
+            select count(1) counts from 72crm_work_resources_setting where 1=1 and resources_status ='未到位'
             and work_id = #(x.work_id)
-            and ((DATE_FORMAT(actual_time, '%Y%m%d') - DATE_FORMAT(now(), '%Y%m%d')) / (#(x.end_time)-#(x.start_time)) ) < 0.1
+            and ((DATE_FORMAT(plan_time, '%Y%m%d') - DATE_FORMAT(now(), '%Y%m%d')) / (#(x.end_time)-#(x.start_time)) ) < 0.1
         #end
         ) w
     #end
@@ -226,24 +246,31 @@
     select sum(counts) counts from(
         #for(x:works)
         #(for.index == 0 ? "" : "union all")
-            select count(1) counts from 72crm_work_resources_setting where 1=1 and actual_time is not null
+            select count(1) counts from 72crm_work_resources_setting where 1=1 and resources_status ='未到位'
             and work_id = #(x.work_id)
-            and (DATE_FORMAT(actual_time, '%Y%m%d') - DATE_FORMAT(now(), '%Y%m%d'))  < 0
+            and (DATE_FORMAT(plan_time, '%Y%m%d') - DATE_FORMAT(now(), '%Y%m%d'))  < 0
         #end
         ) w
     #end
 
         #sql("warningTime")
-        select work_id,DATE_FORMAT(start_time, '%Y%m%d' ) start_time,DATE_FORMAT(end_time, '%Y%m%d' ) end_time from 72crm_work where
-        (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #(startTime) and #para(endTime))
-        and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #(startTime) and #para(endTime))
+        select work_id,DATE_FORMAT(start_time, '%Y%m%d' ) start_time,DATE_FORMAT(end_time, '%Y%m%d' ) end_time from 72crm_work where 1=1
+        and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+        #if(sqlDateFormat == '%Y%m%d')
+             and (#(startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+            #else
+                and (#(startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(endTime)
+                or #(startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(endTime))
+            #end
     #end
 
 
 -----------------风险-------------------------
 
     #sql("queryWorkIdByDeptId2")
-    select work_id,manager_id from 72crm_work a where 1=1 and (dept_id=#para(dept) or area=#para(dept))
+    select work_id,manager_id from 72crm_work a where 1=1
+    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+    and (dept_id=#para(dept) or area=#para(dept))
     #end
 
     #sql("riskNum")
@@ -255,6 +282,7 @@
 
     #sql("queryWorkState")
     select work_id from 72crm_work where 1=1
+        and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
         #if(x == '已结项')
             and work_phase='结项'
         #else if(x == '未结项')
@@ -272,7 +300,7 @@
     #end
 
     #sql("riskLevel")
-         select count(1) counts from 72crm_work_risk where risk_level=#para(search)
+         select count(1) counts from 72crm_work_risk where risk_level=#para(search) and work_id in (#fori(workIds))
          #if(state == 1)
             and risk_status='空'
          #else
@@ -285,6 +313,7 @@
     #sql("queryDemandByWork")
         select demand_id from 72crm_work_demand where work_id in (
         select work_id from 72crm_work where 1=1
+        and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
         and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
         and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
         )
@@ -296,18 +325,17 @@
     #end
 
     #sql("usageArea2")
-    select sum(counts) counts,name from (
+    select ifnull(sum(counts),0) counts,name from (
         #for(x :deptIds)
         #(for.index == 0 ? "" : "union all")
          select count(1) counts,(select product_name from 72crm_work_product where product_id = dp.product_id) name from 72crm_work_demand_product dp where demand_id in (
                 select demand_id from 72crm_work_demand where work_id in (
-                #for(i : x.below)
-                #(for.index == 0 ? "" : "union all")
                     select work_id from 72crm_work where 1=1
-                    and (dept_id in (#fori(i)) or area in (#fori(i)))
+                    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+                    and (dept_id in (#(x.below)) or area in (#(x.below)))
                     and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
                     and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
-                #end
+
                 )
             ) group by product_id
         #end
@@ -321,6 +349,7 @@
          select count(1) counts,(select product_name from 72crm_work_product where product_id = dp.product_id) name from 72crm_work_demand_product dp where demand_id in (
                 select demand_id from 72crm_work_demand where work_id in (
                     select work_id from 72crm_work where 1=1
+                    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
                     and (dept_id = #(x.dept_id) or area = #(x.dept_id))
                     and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
                     and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
@@ -337,8 +366,13 @@
             select ifnull(count(1),0) counts,(select product_name from 72crm_work_product where product_id = dp.product_id) name from 72crm_work_demand_product dp where demand_id in (
                 select demand_id from 72crm_work_demand where work_id in (
                     select work_id from 72crm_work where 1=1
-                    and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime))
-                    and (#(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+                    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+                    #if(sqlDateFormat == '%Y%m%d')
+                     and (#(x.startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+                    #else
+                        and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime)
+                        or #(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+                    #end
                 )
             ) group by product_id
         #end
@@ -350,7 +384,7 @@
     #end
 
     #sql("queryProductByWorkId")
-        SELECT product_id,(select product_name from 72crm_work_product where product_id=dp.product_id) product_name,sum(product_percentage) product_percentage from 72crm_work_demand_product dp WHERE
+        SELECT product_id,(select product_name from 72crm_work_product where product_id=dp.product_id) product_name,ifnull(sum(product_percentage),0) product_percentage from 72crm_work_demand_product dp WHERE
         demand_id in (#fori(demandIds))
         GROUP BY product_id
     #end
@@ -369,17 +403,22 @@
     (SELECT
         wp.product_id,
         wp.product_name,
-				ifnull(sum(dp.product_percentage),0) product_percentage
+		ifnull(sum(dp.product_percentage),0) product_percentage
         from
         `72crm_work_product` wp
-        LEFT JOIN 72crm_work_demand_product dp ON dp.product_id = wp.product_id
+        LEFT JOIN
+        (select product_id,product_percentage from 72crm_work_demand_product where demand_id in (#fori(demandIds)))
+        dp  ON dp.product_id = wp.product_id
     GROUP BY
         wp.product_id) p
-    LEFT JOIN 72crm_work_demand_function f on p.product_id = f.product_id GROUP BY p.product_id
+    LEFT JOIN 72crm_work_demand_function f on p.product_id = f.product_id
+    where f.demand_id in (#fori(demandIds))
+    GROUP BY p.product_id
     #end
 
     #sql("queryWorkInDept2")
         select work_id from 72crm_work a where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
             and (dept_id in (#fori(i)) or area in (#fori(i)))
             and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
             and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
@@ -387,6 +426,7 @@
 
     #sql("queryWorkInDept1")
         select work_id from 72crm_work a where 1=1
+        and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
         and (dept_id = #para(deptId) or area = #para(deptId))
          and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
          and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
@@ -396,16 +436,88 @@
         SELECT IFNULL(SUM(dp.product_percentage),0) counts from 72crm_work_demand_product dp where demand_id in (
         SELECT demand_id from 72crm_work_demand where work_id in (#fori(i))
         )
+        #if(productId)
+        and product_id = #para(productId)
+        #end
     #end
 
     #sql("countWorkFunction")
-        SELECT COUNT(1) from 72crm_work_demand_function dp LEFT JOIN (
-        SELECT demand_id from 72crm_work_demand where work_id in (#fori(i))) wd on dp.demand_id=wd.demand_id
+         SELECT COUNT(1) from 72crm_work_demand_function dp where demand_id in (
+        SELECT demand_id from 72crm_work_demand where work_id in (#fori(i))
+        )
+        #if(productId)
+        and product_id = #para(productId)
+        #end
     #end
 
     #sql("queryWorkInTime")
-        select work_id counts from 72crm_work where
-        (#para(startTime)<=DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(endTime))
-        and (#para(startTime)<=DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(endTime))
+        select work_id counts from 72crm_work where 1=1
+        and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+            #if(sqlDateFormat == '%Y%m%d')
+             and (#(startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+            #else
+                and (#(startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(endTime)
+                or #(startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(endTime))
+            #end
     #end
+
+    #sql("sumHours")
+        SELECT ifnull(SUM(working_hours),0) hours from 72crm_task_hours where check_status=1 and work_id in (#fori(workIds))
+        #if(userIds)
+        and create_user_id in (#fori(userIds))
+        #end
+    #end
+
+
+--------------人力资源-------------------
+
+    #sql("queryUserByDept1")
+        #for(x : deptIds)
+        #(for.index == 0 ? "" : "union all")
+        select '#(x.name)' as name ,count(1) counts from (
+            select user_id from 72crm_work_user
+            where work_id in (
+            select work_id from 72crm_work where 1=1
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+            #if(deptIds)
+                and (dept_id = #(x.dept_id) or area = #(x.dept_id))
+             #end
+             and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+             and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+            )
+            group by user_id) a
+        #end
+    #end
+
+    #sql("queryUserByDept2")
+        #for(x : deptIds)
+        #(for.index == 0 ? "" : "union all")
+            select (select name from 72crm_admin_dept where dept_id='#(x.dept)') name,count(1) counts from (
+            select user_id from 72crm_work_user
+            where work_id in (
+                    select work_id from 72crm_work a where 1=1
+                    and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+                    and (dept_id in (#(x.below)) or area in (#(x.below)))
+                and (DATE_FORMAT(start_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+                and (DATE_FORMAT(end_time,'#(sqlDateFormat)') between #para(beginTime) and #para(finalTime))
+           ) group by user_id ) a
+        #end
+    #end
+
+    #sql("queryUserByTime")
+        #for(x:timeList)
+            #(for.index == 0 ? "":"union all")
+            select '#(x.startTime)' as name ,count(1) counts from 72crm_work_user
+            where work_id in (
+            select work_id from 72crm_work where
+            and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')
+            #if(sqlDateFormat == '%Y%m%d')
+             and (#(x.startTime)  between DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)'))
+            #else
+                and (#(x.startTime)<= DATE_FORMAT(start_time,'#(sqlDateFormat)') and DATE_FORMAT(start_time,'#(sqlDateFormat)')<#para(x.endTime)
+                or #(x.startTime)<= DATE_FORMAT(end_time,'#(sqlDateFormat)') and DATE_FORMAT(end_time,'#(sqlDateFormat)')<#para(x.endTime))
+            #end
+        #end
+    #end
+
 #end

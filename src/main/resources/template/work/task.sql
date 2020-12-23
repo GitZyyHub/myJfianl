@@ -283,7 +283,7 @@
     #end
 
     #sql("countTaskByBeforeId")
-        select count(1) from 72crm_task where before_id in (#fori(ids))
+        select count(1) from 72crm_task where pid in (#fori(ids))
     #end
 
     #sql ("deleteTask")

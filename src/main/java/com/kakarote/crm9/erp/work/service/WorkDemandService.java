@@ -202,9 +202,9 @@ public class WorkDemandService extends AbstractBasePageList {
         String functionIds = jsonObject.getString("functionIds");
         List<Map<String,Object>> products = (List<Map<String,Object>>)jsonObject.get("products");
         boolean temp = false;
-        if (StrUtil.isEmpty(demandId + "") || CollectionUtils.isEmpty(products) || StrUtil.isEmpty(functionIds)) {
+        /*if (StrUtil.isEmpty(demandId + "") || CollectionUtils.isEmpty(products) || StrUtil.isEmpty(functionIds)) {
             return R.error("数据不完整");
-        }else {
+        }else {*/
 
             for (Map<String, Object> product : products) {
                 WorkDemandProduct workDemandProduct = new WorkDemandProduct();
@@ -224,7 +224,6 @@ public class WorkDemandService extends AbstractBasePageList {
                 temp = workDemandFunction.save();
             }
             Db.update("update 72crm_work_demand set is_associated=1 where demand_id =?",demandId);
-        }
 
         return temp ? R.ok() : R.error("关联失败");
     }

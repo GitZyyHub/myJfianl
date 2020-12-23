@@ -111,7 +111,7 @@ public class ConfigManageController extends Controller {
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setCharacterEncoding("UTF-8");
             //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=resource.xls");
+            response.setHeader("Content-Disposition", "attachment;filename=configManage.xls");
 
             ServletOutputStream out = response.getOutputStream();
             writer.flush(out);

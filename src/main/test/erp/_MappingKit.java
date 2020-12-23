@@ -156,7 +156,7 @@ public class _MappingKit {
 		arp.addMapping("72crm_work_type", "work_type_id", WorkType.class);
 		arp.addMapping("72crm_work_user", "id", WorkUser.class);
 		arp.addMapping("72crm_work_user_record", "id", WorkUserRecord.class);
-		arp.addMapping("wk_admin_menu", "menu_id", WkAdminMenu.class);
+		arp.addMapping("undo_log", "id", UndoLog.class);
 	}
 }
 

@@ -14,6 +14,7 @@ import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.service.WorkService;
 import com.kakarote.crm9.utils.R;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class RiskStatisticsService {
     public R riskPercentage(WorkParams workParams) {
         String deptId = workParams.getDeptId();
         String area = workParams.getArea();
+        DecimalFormat df = new DecimalFormat("0%");
         if(!StrUtil.isEmpty(deptId) || !StrUtil.isEmpty(area)){
             Kv kv = new Kv();
             if(!StrUtil.isEmpty(deptId)){
@@ -53,7 +55,8 @@ public class RiskStatisticsService {
                 }
                 double rate = workService.divide(Double.parseDouble(complete), Double.parseDouble(risknum), 2);
                 record.set("name", Aop.get(Work.class).findById(workId.get("work_id")).getWorkName());
-                record.set("rate",rate);
+                String format = df.format(rate);
+                record.set("rate",format.substring(0, format.length() - 1));
                 list.add(record);
             }
             JSONObject jsonObject = new JSONObject();
@@ -82,8 +85,8 @@ public class RiskStatisticsService {
             List<Integer> works = Db.template("statistics.queryWorkState", Kv.by("x", s)).query();
             Record record = new Record();
             record.set("name",s);
-            record.set("complete",Db.template("statistics.riskWorkType", Kv.by("state", 1).set("works",works)).queryInt());
-            record.set("unfinished",Db.template("statistics.riskWorkType", Kv.by("state", 0).set("works",works)).queryInt());
+            record.set("complete",Db.template("statistics.riskWorkType", Kv.by("state", 0).set("works",works)).queryInt());
+            record.set("unfinished",Db.template("statistics.riskWorkType", Kv.by("state", 1).set("works",works)).queryInt());
             records.add(record);
         }
         JSONObject jsonObject = new JSONObject();
@@ -97,9 +100,16 @@ public class RiskStatisticsService {
         List<Record> records = new ArrayList<>();
         for (String s : search) {
             Record record = new Record();
-            record.set("name",s);
-            record.set("complete",Db.template("statistics.riskLevel", Kv.by("state", 1).set("search",s)).queryInt());
-            record.set("unfinished",Db.template("statistics.riskLevel", Kv.by("state", 0).set("search",s)).queryInt());
+            List<Object> query = Db.query("select work_id from 72crm_work where 1=1 and (work_type ='自主实施（有合同）' or work_type ='自主实施（无合同）')");
+            if(query.size()==0){
+                record.set("name",s);
+                record.set("complete",0);
+                record.set("unfinished",0);
+            }else {
+                record.set("name",s);
+                record.set("complete",Db.template("statistics.riskLevel", Kv.by("state", 0).set("search",s).set("workIds",query)).queryInt());
+                record.set("unfinished",Db.template("statistics.riskLevel", Kv.by("state", 1).set("search",s).set("workIds",query)).queryInt());
+            }
             records.add(record);
         }
         JSONObject jsonObject = new JSONObject();

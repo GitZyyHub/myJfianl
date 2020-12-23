@@ -40,7 +40,12 @@ public class StatisticsTypeUtils {
                 int id = Integer.parseInt(string);
                 List<Integer> integers = Aop.get(AdminUserService.class).queryChileDeptIds(id, BaseConstant.AUTH_DATA_RECURSION_NUM);
                 integers.add(id);
-                map.put("below",integers);
+                StringBuffer stringBuffer = new StringBuffer();
+                for (Integer integer : integers) {
+                    stringBuffer.append(integer+",");
+                }
+                String s = stringBuffer.toString();
+                map.put("below",s.substring(0,s.length()-1));
                 map.put("dept",Integer.parseInt(string));
                 deptIds.add(map);
             }

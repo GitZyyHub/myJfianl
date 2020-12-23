@@ -130,6 +130,7 @@ public class MilestoneService extends AbstractBasePageList {
             }
             entity.setCreateTime(new Date());
             entity.setUpdateTime(new Date());
+            entity.setCreateUserId(BaseUtil.getUserId());
             setting = entity.save();
             workHistoricalRecordService.add( entity.getWorkId(),WorkRecordEnum.MILESTONE, BehaviorEnum.SAVE, entity.getMilestoneNum(),null,null, entity.getMilestoneId());
         } else {

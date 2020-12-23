@@ -790,10 +790,6 @@ public class AdminFieldService {
                         .add("create_time", "发起时间", FormTypeEnum.DATE.getType())
                         .add("examine_time", "审批时间", FormTypeEnum.DATE.getType())
                         .add("check_status", "审核状态", FormTypeEnum.TEXT.getType());
-            } else if (CrmEnum.SUBTASKS.getType() == adminFieldSort.getLabel()) {
-                fieldUtil.add("task_num", "子任务编号", FormTypeEnum.TEXT.getType());
-            } else if (CrmEnum.MILESTONE.getType() == adminFieldSort.getLabel()) {
-                fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4);
             }
 
 
@@ -808,7 +804,6 @@ public class AdminFieldService {
             if (CrmEnum.DEMAND.getType() != adminFieldSort.getLabel()
                     && CrmEnum.TASK_HOURS.getType() != adminFieldSort.getLabel()
                     && CrmEnum.SUBTASKS.getType() != adminFieldSort.getLabel()
-                    && CrmEnum.MILESTONE.getType() != adminFieldSort.getLabel()
             ) {
                 fieldUtil.add("updateTime", "更新时间", 4).add("createTime", "创建时间", 4)
                         .add("createUserName", "创建人", 1);

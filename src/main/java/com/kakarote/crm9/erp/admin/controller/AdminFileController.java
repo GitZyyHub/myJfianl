@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
+import com.jfinal.kit.PathKit;
 import com.kakarote.crm9.common.annotation.LoginFormCookie;
 import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
@@ -149,6 +150,22 @@ public class AdminFileController extends Controller {
     public void deleteByBatchIds() {
         List<String> batchIds = JSON.parseArray(getRawData(), String.class);
         renderJson(adminFileService.deleteByBatchIds(batchIds));
+    }
+
+    /**
+     * app软件下载
+     */
+    public void  softwareDownload (){
+        String path = PathKit.getWebRootPath() + File.separator + "WEB-INF/classes/app-release.apk";
+        System.out.println(path);
+        File file = new File(path);
+        System.out.println(file.exists());
+        if (file.exists()) {
+            renderFile(file);
+        } else {
+            renderJson("文件不存在");
+        }
+
     }
 }
 

@@ -277,9 +277,9 @@ public class TaskService extends AbstractBasePageList {
             if(byId==null){
                 continue;
             }
-            Record first = Db.findFirst("select before_id from 72crm_task where task_id=?", string);
-            if(StrUtil.isEmpty(first.getStr("before_id"))){
-                return R.error("任务："+first.getStr("task_name")+"存在前置任务");
+            Record first = Db.findFirst("select task_id from 72crm_task where before_id=?", string);
+            if(first!=null){
+                return R.error("任务已被关联（前置任务）不可以删除");
             }
         }
         Kv kv = Kv.by("ids", strings);
@@ -289,7 +289,7 @@ public class TaskService extends AbstractBasePageList {
         }
         Integer integer = Db.template("work.task.countTaskByBeforeId", kv).queryInt();
         if(integer != 0){
-            return R.error("有任务存在子任务是否继续");
+            return R.ok("有任务存在子任务是否继续");
         }
         return R.ok("是否删除"+strings.size()+"条任务");
     }
@@ -298,14 +298,14 @@ public class TaskService extends AbstractBasePageList {
      */
     @Before(Tx.class)
     public R delTask(String ids){
-        List<String> strings = Arrays.asList(ids.split(","));
-        for (String string : strings) {
+       List<String> strings = Arrays.asList(ids.split(","));
+         /*for (String string : strings) {
             Task byId = Task.dao.findById(string);
             if(byId==null){
                 continue;
             }
-            Record first = Db.findFirst("select before_id from 72crm_task where task_id=?", string);
-            if(!StrUtil.isEmpty(first.getStr("before_id"))){
+            Record first = Db.findFirst("select task_id from 72crm_task where before_id=?", string);
+            if(first!=null){
                 return R.error("任务已被关联（前置任务）不可以删除");
             }
         }
@@ -317,7 +317,7 @@ public class TaskService extends AbstractBasePageList {
         Integer integer = Db.template("work.task.countTaskByBeforeId", kv).queryInt();
         if(integer != 0){
             return R.error("有任务存在子任务是否继续");
-        }
+        }*/
         //List<String> strings = Arrays.asList(ids.split(","));
         int delete = Db.template("work.task.deleteTask", Kv.by("ids", ids)).delete();
         Db.template("task.file.deleteFileByTaskIds", Kv.by("ids", ids)).delete();
