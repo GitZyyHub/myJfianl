@@ -174,6 +174,9 @@ public class AdminUserService {
             deptIdList.addAll(queryChileDeptIds(request.getData().getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
         }
         AdminUser adminUser = request.getData();
+        if(StrUtil.isEmpty(roleId)){
+            roleId = jsonObject.getString("roleId");
+        }
         Kv kv = Kv.by("name", adminUser.getRealname()).set("deptId", deptIdList).set("status", adminUser.getStatus()).set("roleId", roleId);
         kv.set("search", jsonObject.get("search"));
         List<String> pinyinSearchList = new ArrayList<>();

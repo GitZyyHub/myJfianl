@@ -44,8 +44,8 @@ public class RiskStatisticsService {
             List<Record> list = new ArrayList<>();
             for (Record workId : workIds) {
                 Record record = new Record();
-                String risknum = Db.template("statistics.riskNum",Kv.by("workId",workId.get("work_id")).set("userId",workId.get("manager_id"))).queryStr();
-                String complete = Db.template("statistics.riskNum",Kv.by("workId",workId.get("work_id")).set("userId",workId.get("manager_id")).set("isComplete",1)).queryStr();
+                String risknum = Db.template("statistics.riskNum",Kv.by("workId",workId.get("work_id"))).queryStr();
+                String complete = Db.template("statistics.riskNum",Kv.by("workId",workId.get("work_id")).set("isComplete",1)).queryStr();
                 //相除
                 if("0".equals(risknum)||"0".equals(complete)){
                     record.set("name", Aop.get(Work.class).findById(workId.get("work_id")).getWorkName());

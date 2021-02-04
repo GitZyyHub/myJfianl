@@ -274,7 +274,7 @@
     #end
 
     #sql("riskNum")
-        SELECT COUNT(1) from 72crm_work_risk where work_id=#para(workId) and create_user_id =#para(userId)
+        SELECT COUNT(1) from 72crm_work_risk where work_id=#para(workId)
         #if(isComplete)
             and solve_time is not null and solve_user_id is not null
         #end

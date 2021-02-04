@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.work.entity.base;
 
+import cn.hutool.core.util.StrUtil;
 import com.jfinal.plugin.activerecord.Model;
 import com.jfinal.plugin.activerecord.IBean;
 
@@ -96,7 +97,10 @@ public abstract class BaseWork<M extends BaseWork<M>> extends Model<M> implement
 	}
 	
 	public Long getSalesId() {
-		return getLong("sales_id");
+		if(StrUtil.isEmpty(getStr("sales_id"))){
+			return Long.parseLong(getStr("sales_id"));
+		}
+		return null;
 	}
 
 	public M setCreateUserId(Long createUserId) {

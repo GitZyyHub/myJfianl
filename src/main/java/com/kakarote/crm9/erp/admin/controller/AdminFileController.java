@@ -126,10 +126,10 @@ public class AdminFileController extends Controller {
         if (adminFile != null) {
             file = new File(adminFile.getPath());
         }
-        String name = file.getName();
-        name =  name.substring(name.lastIndexOf("."));
 
         if (file != null) {
+            String name = file.getName();
+            name =  name.substring(name.lastIndexOf("."));
             renderFile(file,"file"+name);
             return;
         }

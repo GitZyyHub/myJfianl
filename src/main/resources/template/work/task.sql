@@ -176,7 +176,7 @@
             and work_id=#para(workId)
         #end
         #if(isWaiting)
-            and (status!='已完成' or completeness!=100)
+            and (status!='已完成' and completeness!=100)
         #end
 
     #end

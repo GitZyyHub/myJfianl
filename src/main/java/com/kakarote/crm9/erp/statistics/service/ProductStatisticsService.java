@@ -54,7 +54,7 @@ public class ProductStatisticsService {
     }
 
     public R usageArea(WorkParams workParams) {
-        if (StrUtil.isEmpty(workParams.getDeptId()) || StrUtil.isEmpty(workParams.getArea())) {
+        if (StrUtil.isEmpty(workParams.getDeptId()) && StrUtil.isEmpty(workParams.getArea())) {
             workParams.setDeptId(BaseUtil.getDept().toString());
         }
         Record dpteStatisticsField = statisticsTypeUtils.getDpteStatisticsField(workParams);

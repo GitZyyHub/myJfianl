@@ -257,7 +257,8 @@ public class WorkService extends AbstractBasePageList {
             Db.delete("DELETE from 72crm_admin_examine_step WHERE step_id=?", first.getInt("examine_step_id"));
         }
         //work.setWorkPhase(phase)
-        examineData = examineRecordService.saveExamineRecord(5, checkUserId, work.getSalesId(), null, null);
+        Long salesId = work.getSalesId();
+        examineData = examineRecordService.saveExamineRecord(5, checkUserId,salesId , null, null);
         if (examineData.getInt("status") == 0) {
             return R.error("没有启动的审核步骤，不能添加！");
         } else if (examineData.getInt("status") == 2) {
