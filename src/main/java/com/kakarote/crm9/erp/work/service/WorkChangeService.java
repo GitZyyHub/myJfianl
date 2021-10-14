@@ -118,12 +118,12 @@ public class WorkChangeService {
             }
         }
         Set<Long> ownerUserId = null;
-        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(entity.getOwnerUserId())) {
+        if (!com.mysql.cj.util.StringUtils.isNullOrEmpty(entity.getOwnerUserId())) {
             ownerUserId = TagUtil.toLongSet(entity.getOwnerUserId());
             entity.setOwnerUserId(TagUtil.fromLongSet(ownerUserId));
         }
         Set<Long> forwardUserId = null;
-        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(entity.getForwardUser())) {
+        if (!com.mysql.cj.util.StringUtils.isNullOrEmpty(entity.getForwardUser())) {
             forwardUserId = TagUtil.toLongSet(entity.getForwardUser());
             entity.setForwardUser(TagUtil.fromLongSet(forwardUserId));
         }

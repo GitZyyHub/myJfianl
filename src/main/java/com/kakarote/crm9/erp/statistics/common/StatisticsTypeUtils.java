@@ -87,6 +87,12 @@ public class StatisticsTypeUtils {
                 records = Arrays.asList("项目立项", "需求阶段", "设计阶段", "开发测试", "项目初验", "试运行", "项目终验", "结项");
             }else if(workParams.getTypeId() == StatisticsFieldEnum.WORKTYPE.getType()){
                 records = Arrays.asList("已结项","未结项");
+            }else if(workParams.getTypeId() == StatisticsFieldEnum.DEMAND_TYPE.getType()){
+                records = Arrays.asList("功能","模型","非功能","数据治理");
+            }else if(workParams.getTypeId() == StatisticsFieldEnum.RESOURCES_TYPE.getType()){
+                records = Arrays.asList("已到位","未到位");
+            }else if(workParams.getTypeId() == StatisticsFieldEnum.HOURS_TYPE.getType()){
+                records = Arrays.asList("加班","常规工时");
             }
         }
         record.set("search",records);

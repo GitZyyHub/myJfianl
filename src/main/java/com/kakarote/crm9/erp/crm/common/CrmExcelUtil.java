@@ -36,7 +36,7 @@ import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.ToolUtils;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFSheet;

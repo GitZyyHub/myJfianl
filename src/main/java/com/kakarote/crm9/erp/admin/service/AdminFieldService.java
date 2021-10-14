@@ -31,7 +31,7 @@ import com.kakarote.crm9.erp.work.entity.TaskHours;
 import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.service.*;
 import com.kakarote.crm9.utils.*;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 import org.apache.poi.util.Internal;
 
 import java.math.BigDecimal;

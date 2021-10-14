@@ -69,6 +69,9 @@ public class AdminUserService {
             adminUser.setCreateTime(new Date());
             adminUser.setMobile(adminUser.getUsername());
             bol = adminUser.save();
+            if(!bol){
+                return R.isSuccess(bol);
+            }
             List<String> sqlList = new ArrayList<>();
             sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '电话无人接听', '跟进记录常用语')");
             sqlList.add("INSERT INTO `72crm_admin_user_config`  VALUES (null,'" + adminUser.getUserId() + "', '1', 'ActivityPhrase', '客户无意向', '跟进记录常用语')");
@@ -93,7 +96,7 @@ public class AdminUserService {
             if (!username.equals(adminUser.getUsername())) {
                 return R.error("用户名不能修改！");
             }
-            bol = adminUser.update();
+            adminUser.update();
             Db.delete("delete from 72crm_admin_user_role where user_id = ?", adminUser.getUserId());
             Db.delete("delete from 72crm_admin_scene where user_id = ? and is_system = 1", adminUser.getUserId());
         }
@@ -106,7 +109,7 @@ public class AdminUserService {
                 adminUserRole.save();
             }
         }
-        return R.isSuccess(bol);
+        return R.ok();
     }
 
     private void updateScene(AdminUser adminUser) {

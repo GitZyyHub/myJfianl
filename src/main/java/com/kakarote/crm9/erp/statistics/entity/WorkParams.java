@@ -15,6 +15,25 @@ public class WorkParams {
     private Integer isDept;//0 区域 1 部门
     private Integer typeId;
     private Integer rate;
+    private Integer para;
+    private Boolean isParent;
+
+    public Boolean getIsParent() {
+        return isParent;
+    }
+
+    public void setIsParent(Boolean parent) {
+        isParent = parent;
+    }
+
+    public Integer getPara() {
+        return para;
+    }
+
+    public void setPara(Integer para) {
+        this.para = para;
+    }
+
     private JSONObject jsonObject;
 
     public JSONObject getJsonObject() {

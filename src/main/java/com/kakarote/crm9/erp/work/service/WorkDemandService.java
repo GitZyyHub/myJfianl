@@ -29,7 +29,7 @@ import com.kakarote.crm9.erp.work.entity.*;
 import com.kakarote.crm9.utils.AbstractBasePageList;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.*;
 

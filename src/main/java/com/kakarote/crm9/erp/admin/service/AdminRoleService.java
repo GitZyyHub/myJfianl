@@ -240,14 +240,14 @@ public class AdminRoleService {
             }
         }
         jsonObject.remove("work");
-        Map<String, Object> project = jsonObject.getJSONObject("project");
+/*        Map<String, Object> project = jsonObject.getJSONObject("project");
         if (project.get("manpowerStatistics") != null
                 || project.get("productStatistical") != null
                 || project.get("riskStatistics") != null
                 || project.get("workStatistics ") != null
         ) {
             project.put("statistics", true);
-        }
+        }*/
 
 
         /*try {

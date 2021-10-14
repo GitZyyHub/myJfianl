@@ -17,7 +17,7 @@ import com.kakarote.crm9.erp.work.common.WorkAuthVerify;
 import com.kakarote.crm9.erp.work.entity.*;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 import net.sf.cglib.asm.$Label;
 
 import java.util.*;
@@ -190,7 +190,7 @@ public class WorkHistoricalRecordService {
             }else if (workRecordEnum.getType() == 1 || workRecordEnum.getType() == 13) {
                 List<Record> structures = Db.find(Db.getSql("work.queryStructure"), "72crm_work");
                 for (Record structure : structures) {
-                    records.add(new Record().set("field_name", structure.getStr("column_name")).set("name", structure.getStr("column_comment")));
+                    records.add(new Record().set("field_name", structure.getStr("columnName")).set("name", structure.getStr("columnComment")));
                 }
             } else if (workRecordEnum.getType() == 3) {
                 records = Db.find(Db.getSql("admin.field.queryField"), CrmEnum.DEMAND.getType());
@@ -219,12 +219,12 @@ public class WorkHistoricalRecordService {
             } else if (workRecordEnum.getType() == 8) {
                 List<Record> structures = Db.find(Db.getSql("work.queryStructure"), "72crm_work_risk");
                 for (Record structure : structures) {
-                    records.add(new Record().set("field_name", structure.getStr("column_name")).set("name", structure.getStr("column_comment")));
+                    records.add(new Record().set("field_name", structure.getStr("columnName")).set("name", structure.getStr("columnComment")));
                 }
             } else if (workRecordEnum.getType() == 9 || workRecordEnum.getType() == 10) {
                 List<Record> structures = Db.find(Db.getSql("work.queryStructure"), "72crm_task_file");
                 for (Record structure : structures) {
-                    records.add(new Record().set("field_name", structure.getStr("column_name")).set("name", structure.getStr("column_comment")));
+                    records.add(new Record().set("field_name", structure.getStr("columnName")).set("name", structure.getStr("columnComment")));
                 }
             }
         }
@@ -234,6 +234,7 @@ public class WorkHistoricalRecordService {
             List<Map<String, Object>> list = new ArrayList<>();
             for (Map.Entry<String, Object> entry : after.getColumns().entrySet()) {
                 String key = entry.getKey();
+                System.out.println("key的值-------------------》"+key);
                 if ("create_time".equals(key) || "update_time".equals(key) || "create_user_id".equals(key)) {
                     continue;
                 }
@@ -273,6 +274,8 @@ public class WorkHistoricalRecordService {
                         workHistorical.setContentAfter(contentAfter);
                     }
                     for (Record record : records) {
+                        String field_name = record.getStr("field_name");
+                        System.out.println("field_name的值是：--------------------》"+field_name);
                         if (record.getStr("field_name").equals(key)) {
                             if (workTaskHistorical != null) {
                                 workTaskHistorical.setField(record.getStr("name"));

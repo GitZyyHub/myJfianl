@@ -48,7 +48,7 @@ public class CrmActivityService{
         if (activityType.equals(CrmEnum.CRM_LEADS.getType())) {
             Db.update("update 72crm_crm_leads set followup = 1 where leads_id = ?", crmActivity.getActivityTypeId());
         } else if (activityType.equals(CrmEnum.CRM_CUSTOMER.getType())) {
-            Db.update("update 72crm_crm_customer set followup = 1 where customer_id = ?", crmActivity.getActivityTypeId());
+            Db.update("update 72crm_crm_customer set followup = 1, where customer_id = ?", crmActivity.getActivityTypeId());
         }
         Aop.get(ActionRecordUtil.class).addFollowupActionRecord(activityType, crmActivity.getActivityTypeId());
         return R.ok();

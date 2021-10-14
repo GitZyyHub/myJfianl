@@ -29,7 +29,7 @@ import com.kakarote.crm9.erp.work.common.WorkRendAuthEnum;
 import com.kakarote.crm9.erp.work.common.WorkUserEnum;
 import com.kakarote.crm9.erp.work.entity.*;
 import com.kakarote.crm9.utils.*;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

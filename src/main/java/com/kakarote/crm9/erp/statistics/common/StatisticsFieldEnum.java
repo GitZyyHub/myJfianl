@@ -15,6 +15,12 @@ public enum StatisticsFieldEnum {
     WORKPHASE(4,"项目阶段"),
     WORKTYPE(5,"项目类型"),
     RISKLEVEL(6,"风险等级"),
+    MILESTONE_TYPE(7,"里程碑状态"),
+    TASK_TYPE(8,"任务状态"),
+    DEMAND_STATUS(9,"需求状态"),
+    DEMAND_TYPE(10,"需求类型"),
+    RESOURCES_TYPE(11,"资源状态"),
+    HOURS_TYPE(12,"工时"),
 
     CRM_NULL(0,"全部");
     ;

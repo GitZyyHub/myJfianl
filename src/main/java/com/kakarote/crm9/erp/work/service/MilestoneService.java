@@ -25,7 +25,7 @@ import com.kakarote.crm9.utils.AbstractBasePageList;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.ToolUtils;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

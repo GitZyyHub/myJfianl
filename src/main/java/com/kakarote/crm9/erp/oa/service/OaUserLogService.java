@@ -19,7 +19,7 @@ import com.kakarote.crm9.erp.crm.service.CrmActivityService;
 import com.kakarote.crm9.erp.oa.entity.*;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.TagUtil;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;

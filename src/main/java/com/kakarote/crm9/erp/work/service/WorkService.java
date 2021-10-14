@@ -44,7 +44,8 @@ import com.kakarote.crm9.erp.work.common.WorkRendAuthEnum;
 import com.kakarote.crm9.erp.work.common.WorkUserEnum;
 import com.kakarote.crm9.erp.work.entity.*;
 import com.kakarote.crm9.utils.*;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.*;
 
@@ -733,6 +734,7 @@ public class WorkService extends AbstractBasePageList {
         WorkParams workParams = new WorkParams();
         workParams.setStartTime(jsonObject.getString("startTime"));
         workParams.setEndTime(jsonObject.getString("endTime"));
+        workParams.setType(jsonObject.getString("type"));
         Record record = statisticsTypeUtils.analyzeTime(workParams);
         Integer deptId = jsonObject.getInteger("deptId");
         List<Integer> integers = Aop.get(AdminUserService.class).queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);

@@ -26,7 +26,7 @@ import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.service.WorkHistoricalRecordService;
 import com.kakarote.crm9.erp.work.service.WorkService;
 import com.kakarote.crm9.utils.R;
-import com.mysql.jdbc.StringUtils;
+import com.mysql.cj.util.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import javax.servlet.ServletOutputStream;

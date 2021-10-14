@@ -10,7 +10,7 @@
         work_phase,
         work_type,
         (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.dept_id ) dept_name,
-        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.area ) area,
+        (SELECT NAME FROM 72crm_admin_dept WHERE dept_id = w.area ) area_name,
         (SELECT realname FROM 72crm_admin_user WHERE user_id = w.sales_id ) sales_name,
         (SELECT realname FROM 72crm_admin_user WHERE user_id = w.manager_id ) manager_name,
         DATE_FORMAT( start_time, '%Y-%m-%d %H:%i:%S' ) start_time,
@@ -40,7 +40,7 @@
     #end
 
     #sql("queryStructure")
-        select column_name,column_comment,data_type from information_schema.columns where table_name=?
+        select column_name columnName,column_comment columnComment,data_type from information_schema.columns where table_name=?
     #end
 
     #sql("searchWork")
